@@ -1,7 +1,7 @@
 <?php
 
 $host = "localhost";
-$dbname = "relax_spa";
+$dbname = "spa-management-db";
 $username = "root";
 $password = "";
 
