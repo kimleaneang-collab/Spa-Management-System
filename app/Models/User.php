@@ -1,28 +1,23 @@
 <?php
+class User {
+    private $conn;
+    private $table = "users";
 
-class User
-{
-    private $pdo;
-
-    public function __construct($pdo)
-    {
-        $this->pdo = $pdo;
+    public function __construct($db) {
+        $this->conn = $db;
     }
 
-    public function login($username, $password)
-    {
-        $sql = "SELECT * FROM users WHERE username = ? LIMIT 1";
+    public function login($email) {
+        $query = "SELECT u.user_id, u.full_name, u.email, u.password, r.role_name 
+                  FROM " . $this->table . " u
+                  JOIN roles r ON u.role_id = r.role_id
+                  WHERE u.email = :email LIMIT 1";
 
-        $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
 
-        $stmt->execute([$username]);
-
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($user && password_verify($password, $user['password'])) {
-            return $user;
-        }
-
-        return false;
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }
+?>
