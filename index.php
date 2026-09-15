@@ -1,35 +1,31 @@
 <?php
+declare(strict_types=1);
 
-session_start();
+require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/controllers/AuthController.php';
 
-require_once __DIR__ . "/config/database.php";
-require_once __DIR__ . "/controllers/AuthController.php";
+$route = trim((string) ($_GET['route'] ?? 'login'), '/');
 
-$authController = new AuthController($pdo);
+$auth = new AuthController();
 
-$action = $_GET['action'] ?? 'login';
-
-
-switch ($action) {
-
+switch ($route) {
+    case '':
     case 'login':
-
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-            $authController->login();
-
-        } else {
-
-            require __DIR__ . "/views/auth/login.php";
-
-        }
-
+        $auth->login();
         break;
 
+    case 'logout':
+        $auth->logout();
+        break;
+
+    case 'dashboard':
+        if (empty($_SESSION['user'])) {
+            redirect('login');
+        }
+        require __DIR__ . '/views/dashboard.php';
+        break;
 
     default:
-
-        require __DIR__ . "/views/auth/login.php";
-
-        break;
+        http_response_code(404);
+        echo '404 - Page not found';
 }
