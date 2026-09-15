@@ -1,20 +1,35 @@
 <?php
 
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../app/Controllers/LoginController.php';
+session_start();
+
+require_once __DIR__ . "/config/database.php";
+require_once __DIR__ . "/controllers/AuthController.php";
+
+$authController = new AuthController($pdo);
 
 $action = $_GET['action'] ?? 'login';
-$loginController = new LoginController($pdo);
+
 
 switch ($action) {
+
     case 'login':
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $loginController->login();
+
+            $authController->login();
+
         } else {
-            $loginController->showLogin();
+
+            require __DIR__ . "/views/auth/login.php";
+
         }
+
         break;
+
+
     default:
-        $loginController->showLogin();
+
+        require __DIR__ . "/views/auth/login.php";
+
         break;
 }

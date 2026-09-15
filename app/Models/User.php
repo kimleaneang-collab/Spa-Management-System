@@ -1,23 +1,23 @@
 <?php
-class User {
-    private $conn;
-    private $table = "users";
 
-    public function __construct($db) {
-        $this->conn = $db;
+class User
+{
+    private PDO $pdo;
+
+    public function __construct(PDO $pdo)
+    {
+        $this->pdo = $pdo;
     }
 
-    public function login($email) {
-        $query = "SELECT u.user_id, u.full_name, u.email, u.password, r.role_name 
-                  FROM " . $this->table . " u
-                  JOIN roles r ON u.role_id = r.role_id
-                  WHERE u.email = :email LIMIT 1";
+    public function findByUsername(string $username)
+    {
+        $sql = "SELECT * FROM users WHERE username = :username LIMIT 1";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':email', $email);
-        $stmt->execute();
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':username' => $username
+        ]);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $stmt->fetch();
     }
 }
-?>

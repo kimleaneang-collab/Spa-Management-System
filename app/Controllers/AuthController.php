@@ -1,30 +1,47 @@
 <?php
-session_start();
-require_once '../config/database.php';
-require_once '../models/User.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_btn'])) {
-    $database = new Database();
-    $db = $database->getConnection();
-    $user = new User($db);
+require_once __DIR__ . "/../models/User.php";
 
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
+class AuthController
+{
+    private User $userModel;
 
-    $userData = $user->login($email);
+    public function __construct(PDO $pdo)
+    {
+        $this->userModel = new User($pdo);
+    }
 
-    if ($userData && password_verify($password, $userData['password'])) {
-        // Set Session
-        $_SESSION['user_id'] = $userData['user_id'];
-        $_SESSION['full_name'] = $userData['full_name'];
-        $_SESSION['role'] = $userData['role_name'];
+    public function login()
+    {
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
 
-        header("Location: ../views/dashboard.php");
-        exit();
-    } else {
-        $error = "Invalid Email or Password!";
-        header("Location: ../views/auth/login.php?error=" . urlencode($error));
-        exit();
+        // Check empty fields
+        if ($username === '' || $password === '') {
+            $_SESSION['login_error'] = "Please enter username and password.";
+            header("Location: index.php");
+            exit;
+        }
+
+        // Find user
+        $user = $this->userModel->findByUsername($username);
+
+        // Check username and password
+        if ($user && password_verify($password, $user['password'])) {
+
+            // Create login session
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = $user['role'] ?? 'Staff';
+
+            // Redirect to dashboard
+            header("Location: dashboard.php");
+            exit;
+        }
+
+        // Wrong login
+        $_SESSION['login_error'] = "Invalid username or password.";
+        header("Location: index.php");
+        exit;
     }
 }
-?>

@@ -1,48 +1,86 @@
 <?php
-session_start();
-// បើ Login រួចហើយ ឱ្យ Redirect ទៅ Dashboard ភ្លាម
-if (isset($_SESSION['user_id'])) {
-    header("Location: ../dashboard.php");
-    exit();
-}
+$error = $_SESSION['login_error'] ?? '';
+unset($_SESSION['login_error']);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Relax Spa - Login</title>
-    <link rel="stylesheet" href="../../public/css/style.css">
+
+    <link rel="stylesheet"
+          href="public/css/style.css">
 </head>
-<body class="login-body">
+
+<body class="login-page">
+
+    <div class="login-overlay"></div>
+
     <div class="login-container">
-        <!-- Logo Section -->
-        <div class="logo-section">
-            <h1 class="brand-logo">Relax <span>spa</span></h1>
+
+        <!-- Logo -->
+        <div class="spa-logo">
+            <div class="logo-script">Relax</div>
+            <div class="logo-spa">♨ spa</div>
         </div>
 
-        <!-- Form Section -->
-        <div class="login-form-wrapper">
-            <h2>Welcome</h2>
+        <!-- Login Form -->
+        <div class="login-box">
 
-            <?php if (isset($_GET['error'])): ?>
-                <p class="error-msg"><?php echo htmlspecialchars($_GET['error']); ?></p>
+            <h1>Welcome</h1>
+
+            <?php if ($error): ?>
+                <div class="login-error">
+                    <?= htmlspecialchars($error) ?>
+                </div>
             <?php endif; ?>
 
-            <form action="../../controllers/AuthController.php" method="POST">
+            <form action="index.php?action=login"
+                  method="POST">
+
+                <!-- Username -->
                 <div class="input-group">
-                    <label for="email">Username or Email</label>
-                    <input type="text" id="email" name="email" required autocomplete="off">
+                    <label for="username">
+                        Username
+                    </label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        autocomplete="username"
+                    >
                 </div>
 
+                <!-- Password -->
                 <div class="input-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        autocomplete="current-password"
+                    >
                 </div>
 
-                <button type="submit" name="login_btn" class="btn-login">Log in</button>
+                <!-- Login Button -->
+                <button type="submit" class="login-button">
+                    Log in
+                </button>
+
             </form>
+
         </div>
+
     </div>
+
 </body>
 </html>
