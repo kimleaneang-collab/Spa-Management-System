@@ -84,6 +84,7 @@ if (empty($_SESSION['user'])) {
                                     <th>Status</th>
                                     <th>Today bookings</th>
                                     <th>Rating</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -94,6 +95,14 @@ if (empty($_SESSION['user'])) {
                                         <td><span class="status-pill status-<?= e($therapist['status_class']) ?>"><?= e($therapist['status']) ?></span></td>
                                         <td><?= e((string) $therapist['today']) ?></td>
                                         <td>⭐ <?= e(number_format((float) $therapist['rating'], 1)) ?></td>
+                                        <td>
+                                            <a class="secondary-button" href="<?= e(APP_URL) ?>/?route=therapists&amp;edit=<?= e((string) ($therapist['id'] ?? 0)) ?>">Edit</a>
+                                            <form method="post" action="<?= e(APP_URL) ?>/?route=therapists" style="display:inline" onsubmit="return confirm('Delete this therapist?');">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="id" value="<?= e((string) ($therapist['id'] ?? 0)) ?>">
+                                                <button class="secondary-button" type="submit">Delete</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -104,50 +113,52 @@ if (empty($_SESSION['user'])) {
         </main>
     </div>
 
-    <div class="modal-backdrop hidden" id="therapist-modal" aria-hidden="true">
+    <div class="modal-backdrop <?= $editingTherapist !== null ? '' : 'hidden' ?>" id="therapist-modal" aria-hidden="<?= $editingTherapist !== null ? 'false' : 'true' ?>">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="therapist-title">
             <div class="modal-header">
                 <div>
                     <p class="eyebrow">Therapist</p>
-                    <h2 id="therapist-title">Add therapist</h2>
+                    <h2 id="therapist-title"><?= $editingTherapist !== null ? 'Edit therapist' : 'Add therapist' ?></h2>
                 </div>
                 <button class="modal-close" type="button" aria-label="Close" data-close-modal="therapist-modal">×</button>
             </div>
             <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=therapists">
+                <input type="hidden" name="action" value="<?= $editingTherapist !== null ? 'update' : 'create' ?>">
+                <input type="hidden" name="id" value="<?= e((string) ($editingTherapist['id'] ?? '')) ?>">
                 <div class="form-grid two-col">
                     <label>
                         <span>Full name</span>
-                        <input type="text" name="therapist_name" required>
+                        <input type="text" name="therapist_name" value="<?= e($editingTherapist['full_name'] ?? '') ?>" minlength="2" maxlength="150" required>
                     </label>
                     <label>
                         <span>Phone</span>
-                        <input type="text" name="therapist_phone" required>
+                        <input type="tel" name="therapist_phone" value="<?= e($editingTherapist['phone'] ?? '') ?>" pattern="[0-9+()\-\s]{7,30}" maxlength="30" required>
                     </label>
                     <label>
                         <span>Specialization</span>
-                        <input type="text" name="therapist_specialization" placeholder="Massage Therapy">
+                        <input type="text" name="therapist_specialization" value="<?= e($editingTherapist['specialization'] ?? '') ?>" placeholder="Massage Therapy">
                     </label>
                     <label>
                         <span>Gender</span>
                         <select name="therapist_gender">
                             <option value="">Select gender</option>
-                            <option value="female">Female</option>
-                            <option value="male">Male</option>
-                            <option value="other">Other</option>
+                            <option value="female" <?= ($editingTherapist['gender'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
+                            <option value="male" <?= ($editingTherapist['gender'] ?? '') === 'male' ? 'selected' : '' ?>>Male</option>
+                            <option value="other" <?= ($editingTherapist['gender'] ?? '') === 'other' ? 'selected' : '' ?>>Other</option>
                         </select>
                     </label>
                     <label>
                         <span>Status</span>
                         <select name="therapist_status">
-                            <option value="active">Available</option>
-                            <option value="on_leave">On Break</option>
-                            <option value="inactive">Off Duty</option>
+                            <option value="active" <?= ($editingTherapist['employment_status'] ?? 'active') === 'active' ? 'selected' : '' ?>>Available</option>
+                            <option value="on_leave" <?= ($editingTherapist['employment_status'] ?? '') === 'on_leave' ? 'selected' : '' ?>>On Break</option>
+                            <option value="inactive" <?= ($editingTherapist['employment_status'] ?? '') === 'inactive' ? 'selected' : '' ?>>Off Duty</option>
                         </select>
                     </label>
                 </div>
                 <div class="modal-actions">
                     <button class="secondary-button" type="button" data-close-modal="therapist-modal">Cancel</button>
-                    <button class="primary-button" type="submit">Save therapist</button>
+                    <button class="primary-button" type="submit"><?= $editingTherapist !== null ? 'Update therapist' : 'Save therapist' ?></button>
                 </div>
             </form>
         </div>

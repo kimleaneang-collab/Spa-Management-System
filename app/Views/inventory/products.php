@@ -5,12 +5,6 @@ if (empty($_SESSION['user'])) {
     redirect('login');
 }
 
-$products = [
-    ['name' => 'Massage Oil 100ml', 'price' => '$15.00', 'status' => 'Low Stock', 'status_class' => 'status-cancelled', 'image' => APP_URL . '/public/uploads/massage.png'],
-    ['name' => 'Body Lotion 200ml', 'price' => '$12.00', 'status' => 'In Stock', 'status_class' => 'status-confirmed', 'image' => APP_URL . '/public/uploads/body-scrub.png'],
-    ['name' => 'Essential Oil 10ml', 'price' => '$10.00', 'status' => 'In Stock', 'status_class' => 'status-confirmed', 'image' => APP_URL . '/public/uploads/Essentail-oil.png'],
-    ['name' => 'Gift Voucher', 'price' => 'From $10.00', 'status' => 'Unlimited', 'status_class' => 'status-in-progress', 'image' => APP_URL . '/public/uploads/gift.png'],
-];
 ?>
 <!doctype html>
 <html lang="en">
@@ -74,7 +68,7 @@ $products = [
                         <h1 class="page-title">PRODUCTS</h1>
                         <div class="page-date">Inventory catalog</div>
                     </div>
-                    <button class="primary-button" type="button">+ Add product</button>
+                    <button class="primary-button" type="button" data-open-modal="product-modal">+ Add product</button>
                 </div>
                 <section class="product-grid">
                     <?php foreach ($products as $product): ?>
@@ -90,6 +84,68 @@ $products = [
                 </section>
             </div>
         </main>
+    </div>
+
+    <div class="modal-backdrop hidden" id="product-modal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="product-title">
+            <div class="modal-header">
+                <div>
+                    <p class="eyebrow">Inventory</p>
+                    <h2 id="product-title">Add product</h2>
+                </div>
+                <button class="modal-close" type="button" aria-label="Close" data-close-modal="product-modal">×</button>
+            </div>
+            <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=products" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="create">
+                <div class="form-grid two-col">
+                    <label>
+                        <span>Product code</span>
+                        <input type="text" name="product_code" placeholder="PROD-001" minlength="2" maxlength="40" required>
+                    </label>
+                    <label>
+                        <span>Product name</span>
+                        <input type="text" name="product_name" placeholder="Massage Oil 100ml" minlength="2" maxlength="150" required>
+                    </label>
+                    <label>
+                        <span>Category</span>
+                        <input type="text" name="category" placeholder="Spa supplies">
+                    </label>
+                    <label>
+                        <span>Unit</span>
+                        <input type="text" name="unit" value="pcs" required>
+                    </label>
+                    <label>
+                        <span>Cost price</span>
+                        <input type="number" name="cost_price" min="0" step="0.01" value="0">
+                    </label>
+                    <label>
+                        <span>Selling price</span>
+                        <input type="number" name="selling_price" min="0" step="0.01" value="0" required>
+                    </label>
+                    <label>
+                        <span>Stock quantity</span>
+                        <input type="number" name="stock_quantity" min="0" step="0.001" value="0" required>
+                    </label>
+                    <label>
+                        <span>Reorder level</span>
+                        <input type="number" name="reorder_level" min="0" step="0.001" value="0" required>
+                    </label>
+                    <label>
+                        <span>Expiry date</span>
+                        <input type="date" name="expiry_date">
+                    </label>
+                    <label>
+                        <span>Product picture</span>
+                        <input type="file" name="product_image" accept="image/jpeg,image/png,image/gif,image/webp">
+                    </label>
+                </div>
+                <p class="page-date">Accepted: JPG, PNG, GIF, or WEBP. Maximum 5 MB.</p>
+                <div class="modal-actions">
+                    <button class="secondary-button" type="button" data-close-modal="product-modal">Cancel</button>
+                    <button class="primary-button" type="submit">Save product</button>
+                </div>
+            </form>
+        </div>
     </div>
     <script src="<?= e(APP_URL) ?>/public/js/main.js"></script>
 </body>

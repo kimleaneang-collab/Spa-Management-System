@@ -13,7 +13,7 @@ final class User
     public function all(int $limit = 20): array
     {
         $stmt = $this->db->prepare(
-            'SELECT u.full_name, u.username, u.email, u.status, r.name AS role_name
+            'SELECT u.id, u.full_name, u.username, u.email, u.phone, u.status, u.role_id, r.name AS role_name
              FROM users u
              LEFT JOIN roles r ON r.id = u.role_id
              ORDER BY u.id DESC
@@ -23,6 +23,15 @@ final class User
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function find(int $id): ?array
+    {
+        $stmt = $this->db->prepare('SELECT u.id, u.full_name, u.username, u.email, u.phone, u.status, u.role_id, r.name AS role_name FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.id = :id');
+        $stmt->execute([':id' => $id]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $user !== false ? $user : null;
     }
 
     public function roles(): array
@@ -37,7 +46,8 @@ final class User
         string $username,
         string $email,
         string $phone,
-        string $roleName
+        string $roleName,
+        string $password = 'password123'
     ): void {
         $roleId = null;
         if ($roleName !== '') {
@@ -66,12 +76,56 @@ final class User
         $stmt->execute([
             ':role_id' => $roleId ?? 1,
             ':username' => $username,
-            ':password_hash' => password_hash('password123', PASSWORD_DEFAULT),
+            ':password_hash' => password_hash($password, PASSWORD_DEFAULT),
             ':full_name' => $name,
             ':email' => $email,
             ':phone' => $phone,
             ':status' => 'active',
         ]);
+    }
+
+    public function update(int $id, string $name, string $username, string $email, string $phone, string $roleName, string $status, string $password = ''): void
+    {
+        $roleId = $this->roleId($roleName);
+        $fields = 'role_id = :role_id, full_name = :full_name, username = :username, email = :email, phone = :phone, status = :status';
+        $parameters = [
+            ':id' => $id,
+            ':role_id' => $roleId,
+            ':full_name' => $name,
+            ':username' => $username,
+            ':email' => $email,
+            ':phone' => $phone,
+            ':status' => $status,
+        ];
+        if ($password !== '') {
+            $fields .= ', password_hash = :password_hash';
+            $parameters[':password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+        }
+        $stmt = $this->db->prepare('UPDATE users SET ' . $fields . ' WHERE id = :id');
+        $stmt->execute($parameters);
+    }
+
+    public function delete(int $id): void
+    {
+        $stmt = $this->db->prepare('DELETE FROM users WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+    }
+
+    private function roleId(string $roleName): int
+    {
+        $roleName = strtolower(trim($roleName));
+        $stmt = $this->db->prepare('SELECT id FROM roles WHERE name = :name LIMIT 1');
+        $stmt->execute([':name' => $roleName]);
+        $roleId = $stmt->fetchColumn();
+
+        if ($roleId !== false) {
+            return (int) $roleId;
+        }
+
+        $insert = $this->db->prepare('INSERT INTO roles (name, description) VALUES (:name, :description)');
+        $insert->execute([':name' => $roleName, ':description' => 'Custom role']);
+
+        return (int) $this->db->lastInsertId();
     }
 
     /**

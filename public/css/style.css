@@ -938,9 +938,9 @@ input {
 
 .service-thumb {
     position: relative;
-    height: 105px;
+    aspect-ratio: 16 / 5;
     min-height: 105px;
-    background: linear-gradient(135deg, #dfe9dd, #f1e7d8);
+    background: #f2f4ef;
     display: grid;
     place-items: center;
     overflow: hidden;
@@ -948,9 +948,11 @@ input {
 
 .service-image {
     display: block;
-    width: 100%;
+    width: 80%;
     height: 100%;
-    object-fit: cover;
+    max-width: 100%;
+    margin: 0 auto;
+    object-fit: contain;
     object-position: center;
 }
 
@@ -1729,11 +1731,15 @@ input {
 
 .product-card img {
     display: block;
-    width: calc(100% - 24px);
-    height: 78px;
-    margin: 12px 12px 0;
+    width: 80%;
+    aspect-ratio: 16 / 5;
+    height: auto;
+    min-height: 78px;
+    margin: 12px auto 0;
     border-radius: 7px;
-    object-fit: cover;
+    background: #f2f4ef;
+    object-fit: contain;
+    object-position: center;
 }
 
 .product-card-body {

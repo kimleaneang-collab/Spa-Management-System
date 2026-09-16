@@ -80,11 +80,11 @@ if (empty($_SESSION['user'])) {
                     <div class="table-wrap">
                         <table class="data-table searchable-table">
                             <thead>
-                                <tr><th>Name</th><th>Role</th><th>Email</th><th>Status</th></tr>
+                                <tr><th>Name</th><th>Role</th><th>Email</th><th>Status</th><th>Actions</th></tr>
                             </thead>
                             <tbody>
                                 <?php if ($users === []): ?>
-                                    <tr><td colspan="4">No users found.</td></tr>
+                                    <tr><td colspan="5">No users found.</td></tr>
                                 <?php else: ?>
                                     <?php foreach ($users as $user): ?>
                                         <tr>
@@ -92,6 +92,14 @@ if (empty($_SESSION['user'])) {
                                             <td><?= e($user['role_name'] ?? 'Admin') ?></td>
                                             <td><?= e($user['email'] ?? '') ?></td>
                                             <td><span class="status-pill status-confirmed"><?= e($user['status'] ?? 'active') ?></span></td>
+                                            <td>
+                                                <a class="secondary-button" href="<?= e(APP_URL) ?>/?route=users-and-roles&amp;edit=<?= e((string) ($user['id'] ?? 0)) ?>">Edit</a>
+                                                <form method="post" action="<?= e(APP_URL) ?>/?route=users-and-roles" style="display:inline" onsubmit="return confirm('Delete this user?');">
+                                                    <input type="hidden" name="action" value="delete">
+                                                    <input type="hidden" name="id" value="<?= e((string) ($user['id'] ?? 0)) ?>">
+                                                    <button class="secondary-button" type="submit">Delete</button>
+                                                </form>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -103,49 +111,60 @@ if (empty($_SESSION['user'])) {
         </main>
     </div>
 
-    <div class="modal-backdrop hidden" id="user-modal" aria-hidden="true">
+    <div class="modal-backdrop <?= $editingUser !== null ? '' : 'hidden' ?>" id="user-modal" aria-hidden="<?= $editingUser !== null ? 'false' : 'true' ?>">
         <div class="modal-card">
             <div class="modal-header">
                 <div>
                     <p class="eyebrow">User</p>
-                    <h2>Add user</h2>
+                    <h2><?= $editingUser !== null ? 'Edit user' : 'Add user' ?></h2>
                 </div>
                 <button class="modal-close" type="button" data-close-modal="user-modal">×</button>
             </div>
             <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=users-and-roles">
+                <input type="hidden" name="action" value="<?= $editingUser !== null ? 'update' : 'create' ?>">
+                <input type="hidden" name="id" value="<?= e((string) ($editingUser['id'] ?? '')) ?>">
                 <div class="form-grid two-col">
                     <label>
                         <span>Full name</span>
-                        <input type="text" name="user_name" required>
+                        <input type="text" name="user_name" value="<?= e($editingUser['full_name'] ?? '') ?>" minlength="2" maxlength="150" required>
                     </label>
                     <label>
                         <span>Username</span>
-                        <input type="text" name="username" required>
+                        <input type="text" name="username" value="<?= e($editingUser['username'] ?? '') ?>" pattern="[A-Za-z0-9_.-]{3,100}" minlength="3" maxlength="100" required>
                     </label>
                     <label>
                         <span>Email</span>
-                        <input type="email" name="user_email" required>
+                        <input type="email" name="user_email" value="<?= e($editingUser['email'] ?? '') ?>" maxlength="150" required>
                     </label>
                     <label>
                         <span>Phone</span>
-                        <input type="text" name="user_phone">
+                        <input type="text" name="user_phone" value="<?= e($editingUser['phone'] ?? '') ?>">
                     </label>
                     <label>
                         <span>Role</span>
                         <select name="role_name">
                             <?php foreach ($roles as $role): ?>
-                                <option value="<?= e((string) $role) ?>"><?= e((string) $role) ?></option>
+                                <option value="<?= e((string) $role) ?>" <?= strtolower((string) ($editingUser['role_name'] ?? '')) === strtolower((string) $role) ? 'selected' : '' ?>><?= e((string) $role) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </label>
                     <label>
-                        <span>Default password</span>
-                        <input type="text" value="password123" readonly>
+                        <span>Status</span>
+                        <select name="user_status">
+                            <?php foreach (['active', 'inactive', 'suspended'] as $status): ?>
+                                <option value="<?= e($status) ?>" <?= ($editingUser['status'] ?? 'active') === $status ? 'selected' : '' ?>><?= e(ucfirst($status)) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Password <?= $editingUser !== null ? '(leave blank to keep current)' : '' ?></span>
+                        <input type="password" name="user_password" minlength="8" maxlength="255" <?= $editingUser === null ? 'required' : '' ?> autocomplete="new-password">
+                        <small>Use at least 8 characters with a letter and a number.</small>
                     </label>
                 </div>
                 <div class="modal-actions">
                     <button class="secondary-button" type="button" data-close-modal="user-modal">Cancel</button>
-                    <button class="primary-button" type="submit">Save user</button>
+                    <button class="primary-button" type="submit"><?= $editingUser !== null ? 'Update user' : 'Save user' ?></button>
                 </div>
             </form>
         </div>

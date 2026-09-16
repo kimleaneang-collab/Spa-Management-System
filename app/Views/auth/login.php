@@ -6,7 +6,9 @@ if (empty($_SESSION['csrf_token'])) {
 }
 
 $error = $_SESSION['login_error'] ?? '';
+$loginUsername = $_SESSION['login_username'] ?? '';
 unset($_SESSION['login_error']);
+unset($_SESSION['login_username']);
 ?>
 <!doctype html>
 <html lang="en">
@@ -55,8 +57,11 @@ unset($_SESSION['login_error']);
                             name="username"
                             type="text"
                             inputmode="text"
+                            minlength="3"
                             maxlength="100"
+                            pattern="[A-Za-z0-9_.-]{3,100}"
                             autocomplete="username"
+                            value="<?= e($loginUsername) ?>"
                             required
                             autofocus
                         >
@@ -69,6 +74,7 @@ unset($_SESSION['login_error']);
                                 id="password"
                                 name="password"
                                 type="password"
+                                minlength="1"
                                 maxlength="255"
                                 autocomplete="current-password"
                                 required

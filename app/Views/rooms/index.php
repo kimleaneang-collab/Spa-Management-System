@@ -5,14 +5,6 @@ if (empty($_SESSION['user'])) {
     redirect('login');
 }
 
-$rooms = [
-    ['number' => 'Room 01', 'type' => 'Massage Suite', 'status' => 'Available', 'status_class' => 'available'],
-    ['number' => 'Room 02', 'type' => 'Facial Studio', 'status' => 'Occupied', 'status_class' => 'occupied'],
-    ['number' => 'Room 03', 'type' => 'Body Therapy', 'status' => 'Cleaning', 'status_class' => 'cleaning'],
-    ['number' => 'Room 04', 'type' => 'Wellness Suite', 'status' => 'Available', 'status_class' => 'available'],
-    ['number' => 'Room 05', 'type' => 'Couples Spa', 'status' => 'Occupied', 'status_class' => 'occupied'],
-    ['number' => 'Room 06', 'type' => 'Recovery Room', 'status' => 'Available', 'status_class' => 'available'],
-];
 ?>
 <!doctype html>
 <html lang="en">
@@ -79,11 +71,14 @@ $rooms = [
                         <h1 class="page-title">ROOMS</h1>
                         <div class="page-date">Availability and service status</div>
                     </div>
-                    <button class="primary-button" type="button">+ Add room</button>
+                    <button class="primary-button" type="button" data-open-modal="room-modal">+ Add room</button>
                 </div>
 
                 <section class="module-panel">
                     <div class="room-grid">
+                        <?php if ($rooms === []): ?>
+                            <p>No rooms available.</p>
+                        <?php endif; ?>
                         <?php foreach ($rooms as $room): ?>
                             <article class="room-card">
                                 <div class="room-icon">◫</div>
@@ -92,12 +87,63 @@ $rooms = [
                                     <span class="status-pill status-<?= e($room['status_class']) ?>"><?= e($room['status']) ?></span>
                                 </div>
                                 <p><?= e($room['type']) ?></p>
+                                <small>Capacity: <?= e((string) $room['capacity']) ?></small>
                             </article>
                         <?php endforeach; ?>
                     </div>
                 </section>
             </div>
         </main>
+    </div>
+
+    <div class="modal-backdrop hidden" id="room-modal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="room-title">
+            <div class="modal-header">
+                <div>
+                    <p class="eyebrow">Treatment room</p>
+                    <h2 id="room-title">Add room</h2>
+                </div>
+                <button class="modal-close" type="button" aria-label="Close" data-close-modal="room-modal">×</button>
+            </div>
+            <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=rooms">
+                <input type="hidden" name="action" value="create">
+                <div class="form-grid two-col">
+                    <label>
+                        <span>Room code</span>
+                        <input type="text" name="room_code" placeholder="ROOM-07" minlength="2" maxlength="30" required>
+                    </label>
+                    <label>
+                        <span>Room name</span>
+                        <input type="text" name="room_name" placeholder="Room 07" minlength="2" maxlength="100" required>
+                    </label>
+                    <label>
+                        <span>Room type</span>
+                        <input type="text" name="room_type" placeholder="Massage Suite">
+                    </label>
+                    <label>
+                        <span>Capacity</span>
+                        <input type="number" name="capacity" min="1" max="999" step="1" value="1" required>
+                    </label>
+                    <label>
+                        <span>Status</span>
+                        <select name="status">
+                            <option value="available">Available</option>
+                            <option value="occupied">Occupied</option>
+                            <option value="cleaning">Cleaning</option>
+                            <option value="under_maintenance">Maintenance</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Notes</span>
+                        <input type="text" name="notes" placeholder="Optional notes">
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button class="secondary-button" type="button" data-close-modal="room-modal">Cancel</button>
+                    <button class="primary-button" type="submit">Save room</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="<?= e(APP_URL) ?>/public/js/main.js"></script>

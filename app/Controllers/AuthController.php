@@ -66,10 +66,16 @@ final class AuthController
         | Validation
         |--------------------------------------------------------------------------
         */
-        if ($username === '' || $password === '') {
+        $validUsername = valid_text($username, 3, 100)
+            && preg_match('/^[A-Za-z0-9_.-]{3,100}$/', $username) === 1;
+
+        if (!$validUsername || !valid_login_password($password)) {
 
             $_SESSION['login_error'] =
-                'Please enter username and password.';
+                !$validUsername
+                    ? 'Enter a valid username using at least 3 characters.'
+                    : 'Enter your password.';
+            $_SESSION['login_username'] = $username;
 
             redirect('login');
         }
@@ -128,8 +134,12 @@ final class AuthController
                 false
             );
 
-            $_SESSION['login_error'] =
-                'Invalid username or password.';
+            $_SESSION['login_username'] = $username;
+            $_SESSION['login_error'] = $user === null
+                ? 'Username not found.'
+                : ($user['status'] !== 'active'
+                    ? 'This account is not active.'
+                    : 'Incorrect password.');
 
             redirect('login');
         }

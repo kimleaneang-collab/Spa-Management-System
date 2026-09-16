@@ -5,57 +5,12 @@ if (empty($_SESSION['user'])) {
     redirect('login');
 }
 
-$appointments = [
-    [
-        'time' => '09:00 AM',
-        'customer' => 'Nina Johnson',
-        'therapist' => 'Maya Lim',
-        'service' => 'Deep Tissue Massage',
-        'room' => 'Room 02',
-        'duration' => '60 min',
-        'status' => 'Confirmed',
-        'status_class' => 'confirmed'
-    ],
-    [
-        'time' => '10:30 AM',
-        'customer' => 'Daniel Lee',
-        'therapist' => 'Sophie Tran',
-        'service' => 'Facial Glow Ritual',
-        'room' => 'Room 04',
-        'duration' => '45 min',
-        'status' => 'Pending',
-        'status_class' => 'pending'
-    ],
-    [
-        'time' => '12:00 PM',
-        'customer' => 'Anna Smith',
-        'therapist' => 'Hana Park',
-        'service' => 'Body Sculpting',
-        'room' => 'Room 01',
-        'duration' => '90 min',
-        'status' => 'In Progress',
-        'status_class' => 'in-progress'
-    ],
-    [
-        'time' => '02:15 PM',
-        'customer' => 'Chris Brown',
-        'therapist' => 'Maya Lim',
-        'service' => 'Detox Body Wrap',
-        'room' => 'Room 03',
-        'duration' => '75 min',
-        'status' => 'Completed',
-        'status_class' => 'completed'
-    ],
-    [
-        'time' => '04:00 PM',
-        'customer' => 'Ella Gomez',
-        'therapist' => 'Sophie Tran',
-        'service' => 'Hot Stone Therapy',
-        'room' => 'Room 05',
-        'duration' => '60 min',
-        'status' => 'Cancelled',
-        'status_class' => 'cancelled'
-    ]
+$statusClasses = [
+    'pending' => 'pending',
+    'confirmed' => 'confirmed',
+    'in_progress' => 'in-progress',
+    'completed' => 'completed',
+    'cancelled' => 'cancelled',
 ];
 ?>
 <!doctype html>
@@ -133,10 +88,13 @@ $appointments = [
                 <div class="page-heading">
                     <div>
                         <h1 class="page-title">APPOINTMENTS</h1>
-                        <div class="page-date">Today • 24 bookings</div>
+                        <div class="page-date"><?= e((string) count($appointments)) ?> bookings</div>
                     </div>
                     <button class="primary-button" type="button" data-open-modal="appointment-modal">+ New appointment</button>
                 </div>
+                <?php if ($formError !== ''): ?>
+                    <div class="alert alert-error" role="alert"><?= e($formError) ?></div>
+                <?php endif; ?>
 
                 <section class="module-panel">
                     <div class="toolbar-row">
@@ -146,7 +104,7 @@ $appointments = [
                             <button class="pill" type="button">Confirmed</button>
                             <button class="pill" type="button">Today</button>
                         </div>
-                        <div class="toolbar-meta">5 appointments</div>
+                        <div class="toolbar-meta"><?= e((string) count($appointments)) ?> appointments</div>
                     </div>
 
                     <div class="table-wrap">
@@ -160,20 +118,33 @@ $appointments = [
                                     <th>Room</th>
                                     <th>Duration</th>
                                     <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                <?php if ($appointments === []): ?>
+                                    <tr><td colspan="8">No appointments available.</td></tr>
+                                <?php else: ?>
                                 <?php foreach ($appointments as $appointment): ?>
                                     <tr>
-                                        <td><?= e($appointment['time']) ?></td>
+                                        <td><?= e(date('g:i A', strtotime((string) $appointment['start_time']))) ?></td>
                                         <td><?= e($appointment['customer']) ?></td>
                                         <td><?= e($appointment['therapist']) ?></td>
                                         <td><?= e($appointment['service']) ?></td>
                                         <td><?= e($appointment['room']) ?></td>
-                                        <td><?= e($appointment['duration']) ?></td>
-                                        <td><span class="status-pill status-<?= e($appointment['status_class']) ?>"><?= e($appointment['status']) ?></span></td>
+                                        <td><?= e((string) $appointment['duration_minutes']) ?> min</td>
+                                        <td><span class="status-pill status-<?= e($statusClasses[$appointment['status']] ?? 'pending') ?>"><?= e(ucwords(str_replace('_', ' ', $appointment['status']))) ?></span></td>
+                                        <td>
+                                            <a class="secondary-button" href="<?= e(APP_URL) ?>/?route=appointments&amp;edit=<?= e((string) $appointment['id']) ?>">Edit</a>
+                                            <form method="post" action="<?= e(APP_URL) ?>/?route=appointments" style="display:inline" onsubmit="return confirm('Delete this appointment?');">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="id" value="<?= e((string) $appointment['id']) ?>">
+                                                <button class="secondary-button" type="submit">Delete</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -182,61 +153,80 @@ $appointments = [
         </main>
     </div>
 
-    <div class="modal-backdrop hidden" id="appointment-modal" aria-hidden="true">
+    <div class="modal-backdrop <?= $editingAppointment !== null ? '' : 'hidden' ?>" id="appointment-modal" aria-hidden="<?= $editingAppointment !== null ? 'false' : 'true' ?>">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="appointment-title">
             <div class="modal-header">
                 <div>
-                    <p class="eyebrow">New booking</p>
-                    <h2 id="appointment-title">Schedule Appointment</h2>
+                    <p class="eyebrow"><?= $editingAppointment !== null ? 'Edit booking' : 'New booking' ?></p>
+                    <h2 id="appointment-title"><?= $editingAppointment !== null ? 'Edit Appointment' : 'Schedule Appointment' ?></h2>
                 </div>
                 <button class="modal-close" type="button" aria-label="Close" data-close-modal="appointment-modal">×</button>
             </div>
 
-            <form class="appointment-form" method="post" action="#">
+            <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=appointments">
+                <input type="hidden" name="action" value="<?= $editingAppointment !== null ? 'update' : 'create' ?>">
+                <input type="hidden" name="id" value="<?= e((string) ($editingAppointment['id'] ?? '')) ?>">
                 <div class="form-grid two-col">
                     <label>
                         <span>Customer</span>
-                        <input type="text" name="customer" placeholder="Customer name" required>
+                        <select name="customer_id" required>
+                            <option value="">Select customer</option>
+                            <?php foreach ($options['customers'] as $customer): ?>
+                                <option value="<?= e((string) $customer['id']) ?>" <?= (int) ($editingAppointment['customer_id'] ?? 0) === (int) $customer['id'] ? 'selected' : '' ?>><?= e($customer['full_name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </label>
                     <label>
                         <span>Therapist</span>
-                        <select name="therapist" required>
+                        <select name="therapist_id">
                             <option value="">Select therapist</option>
-                            <option>Maya Lim</option>
-                            <option>Sophie Tran</option>
-                            <option>Hana Park</option>
+                            <?php foreach ($options['therapists'] as $therapist): ?>
+                                <option value="<?= e((string) $therapist['id']) ?>" <?= (int) ($editingAppointment['therapist_id'] ?? 0) === (int) $therapist['id'] ? 'selected' : '' ?>><?= e($therapist['full_name']) ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </label>
                     <label>
                         <span>Service</span>
-                        <select name="service" required>
+                        <select name="service_id" required>
                             <option value="">Select service</option>
-                            <option>Deep Tissue Massage</option>
-                            <option>Facial Glow Ritual</option>
-                            <option>Hot Stone Therapy</option>
+                            <?php foreach ($options['services'] as $service): ?>
+                                <option value="<?= e((string) $service['id']) ?>" <?= (int) ($editingAppointment['service_id'] ?? 0) === (int) $service['id'] ? 'selected' : '' ?>><?= e($service['name']) ?> (<?= e((string) $service['duration_minutes']) ?> min)</option>
+                            <?php endforeach; ?>
                         </select>
                     </label>
                     <label>
                         <span>Room</span>
-                        <select name="room" required>
+                        <select name="room_id">
                             <option value="">Select room</option>
-                            <option>Room 01</option>
-                            <option>Room 02</option>
-                            <option>Room 03</option>
+                            <?php foreach ($options['rooms'] as $room): ?>
+                                <option value="<?= e((string) $room['id']) ?>" <?= (int) ($editingAppointment['room_id'] ?? 0) === (int) $room['id'] ? 'selected' : '' ?>><?= e($room['room_name'] ?: $room['room_code']) ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </label>
                     <label>
                         <span>Date</span>
-                        <input type="date" name="date" required>
+                        <input type="date" name="appointment_date" value="<?= e($editingAppointment['appointment_date'] ?? '') ?>" required>
                     </label>
                     <label>
                         <span>Time</span>
-                        <input type="time" name="time" required>
+                        <input type="time" name="start_time" value="<?= e(substr((string) ($editingAppointment['start_time'] ?? ''), 0, 5)) ?>" required>
+                    </label>
+                    <label>
+                        <span>End time</span>
+                        <input type="time" name="end_time" value="<?= e(substr((string) ($editingAppointment['end_time'] ?? ''), 0, 5)) ?>">
+                    </label>
+                    <label>
+                        <span>Status</span>
+                        <select name="status">
+                            <?php foreach (['pending', 'confirmed', 'in_progress', 'completed', 'cancelled'] as $status): ?>
+                                <option value="<?= e($status) ?>" <?= ($editingAppointment['status'] ?? 'pending') === $status ? 'selected' : '' ?>><?= e(ucwords(str_replace('_', ' ', $status))) ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </label>
                 </div>
                 <div class="modal-actions">
                     <button class="secondary-button" type="button" data-close-modal="appointment-modal">Cancel</button>
-                    <button class="primary-button" type="submit">Save booking</button>
+                    <button class="primary-button" type="submit"><?= $editingAppointment !== null ? 'Update booking' : 'Save booking' ?></button>
                 </div>
             </form>
         </div>

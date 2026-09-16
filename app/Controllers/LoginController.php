@@ -1,6 +1,6 @@
 <?php
 
-require_once DIR . '/../Models/User.php';
+require_once __DIR__ . '/../Models/User.php';
 
 class LoginController
 {
@@ -13,7 +13,7 @@ class LoginController
 
     public function showLogin()
     {
-        require __DIR . '/../Views/login.php';
+        require __DIR__ . '/../Views/login.php';
     }
 
     public function login()
@@ -40,7 +40,7 @@ class LoginController
 
             $error = "Invalid username or password";
 
-            require DIR . '/../Views/login.php';
+            require __DIR__ . '/../Views/login.php';
         }
     }
 }

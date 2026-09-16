@@ -14,20 +14,39 @@ final class TherapistController
 
         $therapistModel = new Therapist(Database::connection());
 
+        $editingTherapist = null;
+        $editId = (int) ($_GET['edit'] ?? 0);
+        if ($editId > 0) {
+            $editingTherapist = $therapistModel->find($editId);
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['therapist_name'])) {
+            $action = (string) ($_POST['action'] ?? 'create');
+            $id = (int) ($_POST['id'] ?? 0);
             $name = trim((string) ($_POST['therapist_name'] ?? ''));
             $phone = trim((string) ($_POST['therapist_phone'] ?? ''));
 
-            if ($name !== '' && $phone !== '') {
-                $therapistModel->create(
-                    $name,
-                    $phone,
-                    trim((string) ($_POST['therapist_specialization'] ?? '')),
-                    trim((string) ($_POST['therapist_gender'] ?? '')),
-                    trim((string) ($_POST['therapist_status'] ?? 'active'))
-                );
+            if (valid_text($name, 2, 150) && valid_phone($phone, true)) {
+                $specialization = trim((string) ($_POST['therapist_specialization'] ?? ''));
+                $gender = trim((string) ($_POST['therapist_gender'] ?? ''));
+                $status = trim((string) ($_POST['therapist_status'] ?? 'active'));
+                if (valid_text($specialization, 0, 150) && in_array($gender, ['', 'male', 'female', 'other'], true) && in_array($status, ['active', 'inactive', 'on_leave'], true) && (($action === 'update' && $id > 0) || $action === 'create')) {
+                    if ($action === 'update' && $id > 0) {
+                    $therapistModel->update($id, $name, $phone, $specialization, $gender, $status);
+                    } else {
+                    $therapistModel->create($name, $phone, $specialization, $gender, $status);
+                    }
+                }
             }
 
+            redirect('therapists');
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
+            $id = (int) ($_POST['id'] ?? 0);
+            if ($id > 0) {
+                $therapistModel->delete($id);
+            }
             redirect('therapists');
         }
 

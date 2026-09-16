@@ -146,6 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!username?.value.trim()) {
                 username?.setCustomValidity('Username is required.');
+            } else if (username.value.trim().length < 3) {
+                username?.setCustomValidity('Username must be at least 3 characters.');
+            } else if (!/^[A-Za-z0-9_.-]+$/.test(username.value.trim())) {
+                username?.setCustomValidity('Username may contain letters, numbers, dots, underscores, and hyphens only.');
             }
 
             if (!password?.value) {

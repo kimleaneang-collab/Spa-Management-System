@@ -10,7 +10,7 @@ final class Therapist
 	public function all(): array
 	{
 		$stmt = $this->db->query(
-			"SELECT t.full_name AS name,
+			"SELECT t.id, t.full_name AS name, t.phone, t.gender,
 					COALESCE(t.specialization, 'General Wellness') AS specialty,
 					t.employment_status,
 					COUNT(a.id) AS today_bookings,
@@ -31,6 +31,7 @@ final class Therapist
 			$status = $statusMap[$therapist['employment_status']] ?? $statusMap['inactive'];
 
 			return [
+				'id' => (int) $therapist['id'],
 				'name' => $therapist['name'],
 				'specialty' => $therapist['specialty'],
 				'status' => $status['label'],
@@ -39,6 +40,15 @@ final class Therapist
 				'rating' => (float) $therapist['rating'],
 			];
 		}, $stmt->fetchAll(PDO::FETCH_ASSOC));
+	}
+
+	public function find(int $id): ?array
+	{
+		$stmt = $this->db->prepare('SELECT id, full_name, phone, specialization, gender, employment_status FROM therapists WHERE id = :id');
+		$stmt->execute([':id' => $id]);
+		$therapist = $stmt->fetch(PDO::FETCH_ASSOC);
+
+		return $therapist !== false ? $therapist : null;
 	}
 
 	public function create(
@@ -61,5 +71,26 @@ final class Therapist
 			':specialization' => $specialization !== '' ? $specialization : null,
 			':status' => $status,
 		]);
+	}
+
+	public function update(int $id, string $name, string $phone, string $specialization, string $gender, string $status): void
+	{
+		$stmt = $this->db->prepare(
+			'UPDATE therapists SET full_name = :name, phone = :phone, specialization = :specialization, gender = :gender, employment_status = :status WHERE id = :id'
+		);
+		$stmt->execute([
+			':id' => $id,
+			':name' => $name,
+			':phone' => $phone,
+			':specialization' => $specialization !== '' ? $specialization : null,
+			':gender' => $gender !== '' ? $gender : null,
+			':status' => $status,
+		]);
+	}
+
+	public function delete(int $id): void
+	{
+		$stmt = $this->db->prepare('DELETE FROM therapists WHERE id = :id');
+		$stmt->execute([':id' => $id]);
 	}
 }

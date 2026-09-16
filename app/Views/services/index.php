@@ -5,15 +5,10 @@ if (empty($_SESSION['user'])) {
     redirect('login');
 }
 
-$categories = ['All', 'Massages', 'Facials', 'Body Care', 'Packages'];
-$services = [
-    ['name' => 'Full Body Massage', 'duration' => '60 mins', 'price' => '$40.00', 'category' => 'Massages', 'status' => 'Active', 'thumb' => 'massage', 'image' => APP_URL . '/public/uploads/fullbody-massage.png'],
-    ['name' => 'Hot Stone Massage', 'duration' => '90 mins', 'price' => '$60.00', 'category' => 'Massages', 'status' => 'Active', 'thumb' => 'stone', 'image' => APP_URL . '/public/uploads/hotstone-message.png'],
-    ['name' => 'Aromatherapy', 'duration' => '60 mins', 'price' => '$45.00', 'category' => 'Massages', 'status' => 'Active', 'thumb' => 'package', 'image' => APP_URL . '/public/uploads/aromatherapy.png'],
-    ['name' => 'Foot Massage', 'duration' => '45 mins', 'price' => '$28.00', 'category' => 'Massages', 'status' => 'Active', 'thumb' => 'wrap', 'image' => APP_URL . '/public/uploads/foot-message.png'],
-    ['name' => 'Facial Treatment', 'duration' => '60 mins', 'price' => '$35.00', 'category' => 'Facials', 'status' => 'Active', 'thumb' => 'facial', 'image' => APP_URL . '/public/uploads/facial-treatment.png'],
-    ['name' => 'Body Scrub', 'duration' => '60 mins', 'price' => '$38.00', 'category' => 'Body Care', 'status' => 'Seasonal', 'thumb' => 'body', 'image' => APP_URL . '/public/uploads/body-scrub.png']
-];
+$categoryNames = ['All'];
+foreach ($categories as $category):
+    $categoryNames[] = $category['name'];
+endforeach;
 $defaultServiceImage = APP_URL . '/public/uploads/login-bg.jpg';
 ?>
 <!doctype html>
@@ -81,13 +76,16 @@ $defaultServiceImage = APP_URL . '/public/uploads/login-bg.jpg';
                         <h1 class="page-title">TREATMENTS</h1>
                         <div class="page-date">Curated spa offerings</div>
                     </div>
-                    <button class="primary-button" type="button">+ Add treatment</button>
+                    <button class="primary-button" type="button" data-open-modal="service-modal">+ Add treatment</button>
                 </div>
+                <?php if ($formError !== ''): ?>
+                    <div class="alert alert-error" role="alert"><?= e($formError) ?></div>
+                <?php endif; ?>
 
                 <section class="module-panel">
                     <div class="toolbar-row">
                         <div class="toolbar-pills categories">
-                            <?php foreach ($categories as $category): ?>
+                            <?php foreach ($categoryNames as $category): ?>
                                 <button class="pill <?= $category === 'All' ? 'active' : '' ?>" type="button"><?= e($category) ?></button>
                             <?php endforeach; ?>
                         </div>
@@ -114,6 +112,61 @@ $defaultServiceImage = APP_URL . '/public/uploads/login-bg.jpg';
                 </section>
             </div>
         </main>
+    </div>
+
+    <div class="modal-backdrop hidden" id="service-modal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="service-title">
+            <div class="modal-header">
+                <div>
+                    <p class="eyebrow">Treatment</p>
+                    <h2 id="service-title">Add treatment</h2>
+                </div>
+                <button class="modal-close" type="button" aria-label="Close" data-close-modal="service-modal">×</button>
+            </div>
+            <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=services" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="create">
+                <div class="form-grid two-col">
+                    <label>
+                        <span>Category</span>
+                        <select name="category_id" required>
+                            <option value="">Select category</option>
+                            <?php foreach ($categories as $category): ?>
+                                <option value="<?= e((string) $category['id']) ?>"><?= e($category['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Service code</span>
+                        <input type="text" name="service_code" minlength="2" maxlength="30" placeholder="SVC011" required>
+                    </label>
+                    <label>
+                        <span>Treatment name</span>
+                        <input type="text" name="service_name" minlength="2" maxlength="150" placeholder="Relaxing Massage" required>
+                    </label>
+                    <label>
+                        <span>Duration (minutes)</span>
+                        <input type="number" name="duration_minutes" min="5" max="1440" step="1" required>
+                    </label>
+                    <label>
+                        <span>Price</span>
+                        <input type="number" name="price" min="0" step="0.01" required>
+                    </label>
+                    <label>
+                        <span>Treatment picture</span>
+                        <input type="file" name="service_image" accept="image/jpeg,image/png,image/gif,image/webp">
+                    </label>
+                    <label>
+                        <span>Description</span>
+                        <textarea name="description" maxlength="2000" rows="3"></textarea>
+                    </label>
+                </div>
+                <p class="page-date">Images must be JPG, PNG, GIF, or WEBP and no larger than 5 MB.</p>
+                <div class="modal-actions">
+                    <button class="secondary-button" type="button" data-close-modal="service-modal">Cancel</button>
+                    <button class="primary-button" type="submit">Save treatment</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="<?= e(APP_URL) ?>/public/js/main.js"></script>

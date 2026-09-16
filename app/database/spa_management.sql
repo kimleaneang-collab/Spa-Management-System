@@ -265,6 +265,7 @@ CREATE TABLE products (
     stock_quantity DECIMAL(14,3) NOT NULL DEFAULT 0,
     reorder_level DECIMAL(14,3) NOT NULL DEFAULT 0,
     expiry_date DATE NULL,
+    image_path VARCHAR(255) NULL,
     status ENUM('active','inactive') NOT NULL DEFAULT 'active',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

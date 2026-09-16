@@ -10,8 +10,8 @@ final class Customer
 	public function all(int $limit = 20): array
 	{
 		$stmt = $this->db->prepare(
-			    'SELECT c.full_name,
-				    c.phone,
+				'SELECT c.id, c.full_name,
+					    c.phone,
 				    (SELECT COUNT(*) FROM appointments a WHERE a.customer_id = c.id) AS visits,
 				    (SELECT COALESCE(SUM(i.total_amount), 0)
 				     FROM invoices i
@@ -27,6 +27,15 @@ final class Customer
 		$stmt->execute();
 
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+
+	public function find(int $id): ?array
+	{
+		$stmt = $this->db->prepare('SELECT id, full_name, phone, email FROM customers WHERE id = :id');
+		$stmt->execute([':id' => $id]);
+		$customer = $stmt->fetch(PDO::FETCH_ASSOC);
+
+		return $customer !== false ? $customer : null;
 	}
 
 	public function create(
@@ -46,5 +55,24 @@ final class Customer
 			':email' => $email,
 			':status' => 'active',
 		]);
+	}
+
+	public function update(int $id, string $name, string $phone, string $email): void
+	{
+		$stmt = $this->db->prepare(
+			'UPDATE customers SET full_name = :full_name, phone = :phone, email = :email WHERE id = :id'
+		);
+		$stmt->execute([
+			':id' => $id,
+			':full_name' => $name,
+			':phone' => $phone,
+			':email' => $email,
+		]);
+	}
+
+	public function delete(int $id): void
+	{
+		$stmt = $this->db->prepare('DELETE FROM customers WHERE id = :id');
+		$stmt->execute([':id' => $id]);
 	}
 }

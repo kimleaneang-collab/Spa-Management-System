@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+// Load application configuration and all controllers used by the route table.
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/app/controllers/AuthController.php';
 require_once __DIR__ . '/app/controllers/DashboardController.php';
@@ -16,6 +17,7 @@ require_once __DIR__ . '/app/controllers/ReportController.php';
 require_once __DIR__ . '/app/controllers/UserController.php';
 require_once __DIR__ . '/app/controllers/SettingsController.php';
 
+// Read the requested page; unauthenticated visitors start at the login route.
 $route = trim(
     (string) ($_GET['route'] ?? 'login'),
     '/'
@@ -23,6 +25,7 @@ $route = trim(
 
 $auth = new AuthController();
 
+// Send each route to the controller action responsible for that feature.
 switch ($route) {
 
     case '':
@@ -64,6 +67,7 @@ switch ($route) {
 
     case 'customer-history':
     case 'history':
+        // Both URLs are supported as aliases for customer history.
         (new CustomerController())->history();
         break;
 
@@ -95,6 +99,7 @@ switch ($route) {
 
     case 'users':
     case 'users-and-roles':
+        // Both URLs are supported as aliases for user and role management.
         (new UserController())->index();
         break;
 
@@ -107,6 +112,7 @@ switch ($route) {
         break;
 
     default:
+        // Unknown routes return a standard HTTP 404 response.
         http_response_code(404);
         echo '404 - Page Not Found';
         break;

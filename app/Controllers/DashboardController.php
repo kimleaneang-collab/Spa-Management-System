@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-require_once DIR . '/../Models/Dashboard.php';
-require_once DIR . '/../../config/database.php';
+require_once __DIR__ . '/../Models/Dashboard.php';
+require_once __DIR__ . '/../../config/database.php';
 
 final class DashboardController
 {
@@ -16,6 +16,6 @@ final class DashboardController
         $dashboard = new Dashboard(Database::connection());
         extract($dashboard->overview(), EXTR_SKIP);
 
-        require DIR . '/../Views/dashboard.php';
+        require __DIR__ . '/../Views/dashboard.php';
     }
 }

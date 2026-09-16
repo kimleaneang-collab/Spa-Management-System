@@ -81,11 +81,11 @@ if (empty($_SESSION['user'])) {
                     <div class="table-wrap">
                         <table class="data-table searchable-table">
                             <thead>
-                                <tr><th>Customer</th><th>Phone</th><th>Visits</th><th>Total spent</th><th>Membership</th></tr>
+                                <tr><th>Customer</th><th>Phone</th><th>Visits</th><th>Total spent</th><th>Membership</th><th>Actions</th></tr>
                             </thead>
                             <tbody>
                                 <?php if ($customers === []): ?>
-                                    <tr><td colspan="5">No customers available.</td></tr>
+                                    <tr><td colspan="6">No customers available.</td></tr>
                                 <?php else: ?>
                                     <?php foreach ($customers as $customer): ?>
                                         <tr>
@@ -94,6 +94,14 @@ if (empty($_SESSION['user'])) {
                                             <td><?= e((string) ($customer['visits'] ?? 0)) ?></td>
                                             <td>$<?= e(number_format((float) ($customer['total_spent'] ?? 0), 2)) ?></td>
                                             <td><span class="status-pill status-confirmed"><?= e($customer['membership'] ?? 'None') ?></span></td>
+                                            <td>
+                                                <a class="secondary-button" href="<?= e(APP_URL) ?>/?route=customers&amp;edit=<?= e((string) ($customer['id'] ?? 0)) ?>">Edit</a>
+                                                <form method="post" action="<?= e(APP_URL) ?>/?route=customers" style="display:inline" onsubmit="return confirm('Delete this customer?');">
+                                                    <input type="hidden" name="action" value="delete">
+                                                    <input type="hidden" name="id" value="<?= e((string) ($customer['id'] ?? 0)) ?>">
+                                                    <button class="secondary-button" type="submit">Delete</button>
+                                                </form>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -105,28 +113,30 @@ if (empty($_SESSION['user'])) {
         </main>
     </div>
 
-    <div class="modal-backdrop hidden" id="customer-modal" aria-hidden="true">
+    <div class="modal-backdrop <?= $editingCustomer !== null ? '' : 'hidden' ?>" id="customer-modal" aria-hidden="<?= $editingCustomer !== null ? 'false' : 'true' ?>">
         <div class="modal-card">
             <div class="modal-header">
                 <div>
                     <p class="eyebrow">Customer</p>
-                    <h2>Add customer</h2>
+                    <h2><?= $editingCustomer !== null ? 'Edit customer' : 'Add customer' ?></h2>
                 </div>
                 <button class="modal-close" type="button" data-close-modal="customer-modal">×</button>
             </div>
             <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=customers">
+                <input type="hidden" name="action" value="<?= $editingCustomer !== null ? 'update' : 'create' ?>">
+                <input type="hidden" name="id" value="<?= e((string) ($editingCustomer['id'] ?? '')) ?>">
                 <div class="form-grid two-col">
                     <label>
                         <span>Name</span>
-                        <input type="text" name="customer_name" required>
+                        <input type="text" name="customer_name" value="<?= e($editingCustomer['full_name'] ?? '') ?>" minlength="2" maxlength="150" required>
                     </label>
                     <label>
                         <span>Phone</span>
-                        <input type="text" name="customer_phone" required>
+                        <input type="tel" name="customer_phone" value="<?= e($editingCustomer['phone'] ?? '') ?>" pattern="[0-9+()\-\s]{7,30}" maxlength="30" required>
                     </label>
                     <label>
                         <span>Email</span>
-                        <input type="email" name="customer_email">
+                        <input type="email" name="customer_email" value="<?= e($editingCustomer['email'] ?? '') ?>" maxlength="150">
                     </label>
                     <label>
                         <span>Membership</span>
@@ -140,7 +150,7 @@ if (empty($_SESSION['user'])) {
                 </div>
                 <div class="modal-actions">
                     <button class="secondary-button" type="button" data-close-modal="customer-modal">Cancel</button>
-                    <button class="primary-button" type="submit">Save customer</button>
+                    <button class="primary-button" type="submit"><?= $editingCustomer !== null ? 'Update customer' : 'Save customer' ?></button>
                 </div>
             </form>
         </div>

@@ -86,3 +86,49 @@ function redirect(string $route): never
 
     exit;
 }
+
+function valid_text(string $value, int $min = 1, int $max = 255): bool
+{
+    $length = function_exists('mb_strlen') ? mb_strlen($value) : strlen($value);
+
+    return $length >= $min && $length <= $max && preg_match('/[<>]/', $value) !== 1;
+}
+
+function valid_email(string $value, bool $required = false): bool
+{
+    return ($value === '' && !$required) || filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+}
+
+function valid_phone(string $value, bool $required = false): bool
+{
+    return ($value === '' && !$required) || preg_match('/^[0-9+()\-\s]{7,30}$/', $value) === 1;
+}
+
+function valid_password(string $value, bool $required = true): bool
+{
+    return ($value === '' && !$required)
+        || (strlen($value) >= 8 && strlen($value) <= 255
+            && preg_match('/[A-Za-z]/', $value) === 1
+            && preg_match('/[0-9]/', $value) === 1);
+}
+
+function valid_date_value(string $value, bool $required = false): bool
+{
+    if ($value === '') {
+        return !$required;
+    }
+
+    $date = DateTime::createFromFormat('Y-m-d', $value);
+
+    return $date !== false && $date->format('Y-m-d') === $value;
+}
+
+function valid_non_negative_number(string $value): bool
+{
+    return is_numeric($value) && (float) $value >= 0;
+}
+
+function valid_login_password(string $value): bool
+{
+    return $value !== '' && strlen($value) <= 255;
+}
