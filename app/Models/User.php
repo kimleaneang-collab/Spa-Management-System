@@ -36,7 +36,7 @@ final class User
 
     public function roles(): array
     {
-        $stmt = $this->db->query('SELECT name FROM roles ORDER BY id ASC');
+        $stmt = $this->db->query("SELECT name FROM roles WHERE name IN ('admin', 'staff', 'receptionist') ORDER BY FIELD(name, 'admin', 'staff', 'receptionist')");
 
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
@@ -47,7 +47,7 @@ final class User
         string $email,
         string $phone,
         string $roleName,
-        string $password = 'password123'
+        string $password
     ): void {
         $roleId = null;
         if ($roleName !== '') {

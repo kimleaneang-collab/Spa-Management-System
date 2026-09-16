@@ -23,6 +23,8 @@ $route = trim(
     '/'
 );
 
+authorize_route($route);
+
 $auth = new AuthController();
 
 // Send each route to the controller action responsible for that feature.

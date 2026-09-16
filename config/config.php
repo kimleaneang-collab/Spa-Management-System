@@ -128,6 +128,46 @@ function valid_non_negative_number(string $value): bool
     return is_numeric($value) && (float) $value >= 0;
 }
 
+function require_authentication(): void
+{
+    if (empty($_SESSION['user']['id'])) {
+        redirect('login');
+    }
+}
+
+function require_roles(array $allowedRoles): void
+{
+    require_authentication();
+
+    $role = strtolower(trim((string) ($_SESSION['user']['role'] ?? '')));
+    $allowedRoles = array_map(static fn (string $value): string => strtolower(trim($value)), $allowedRoles);
+
+    if (!in_array($role, $allowedRoles, true)) {
+        http_response_code(403);
+        echo '403 - Access Denied';
+        exit;
+    }
+}
+
+function authorize_route(string $route): void
+{
+    if ($route === 'login' || $route === 'logout' || $route === '') {
+        return;
+    }
+
+    $adminOnly = ['users', 'users-and-roles', 'settings', 'backup'];
+    $staffRoutes = ['dashboard', 'appointments', 'services', 'therapists', 'rooms', 'customers', 'memberships', 'customer-history', 'history', 'products', 'stock', 'stock-management', 'suppliers', 'reports', 'report', 'sales', 'inventory-report'];
+    $receptionistRoutes = ['dashboard', 'appointments', 'services', 'therapists', 'rooms', 'customers', 'memberships', 'customer-history', 'history'];
+
+    if (in_array($route, $adminOnly, true)) {
+        require_roles(['admin']);
+    } elseif (in_array($route, $staffRoutes, true)) {
+        require_roles(['admin', 'staff', 'receptionist']);
+    } else {
+        require_authentication();
+    }
+}
+
 function valid_login_password(string $value): bool
 {
     return $value !== '' && strlen($value) <= 255;

@@ -32,11 +32,12 @@ final class UserController
                 $role = trim((string) ($_POST['role_name'] ?? ''));
                     $password = (string) ($_POST['user_password'] ?? '');
                     $status = trim((string) ($_POST['user_status'] ?? 'active'));
+                    $role = strtolower($role);
                     $validAccount = valid_text($name, 2, 150)
                         && preg_match('/^[A-Za-z0-9_.-]{3,100}$/', $username) === 1
                         && valid_email($email, true)
                         && valid_phone($phone)
-                        && valid_text($role, 1, 50)
+                        && in_array($role, ['admin', 'staff', 'receptionist'], true)
                         && in_array($status, ['active', 'inactive', 'suspended'], true)
                         && (($action === 'create' && valid_password($password)) || ($action === 'update' && valid_password($password, false)));
 

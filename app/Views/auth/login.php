@@ -33,7 +33,7 @@ unset($_SESSION['login_username']);
 
         <section class="login-panel">
             <div class="login-card">
-                <h1>Welcome</h1>
+                <h1 class="login-title">Welcome</h1>
                 <p class="login-description">Sign in to manage your spa</p>
 
                 <?php if ($error !== ''): ?>

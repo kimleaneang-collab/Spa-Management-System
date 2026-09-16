@@ -64,7 +64,10 @@ if (empty($_SESSION['user'])) {
                     <div class="user-chip">
                         <span class="user-name">SV</span>
                         <span class="user-role">Admin</span>
-                        <a class="logout-link" href="<?= e(APP_URL) ?>/?route=logout">Logout</a>
+                        <form method="post" action="<?= e(APP_URL) ?>/?route=logout" class="logout-form">
+                            <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token'] ?? '') ?>">
+                            <button class="logout-link" type="submit">Logout</button>
+                        </form>
                     </div>
                 </div>
             </header>

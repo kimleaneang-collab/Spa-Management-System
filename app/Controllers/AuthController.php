@@ -135,11 +135,7 @@ final class AuthController
             );
 
             $_SESSION['login_username'] = $username;
-            $_SESSION['login_error'] = $user === null
-                ? 'Username not found.'
-                : ($user['status'] !== 'active'
-                    ? 'This account is not active.'
-                    : 'Incorrect password.');
+            $_SESSION['login_error'] = 'Invalid username or password.';
 
             redirect('login');
         }
@@ -227,6 +223,12 @@ final class AuthController
 
     public function logout(): void
     {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit('Method Not Allowed');
+        }
+
+        $this->verifyCsrf();
         $_SESSION = [];
 
         if (ini_get('session.use_cookies')) {

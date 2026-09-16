@@ -527,10 +527,8 @@ CREATE TABLE audit_logs (
 
 INSERT INTO roles (name, description) VALUES
 ('admin', 'Full system access'),
-('manager', 'Management access'),
-('receptionist', 'Customer and appointment access'),
-('therapist', 'Therapist and assigned treatment access'),
-('cashier', 'Billing and payment access');
+('staff', 'Operational spa management access'),
+('receptionist', 'Customer and appointment access');
 
 INSERT INTO membership_levels
     (name, discount_percent, loyalty_points_multiplier, annual_fee)
@@ -553,49 +551,13 @@ INSERT INTO settings (setting_key, setting_value, setting_type) VALUES
 ('tax_percent', '0', 'number'),
 ('business_hours', '{"monday":"09:00-21:00","tuesday":"09:00-21:00","wednesday":"09:00-21:00","thursday":"09:00-21:00","friday":"09:00-21:00","saturday":"09:00-21:00","sunday":"09:00-21:00"}', 'json');
 
--- Default admin:
--- username: admin
--- password: Admin@123
--- Password is stored as a one-way bcrypt password hash, NOT reversible encryption.
+-- Passwords are bcrypt hashes. Generate each hash with password_hash(), never store plaintext passwords.
 INSERT INTO users
     (role_id, username, password_hash, full_name, email, status)
 VALUES
-    (
-        (SELECT id FROM roles WHERE name = 'admin'),
-        'admin',
-        '$2y$12$SocGAVxnqWwHKbTmvFTbhucdcVcC.TF9T6qh8xLw8Cfmsuhi3YVHy',
-        'System Administrator',
-        'admin@relaxspa.local',
-        'active'
-
-        (SELECT id FROM roles WHERE name = 'manager'),
-        'manager',
-        '$2y$12$SocGAVxnqWwHKbTmvFTbhucdcVcC.TF9T6qh8xLw8Cfmsuhi3YVHy',
-        'System Manager',
-        'manager@relaxspa.local',
-        'active'
-
-         (SELECT id FROM roles WHERE name = 'receptionist'),
-        'receptionist',
-        '$2y$12$SocGAVxnqWwHKbTmvFTbhucdcVcC.TF9T6qh8xLw8Cfmsuhi3YVHy',
-        'System Receptionist',
-        'receptionist@relaxspa.local',
-        'active'
-
-         (SELECT id FROM roles WHERE name = 'therapist'),
-        'therapist',
-        '$2y$12$SocGAVxnqWwHKbTmvFTbhucdcVcC.TF9T6qh8xLw8Cfmsuhi3YVHy',
-        'System Therapist',
-        'therapist@relaxspa.local',
-        'active'
-
-         (SELECT id FROM roles WHERE name = 'cashier'),
-        'cashier',
-        '$2y$12$SocGAVxnqWwHKbTmvFTbhucdcVcC.TF9T6qh8xLw8Cfmsuhi3YVHy',
-        'System Cashier',
-        'cashier@relaxspa.local',
-        'active'
-    );
+    ((SELECT id FROM roles WHERE name = 'admin'), 'admin', '$2y$12$SocGAVxnqWwHKbTmvFTbhucdcVcC.TF9T6qh8xLw8Cfmsuhi3YVHy', 'System Administrator', 'admin@relaxspa.local', 'active'),
+    ((SELECT id FROM roles WHERE name = 'staff'), 'staff', '$2y$12$SocGAVxnqWwHKbTmvFTbhucdcVcC.TF9Tqh8xLw8Cfmsuhi3YVHy', 'Spa Staff', 'staff@relaxspa.local', 'active'),
+    ((SELECT id FROM roles WHERE name = 'receptionist'), 'receptionist', '$2y$12$SocGAVxnqWwHKbTmvFTbhucdcVcC.TF9Tqh8xLw8Cfmsuhi3YVHy', 'Spa Receptionist', 'receptionist@relaxspa.local', 'active');
 
 -- Example services from the specification
 INSERT INTO services
