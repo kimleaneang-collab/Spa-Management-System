@@ -566,6 +566,34 @@ VALUES
         'System Administrator',
         'admin@relaxspa.local',
         'active'
+
+        (SELECT id FROM roles WHERE name = 'manager'),
+        'manager',
+        '$2y$12$SocGAVxnqWwHKbTmvFTbhucdcVcC.TF9T6qh8xLw8Cfmsuhi3YVHy',
+        'System Manager',
+        'manager@relaxspa.local',
+        'active'
+
+         (SELECT id FROM roles WHERE name = 'receptionist'),
+        'receptionist',
+        '$2y$12$SocGAVxnqWwHKbTmvFTbhucdcVcC.TF9T6qh8xLw8Cfmsuhi3YVHy',
+        'System Receptionist',
+        'receptionist@relaxspa.local',
+        'active'
+
+         (SELECT id FROM roles WHERE name = 'therapist'),
+        'therapist',
+        '$2y$12$SocGAVxnqWwHKbTmvFTbhucdcVcC.TF9T6qh8xLw8Cfmsuhi3YVHy',
+        'System Therapist',
+        'therapist@relaxspa.local',
+        'active'
+
+         (SELECT id FROM roles WHERE name = 'cashier'),
+        'cashier',
+        '$2y$12$SocGAVxnqWwHKbTmvFTbhucdcVcC.TF9T6qh8xLw8Cfmsuhi3YVHy',
+        'System Cashier',
+        'cashier@relaxspa.local',
+        'active'
     );
 
 -- Example services from the specification

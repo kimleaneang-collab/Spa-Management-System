@@ -2,128 +2,9 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../config/database.php';
-
 if (empty($_SESSION['user'])) {
     redirect('login');
 }
-
-$user = $_SESSION['user'];
-$db = Database::connection();
-
-$totalRevenue = (float) $db->query(
-    "SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status IN ('paid', 'partial')"
-)->fetchColumn();
-
-$todayAppointments = (int) $db->query(
-    "SELECT COUNT(*) FROM appointments WHERE appointment_date = CURDATE()"
-)->fetchColumn();
-
-$availableRooms = (int) $db->query(
-    "SELECT COUNT(*) FROM treatment_rooms WHERE status = 'available'"
-)->fetchColumn();
-
-$lowStockItems = (int) $db->query(
-    "SELECT COUNT(*) FROM products WHERE stock_quantity <= reorder_level AND status = 'active'"
-)->fetchColumn();
-
-$popularServices = $db->query(
-    "SELECT s.name, COUNT(a.id) AS total
-     FROM appointments a
-     INNER JOIN services s ON s.id = a.service_id
-     GROUP BY s.id, s.name
-     ORDER BY total DESC
-     LIMIT 4"
-)->fetchAll(PDO::FETCH_ASSOC);
-
-$serviceTotals = [];
-$maxServiceCount = 1;
-foreach ($popularServices as $row) {
-    $serviceTotals[] = [
-        'name' => $row['name'],
-        'total' => (int) $row['total'],
-    ];
-    $maxServiceCount = max($maxServiceCount, (int) $row['total']);
-}
-
-$revenueData = $db->query(
-    "SELECT DATE_FORMAT(appointment_date, '%Y-%m-%d') AS day,
-            COUNT(*) AS count
-     FROM appointments
-     WHERE appointment_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-     GROUP BY DATE(appointment_date)
-     ORDER BY day ASC"
-)->fetchAll(PDO::FETCH_ASSOC);
-
-$chartValues = [];
-$chartLabelMap = [];
-for ($i = 6; $i >= 0; $i--) {
-    $date = date('Y-m-d', strtotime("-$i days"));
-    $chartLabelMap[$date] = date('D', strtotime($date));
-    $chartValues[$date] = 0;
-}
-
-foreach ($revenueData as $day) {
-    $chartValues[$day['day']] = (int) $day['count'];
-}
-
-$chartPoints = [];
-$maxChartValue = max(1, max($chartValues));
-$chartMaxY = 60;
-foreach ($chartValues as $date => $value) {
-    $index = array_search($date, array_keys($chartValues), true);
-    $x = 18 + ($index * 75);
-    $y = 140 - (($value / $maxChartValue) * 90);
-    $chartPoints[] = [$x, $y, $chartLabelMap[$date], $value];
-}
-
-$pathPoints = [];
-foreach ($chartPoints as $index => $point) {
-    $pathPoints[] = ($index === 0 ? 'M ' : 'L ') . $point[0] . ' ' . $point[1];
-}
-$chartPath = implode(' ', $pathPoints);
-
-$notifications = [];
-$lowStockRows = $db->query(
-    "SELECT name, stock_quantity, reorder_level
-     FROM products
-     WHERE stock_quantity <= reorder_level AND status = 'active'
-     ORDER BY stock_quantity ASC
-     LIMIT 3"
-)->fetchAll(PDO::FETCH_ASSOC);
-foreach ($lowStockRows as $row) {
-    $notifications[] = [
-        'type' => 'Low stock',
-        'message' => $row['name'] . ' (Oil) is low (' . (int) $row['stock_quantity'] . ' left)',
-        'time' => 'Now'
-    ];
-}
-
-$membershipRows = $db->query(
-    "SELECT c.full_name, m.expiry_date
-     FROM memberships m
-     INNER JOIN customers c ON c.id = m.customer_id
-     WHERE m.status = 'active' AND m.expiry_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-     ORDER BY m.expiry_date ASC
-     LIMIT 2"
-)->fetchAll(PDO::FETCH_ASSOC);
-foreach ($membershipRows as $row) {
-    $notifications[] = [
-        'type' => 'Membership',
-        'message' => $row['full_name'] . " membership expires on " . date('M d', strtotime($row['expiry_date'])),
-        'time' => '2m ago'
-    ];
-}
-
-$appointmentRows = $db->query(
-    "SELECT c.full_name, a.status, a.appointment_date, a.start_time
-     FROM appointments a
-     INNER JOIN customers c ON c.id = a.customer_id
-     ORDER BY a.appointment_date DESC, a.start_time DESC
-     LIMIT 5"
-)->fetchAll(PDO::FETCH_ASSOC);
-
-$revenueTrend = max(0, min(100, round(($totalRevenue > 0 ? ($totalRevenue / 200000) * 100 : 0), 0)));
 ?>
 <!doctype html>
 <html lang="en">
@@ -148,71 +29,71 @@ $revenueTrend = max(0, min(100, round(($totalRevenue > 0 ? ($totalRevenue / 2000
 
             <nav class="sidebar-menu">
                 <div class="nav-section">
-                    <a class="nav-item active" href="#">
+                    <a class="nav-item active" href="<?= e(APP_URL) ?>/?route=dashboard">
                         <span class="nav-icon">⌂</span>
                         <span>Dashboard</span>
                     </a>
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=appointments">
                         <span class="nav-icon">☰</span>
                         <span>Appointments</span>
                     </a>
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=services">
                         <span class="nav-icon">✦</span>
                         <span>Treatments</span>
                     </a>
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=therapists">
                         <span class="nav-icon">◎</span>
                         <span>Therapists</span>
                     </a>
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=rooms">
                         <span class="nav-icon">◫</span>
                         <span>Rooms</span>
                     </a>
                 </div>
 
                 <div class="nav-section">
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=customers">
                         <span class="nav-icon">◉</span>
                         <span>Customers</span>
                     </a>
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=memberships">
                         <span class="nav-icon">◌</span>
                         <span>Memberships</span>
                     </a>
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=customer-history">
                         <span class="nav-icon">◍</span>
                         <span>Customer History</span>
                     </a>
                 </div>
 
                 <div class="nav-section">
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=products">
                         <span class="nav-icon">▣</span>
                         <span>Products</span>
                     </a>
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=stock-management">
                         <span class="nav-icon">▤</span>
                         <span>Stock Management</span>
                     </a>
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=suppliers">
                         <span class="nav-icon">◧</span>
                         <span>Supplier</span>
                     </a>
                 </div>
 
                 <div class="nav-section">
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=reports">
                         <span class="nav-icon">▥</span>
                         <span>Reports &amp; Analytics</span>
                     </a>
                 </div>
 
                 <div class="nav-section">
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=users-and-roles">
                         <span class="nav-icon">⚙</span>
                         <span>Users &amp; Roles</span>
                     </a>
-                    <a class="nav-item" href="#">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings">
                         <span class="nav-icon">⚙</span>
                         <span>Settings</span>
                     </a>
@@ -366,5 +247,6 @@ $revenueTrend = max(0, min(100, round(($totalRevenue > 0 ? ($totalRevenue / 2000
             </div>
         </main>
     </div>
+    <script src="<?= e(APP_URL) ?>/public/js/main.js"></script>
 </body>
 </html>
