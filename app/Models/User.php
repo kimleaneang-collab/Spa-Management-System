@@ -10,6 +10,70 @@ final class User
         $this->db = $db;
     }
 
+    public function all(int $limit = 20): array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT u.full_name, u.username, u.email, u.status, r.name AS role_name
+             FROM users u
+             LEFT JOIN roles r ON r.id = u.role_id
+             ORDER BY u.id DESC
+             LIMIT :limit'
+        );
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function roles(): array
+    {
+        $stmt = $this->db->query('SELECT name FROM roles ORDER BY id ASC');
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function create(
+        string $name,
+        string $username,
+        string $email,
+        string $phone,
+        string $roleName
+    ): void {
+        $roleId = null;
+        if ($roleName !== '') {
+            $roleStmt = $this->db->prepare(
+                'SELECT id FROM roles WHERE name = :name LIMIT 1'
+            );
+            $roleStmt->execute([':name' => strtolower($roleName)]);
+            $roleId = $roleStmt->fetchColumn();
+
+            if (!$roleId) {
+                $insertRole = $this->db->prepare(
+                    'INSERT INTO roles (name, description) VALUES (:name, :description)'
+                );
+                $insertRole->execute([
+                    ':name' => strtolower($roleName),
+                    ':description' => 'Custom role',
+                ]);
+                $roleId = (int) $this->db->lastInsertId();
+            }
+        }
+
+        $stmt = $this->db->prepare(
+            'INSERT INTO users (role_id, username, password_hash, full_name, email, phone, status, created_at)
+             VALUES (:role_id, :username, :password_hash, :full_name, :email, :phone, :status, NOW())'
+        );
+        $stmt->execute([
+            ':role_id' => $roleId ?? 1,
+            ':username' => $username,
+            ':password_hash' => password_hash('password123', PASSWORD_DEFAULT),
+            ':full_name' => $name,
+            ':email' => $email,
+            ':phone' => $phone,
+            ':status' => 'active',
+        ]);
+    }
+
     /**
      * Find user by username.
      */

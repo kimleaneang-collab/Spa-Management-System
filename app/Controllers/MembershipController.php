@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-final class ServiceController
+final class MembershipController
 {
     public function index(): void
     {
@@ -9,6 +9,6 @@ final class ServiceController
             redirect('login');
         }
 
-        require __DIR__ . '/../Views/services/index.php';
+        require __DIR__ . '/../Views/memberships/index.php';
     }
 }

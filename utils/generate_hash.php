@@ -10,3 +10,15 @@
  */
 $plainPassword = "admin123"; // change this to whatever password you want
 echo password_hash($plainPassword, PASSWORD_BCRYPT);
+
+$plainPassword = "manager123"; // change this to whatever password you want
+echo password_hash($plainPassword, PASSWORD_BCRYPT);
+
+$plainPassword = "receptionist123"; // change this to whatever password you want
+echo password_hash($plainPassword, PASSWORD_BCRYPT);
+
+$plainPassword = "therapist123"; // change this to whatever password you want
+echo password_hash($plainPassword, PASSWORD_BCRYPT);
+
+$plainPassword = "cashier123"; // change this to whatever password you want
+echo password_hash($plainPassword, PASSWORD_BCRYPT);
