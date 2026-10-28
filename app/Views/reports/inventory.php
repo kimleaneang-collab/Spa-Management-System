@@ -4,6 +4,7 @@ declare(strict_types=1);
 if (empty($_SESSION['user'])) {
     redirect('login');
 }
+$isManager = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'manager';
 ?>
 <!doctype html>
 <html lang="en">
@@ -11,9 +12,9 @@ if (empty($_SESSION['user'])) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Reports | Relax Spa</title>
-    <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css">
+    <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css?v=<?= e(asset_version('public/css/style.css')) ?>">
 </head>
-<body class="dashboard-page">
+<body class="dashboard-page <?= $isManager ? 'manager-role' : '' ?>" data-role="<?= e(strtolower((string) ($_SESSION['user']['role'] ?? ''))) ?>">
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">
@@ -26,6 +27,27 @@ if (empty($_SESSION['user'])) {
                 </div>
             </div>
             <nav class="sidebar-menu">
+                <?php if ($isManager): ?>
+                <div class="nav-section" data-label="Main">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=dashboard"><span class="nav-icon">⌂</span><span>Dashboard</span></a>
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=appointments"><span class="nav-icon">☰</span><span>Appointments</span></a>
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=customers"><span class="nav-icon">◉</span><span>Customers</span></a>
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=calendar"><span class="nav-icon">▦</span><span>Calendar</span></a>
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=rooms"><span class="nav-icon">◫</span><span>Rooms</span></a>
+                </div>
+                <div class="nav-section" data-label="Quick Actions">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=services"><span class="nav-icon">✦</span><span>Services</span></a>
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=pos"><span class="nav-icon">▤</span><span>POS &amp; Billing</span></a>
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=products"><span class="nav-icon">▣</span><span>Inventory</span></a>
+                </div>
+                <div class="nav-section" data-label="Reports">
+                    <a class="nav-item active" href="<?= e(APP_URL) ?>/?route=reports"><span class="nav-icon">▥</span><span>Reports &amp; Analytics</span></a>
+                </div>
+                <div class="nav-section" data-label="Settings">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=users-and-roles"><span class="nav-icon">⚙</span><span>Users &amp; Roles</span></a>
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
+                </div>
+                <?php else: ?>
                 <div class="nav-section">
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=dashboard"><span class="nav-icon">⌂</span><span>Dashboard</span></a>
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=appointments"><span class="nav-icon">☰</span><span>Appointments</span></a>
@@ -50,15 +72,26 @@ if (empty($_SESSION['user'])) {
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=users-and-roles"><span class="nav-icon">⚙</span><span>Users &amp; Roles</span></a>
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
                 </div>
+                <?php endif; ?>
             </nav>
+            <?php if ($isManager): ?>
+            <div class="sidebar-role">
+                <span>Current Role</span>
+                <div class="role-select">
+                    <?= profile_avatar($_SESSION['user'] ?? [], 'role-avatar', strtoupper(substr((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'M'), 0, 1))) ?>
+                    <span>Manager</span>
+                    <span class="chevron">▾</span>
+                </div>
+            </div>
+            <?php endif; ?>
         </aside>
         <main class="main-panel">
             <header class="topbar">
-                <div class="topbar-left"><div class="welcome-text">Welcome back, Admin!</div></div>
+                <div class="topbar-left"><div class="welcome-text">Welcome back, <?= e((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'Admin')) ?>!</div></div>
                 <div class="topbar-actions">
                     <div class="search-box"><span class="search-icon">⌕</span><span>Search</span></div>
                     <button class="icon-button" aria-label="Notifications">◔</button>
-                    <div class="user-chip"><span class="user-name">SV</span><span class="user-role">Admin</span><span class="user-chevron">▾</span></div>
+                    <div class="user-chip"><?= profile_avatar($_SESSION['user'] ?? [], 'user-name', strtoupper(substr((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'SV'), 0, 2))) ?><span class="user-role"><?= e(role_label((string) ($_SESSION['user']['role'] ?? 'admin'))) ?></span><span class="user-chevron">▾</span></div>
                 </div>
             </header>
             <div class="content-wrap">
@@ -93,6 +126,6 @@ if (empty($_SESSION['user'])) {
             </div>
         </main>
     </div>
-    <script src="<?= e(APP_URL) ?>/public/js/main.js"></script>
+    <script src="<?= e(APP_URL) ?>/public/js/main.js?v=<?= e(asset_version('public/js/main.js')) ?>"></script>
 </body>
 </html>

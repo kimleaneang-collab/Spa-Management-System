@@ -10,16 +10,14 @@ final class User
         $this->db = $db;
     }
 
-    public function all(int $limit = 20): array
+    public function all(): array
     {
         $stmt = $this->db->prepare(
-            'SELECT u.id, u.full_name, u.username, u.email, u.phone, u.status, u.role_id, r.name AS role_name
+            'SELECT u.id, u.full_name, u.username, u.email, u.phone, u.profile_image, u.status, u.role_id, u.last_login_at, r.name AS role_name
              FROM users u
              LEFT JOIN roles r ON r.id = u.role_id
-             ORDER BY u.id DESC
-             LIMIT :limit'
+             ORDER BY u.id DESC'
         );
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -27,7 +25,7 @@ final class User
 
     public function find(int $id): ?array
     {
-        $stmt = $this->db->prepare('SELECT u.id, u.full_name, u.username, u.email, u.phone, u.status, u.role_id, r.name AS role_name FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.id = :id');
+        $stmt = $this->db->prepare('SELECT u.id, u.full_name, u.username, u.email, u.phone, u.profile_image, u.status, u.role_id, r.name AS role_name FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.id = :id');
         $stmt->execute([':id' => $id]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -36,18 +34,29 @@ final class User
 
     public function roles(): array
     {
-        $stmt = $this->db->query("SELECT name FROM roles WHERE name IN ('admin', 'staff', 'receptionist') ORDER BY FIELD(name, 'admin', 'staff', 'receptionist')");
+        $this->db->exec(
+            "INSERT IGNORE INTO roles (name, description)
+             VALUES ('manager', 'Spa operations management access')"
+        );
+
+        $stmt = $this->db->query(
+            "SELECT name FROM roles
+             WHERE name IN ('admin', 'manager', 'staff', 'receptionist')
+             ORDER BY FIELD(name, 'admin', 'manager', 'staff', 'receptionist')"
+        );
 
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
+    // SECURITY: Hash user passwords with the modern default algorithm before storing them.
     public function create(
         string $name,
         string $username,
         string $email,
         string $phone,
         string $roleName,
-        string $password
+        string $password,
+        string $profileImage = ''
     ): void {
         $roleId = null;
         if ($roleName !== '') {
@@ -70,8 +79,8 @@ final class User
         }
 
         $stmt = $this->db->prepare(
-            'INSERT INTO users (role_id, username, password_hash, full_name, email, phone, status, created_at)
-             VALUES (:role_id, :username, :password_hash, :full_name, :email, :phone, :status, NOW())'
+            'INSERT INTO users (role_id, username, password_hash, full_name, email, phone, profile_image, status, created_at)
+             VALUES (:role_id, :username, :password_hash, :full_name, :email, :phone, :profile_image, :status, NOW())'
         );
         $stmt->execute([
             ':role_id' => $roleId ?? 1,
@@ -80,11 +89,13 @@ final class User
             ':full_name' => $name,
             ':email' => $email,
             ':phone' => $phone,
+            ':profile_image' => $profileImage !== '' ? $profileImage : null,
             ':status' => 'active',
         ]);
     }
 
-    public function update(int $id, string $name, string $username, string $email, string $phone, string $roleName, string $status, string $password = ''): void
+    // SECURITY: Update the password hash only when a new password is supplied, never plain text.
+    public function update(int $id, string $name, string $username, string $email, string $phone, string $roleName, string $status, string $password = '', string $profileImage = ''): void
     {
         $roleId = $this->roleId($roleName);
         $fields = 'role_id = :role_id, full_name = :full_name, username = :username, email = :email, phone = :phone, status = :status';
@@ -97,6 +108,10 @@ final class User
             ':phone' => $phone,
             ':status' => $status,
         ];
+        if ($profileImage !== '') {
+            $fields .= ', profile_image = :profile_image';
+            $parameters[':profile_image'] = $profileImage;
+        }
         if ($password !== '') {
             $fields .= ', password_hash = :password_hash';
             $parameters[':password_hash'] = password_hash($password, PASSWORD_DEFAULT);
@@ -109,6 +124,21 @@ final class User
     {
         $stmt = $this->db->prepare('DELETE FROM users WHERE id = :id');
         $stmt->execute([':id' => $id]);
+    }
+
+    public function hasOtherActiveAdmin(int $userId): bool
+    {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*)
+             FROM users u
+             INNER JOIN roles r ON r.id = u.role_id
+             WHERE r.name = 'admin'
+               AND u.status = 'active'
+               AND u.id <> :id"
+        );
+        $stmt->execute([':id' => $userId]);
+
+        return (int) $stmt->fetchColumn() > 0;
     }
 
     private function roleId(string $roleName): int
@@ -141,6 +171,7 @@ final class User
                 u.full_name,
                 u.email,
                 u.phone,
+                u.profile_image,
                 u.role_id,
                 u.status,
                 r.name AS role_name

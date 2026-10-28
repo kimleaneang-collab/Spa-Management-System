@@ -5,18 +5,14 @@ final class SettingsController
 {
     public function general(): void
     {
-        if (empty($_SESSION['user'])) {
-            redirect('login');
-        }
+        require_roles(['admin', 'manager']);
 
         require __DIR__ . '/../Views/settings/general.php';
     }
 
     public function backup(): void
     {
-        if (empty($_SESSION['user'])) {
-            redirect('login');
-        }
+        require_roles(['admin']);
 
         require __DIR__ . '/../Views/settings/backup.php';
     }

@@ -17,8 +17,24 @@ final class Dashboard
             "SELECT COUNT(*) FROM appointments WHERE appointment_date = CURDATE()"
         )->fetchColumn();
 
+        $pendingAppointments = (int) $this->db->query(
+            "SELECT COUNT(*) FROM appointments
+             WHERE appointment_date = CURDATE() AND status = 'pending'"
+        )->fetchColumn();
+
+        $todayRevenue = (float) $this->db->query(
+            "SELECT COALESCE(SUM(total_amount), 0)
+             FROM invoices
+             WHERE DATE(invoice_date) = CURDATE()
+               AND status IN ('paid', 'partial')"
+        )->fetchColumn();
+
         $availableRooms = (int) $this->db->query(
             "SELECT COUNT(*) FROM treatment_rooms WHERE status = 'available'"
+        )->fetchColumn();
+
+        $totalRooms = (int) $this->db->query(
+            "SELECT COUNT(*) FROM treatment_rooms WHERE status <> 'under_maintenance'"
         )->fetchColumn();
 
         $lowStockItems = (int) $this->db->query(
@@ -112,17 +128,24 @@ final class Dashboard
         }
 
         $appointmentRows = $this->db->query(
-            "SELECT c.full_name, a.status, a.appointment_date, a.start_time
+            "SELECT c.full_name, a.status, a.appointment_date, a.start_time,
+                    s.name AS service, COALESCE(r.room_name, r.room_code, 'Unassigned') AS room
              FROM appointments a
              INNER JOIN customers c ON c.id = a.customer_id
-             ORDER BY a.appointment_date DESC, a.start_time DESC
-             LIMIT 5"
+             INNER JOIN services s ON s.id = a.service_id
+             LEFT JOIN treatment_rooms r ON r.id = a.room_id
+             WHERE a.appointment_date = CURDATE()
+             ORDER BY a.start_time ASC
+             LIMIT 8"
         )->fetchAll(PDO::FETCH_ASSOC);
 
         return [
             'totalRevenue' => $totalRevenue,
             'todayAppointments' => $todayAppointments,
+            'pendingAppointments' => $pendingAppointments,
+            'todayRevenue' => $todayRevenue,
             'availableRooms' => $availableRooms,
+            'totalRooms' => $totalRooms,
             'lowStockItems' => $lowStockItems,
             'serviceTotals' => $serviceTotals,
             'maxServiceCount' => $maxServiceCount,

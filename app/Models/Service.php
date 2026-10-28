@@ -17,7 +17,7 @@ final class Service
 	public function all(): array
 	{
 		$stmt = $this->db->query(
-			"SELECT s.id, s.name, s.duration_minutes, s.price, s.status, s.image_path, c.name AS category
+			"SELECT s.id, s.name, s.description, s.duration_minutes, s.price, s.status, s.image_path, c.name AS category
 			 FROM services s
 			 INNER JOIN service_categories c ON c.id = s.category_id
 			 ORDER BY s.id DESC"
@@ -50,6 +50,7 @@ final class Service
 			return [
 				'id' => (int) $service['id'],
 				'name' => $service['name'],
+				'description' => (string) ($service['description'] ?? ''),
 				'duration' => $service['duration_minutes'] . ' mins',
 				'price' => '$' . number_format((float) $service['price'], 2),
 				'category' => $service['category'],

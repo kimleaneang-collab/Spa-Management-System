@@ -12,9 +12,9 @@ if (empty($_SESSION['user'])) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Products | Relax Spa</title>
-    <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css">
+    <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css?v=<?= e(asset_version('public/css/style.css')) ?>">
 </head>
-<body class="dashboard-page">
+<body class="dashboard-page inventory-page <?= strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'manager' ? 'manager-role' : '' ?>" data-role="<?= e(strtolower((string) ($_SESSION['user']['role'] ?? ''))) ?>">
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">
@@ -27,60 +27,109 @@ if (empty($_SESSION['user'])) {
                 </div>
             </div>
             <nav class="sidebar-menu">
-                <div class="nav-section">
+                <div class="nav-section" data-label="Main">
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=dashboard"><span class="nav-icon">⌂</span><span>Dashboard</span></a>
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=appointments"><span class="nav-icon">☰</span><span>Appointments</span></a>
-                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=services"><span class="nav-icon">✦</span><span>Treatments</span></a>
-                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=therapists"><span class="nav-icon">◎</span><span>Therapists</span></a>
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=customers"><span class="nav-icon">◉</span><span>Customers</span></a>
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=calendar"><span class="nav-icon">▦</span><span>Calendar</span></a>
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=rooms"><span class="nav-icon">◫</span><span>Rooms</span></a>
                 </div>
-                <div class="nav-section">
-                    <a class="nav-item active" href="<?= e(APP_URL) ?>/?route=products"><span class="nav-icon">▣</span><span>Products</span></a>
-                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=stock-management"><span class="nav-icon">▤</span><span>Stock Management</span></a>
-                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=suppliers"><span class="nav-icon">◧</span><span>Supplier</span></a>
+                <div class="nav-section" data-label="Quick Actions">
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=services"><span class="nav-icon">✦</span><span>Services</span></a>
+                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=pos"><span class="nav-icon">▤</span><span>POS &amp; Billing</span></a>
+                    <a class="nav-item active" href="<?= e(APP_URL) ?>/?route=products"><span class="nav-icon">▣</span><span>Inventory</span></a>
                 </div>
-                <div class="nav-section">
-                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=customers"><span class="nav-icon">◉</span><span>Customers</span></a>
-                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=memberships"><span class="nav-icon">◌</span><span>Memberships</span></a>
-                    <a class="nav-item" href="<?= e(APP_URL) ?>/?route=customer-history"><span class="nav-icon">◍</span><span>Customer History</span></a>
-                </div>
-                <div class="nav-section">
+                <div class="nav-section" data-label="Reports">
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=reports"><span class="nav-icon">▥</span><span>Reports &amp; Analytics</span></a>
                 </div>
-                <div class="nav-section">
+                <div class="nav-section" data-label="Settings">
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=users-and-roles"><span class="nav-icon">⚙</span><span>Users &amp; Roles</span></a>
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
                 </div>
             </nav>
+            <div class="sidebar-role">
+                <span>Current Role</span>
+                <div class="role-select">
+                    <?= profile_avatar($_SESSION['user'] ?? [], 'role-avatar', strtoupper(substr((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'M'), 0, 1))) ?>
+                    <span><?= e(role_label((string) ($_SESSION['user']['role'] ?? 'staff'))) ?></span>
+                    <span class="chevron">▾</span>
+                </div>
+            </div>
         </aside>
         <main class="main-panel">
             <header class="topbar">
-                <div class="topbar-left"><div class="welcome-text">Welcome back, Admin!</div></div>
-                <div class="topbar-actions">
+                <div class="topbar-left">
                     <div class="search-box"><span class="search-icon">⌕</span><span>Search</span></div>
-                    <button class="icon-button" aria-label="Notifications">◔</button>
-                    <div class="user-chip"><span class="user-name">SV</span><span class="user-role">Admin</span><span class="user-chevron">▾</span></div>
+                </div>
+                <div class="topbar-actions">
+                    <button class="icon-button inventory-topbar-icon" type="button" aria-label="Notifications">♧</button>
+                    <a class="icon-button inventory-topbar-icon" href="<?= e(APP_URL) ?>/?route=appointments" aria-label="Create appointment">▣</a>
+                    <div class="user-chip">
+                        <?= profile_avatar($_SESSION['user'] ?? [], 'user-name', strtoupper(substr((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'M'), 0, 2))) ?>
+                        <span class="user-identity">
+                            <strong><?= e((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'User')) ?></strong>
+                            <small><?= e(role_label((string) ($_SESSION['user']['role'] ?? 'admin'))) ?></small>
+                        </span>
+                        <span class="user-chevron">⌄</span>
+                    </div>
                 </div>
             </header>
-            <div class="content-wrap">
-                <div class="page-heading">
+            <div class="content-wrap inventory-content">
+                <div class="inventory-page-heading">
                     <div>
-                        <h1 class="page-title">PRODUCTS</h1>
-                        <div class="page-date">Inventory catalog</div>
+                        <h1 class="page-title">INVENTORY</h1>
+                        <p class="inventory-summary">Track products and supply stock levels.</p>
                     </div>
-                    <button class="primary-button" type="button" data-open-modal="product-modal">+ Add product</button>
+                    <button class="primary-button inventory-add-button" type="button" data-open-modal="product-modal"><span>＋</span> Add Item</button>
                 </div>
-                <section class="product-grid">
+                <div class="inventory-filters">
+                    <label class="inventory-search" for="inventory-search">
+                        <span class="search-icon">⌕</span>
+                        <input id="inventory-search" type="search" placeholder="Search inventory" autocomplete="off">
+                    </label>
+                    <label class="inventory-status-filter" for="inventory-status">
+                        <select id="inventory-status" aria-label="Filter inventory by status">
+                            <option value="all">Status: All</option>
+                            <option value="in stock">In Stock</option>
+                            <option value="reorder soon">Reorder Soon</option>
+                            <option value="low stock">Low Stock</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </label>
+                </div>
+                <section class="inventory-table-panel" aria-label="Inventory stock levels">
+                    <div class="inventory-table-wrap">
+                    <table class="inventory-table" id="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Category</th>
+                                <th>Stock Level</th>
+                                <th>Reorder At</th>
+                                <th>Unit Cost</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                     <?php foreach ($products as $product): ?>
-                        <article class="product-card">
-                            <img src="<?= e($product['image']) ?>" alt="<?= e($product['name']) ?>">
-                            <div class="product-card-body">
-                                <h3><?= e($product['name']) ?></h3>
-                                <p><?= e($product['price']) ?></p>
-                                <span class="status-pill <?= e($product['status_class']) ?>"><?= e($product['status']) ?></span>
-                            </div>
-                        </article>
+                        <tr data-search="<?= e(strtolower((string) $product['name'] . ' ' . (string) $product['category'] . ' ' . (string) $product['code'])) ?>" data-status="<?= e(strtolower((string) $product['status'])) ?>">
+                            <td class="inventory-item-name"><?= e((string) $product['name']) ?></td>
+                            <td><?= e((string) $product['category']) ?></td>
+                            <td>
+                                <div class="inventory-stock-cell">
+                                    <span class="inventory-stock-meter <?= e($product['status_class']) ?>" aria-hidden="true"><span style="width: <?= e(number_format((float) $product['stock_percent'], 1, '.', '')) ?>%"></span></span>
+                                    <span><?= e((string) $product['stock_display']) ?></span>
+                                </div>
+                            </td>
+                            <td><?= e((string) $product['reorder_display']) ?></td>
+                            <td><?= e((string) $product['unit_cost']) ?></td>
+                            <td><span class="inventory-status-pill <?= e($product['status_class']) ?>"><?= e((string) $product['status']) ?></span></td>
+                        </tr>
                     <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    </div>
+                    <p class="inventory-empty" id="inventory-empty" <?= $products === [] ? '' : 'hidden' ?>>No inventory items match your filter.</p>
                 </section>
             </div>
         </main>
@@ -147,6 +196,6 @@ if (empty($_SESSION['user'])) {
             </form>
         </div>
     </div>
-    <script src="<?= e(APP_URL) ?>/public/js/main.js"></script>
+    <script src="<?= e(APP_URL) ?>/public/js/main.js?v=<?= e(asset_version('public/js/main.js')) ?>"></script>
 </body>
 </html>

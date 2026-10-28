@@ -6,6 +6,8 @@ require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/app/controllers/AuthController.php';
 require_once __DIR__ . '/app/controllers/DashboardController.php';
 require_once __DIR__ . '/app/controllers/AppointmentController.php';
+require_once __DIR__ . '/app/controllers/CalendarController.php';
+require_once __DIR__ . '/app/controllers/BillingController.php';
 require_once __DIR__ . '/app/controllers/ServiceController.php';
 require_once __DIR__ . '/app/controllers/TherapistController.php';
 require_once __DIR__ . '/app/controllers/RoomController.php';
@@ -45,6 +47,14 @@ switch ($route) {
 
     case 'appointments':
         (new AppointmentController())->index();
+        break;
+
+    case 'calendar':
+        (new CalendarController())->index();
+        break;
+
+    case 'pos':
+        (new BillingController())->index();
         break;
 
     case 'services':

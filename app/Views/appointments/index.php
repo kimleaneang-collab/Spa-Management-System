@@ -19,7 +19,7 @@ $statusClasses = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Appointments | Relax Spa</title>
-    <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css">
+    <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css?v=<?= e(asset_version('public/css/style.css')) ?>">
 </head>
 <body class="dashboard-page">
     <div class="dashboard-shell">
@@ -64,7 +64,7 @@ $statusClasses = [
             <div class="sidebar-role">
                 <span>Current Role</span>
                 <div class="role-select">
-                    <span class="role-avatar">A</span>
+                    <?= profile_avatar($_SESSION['user'] ?? [], 'role-avatar', strtoupper(substr((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'A'), 0, 1))) ?>
                     <span><?= e(ucfirst($_SESSION['user']['role'] ?? 'admin')) ?></span>
                     <span class="chevron">▾</span>
                 </div>
@@ -74,13 +74,13 @@ $statusClasses = [
         <main class="main-panel">
             <header class="topbar">
                 <div class="topbar-left">
-                    <div class="welcome-text">Welcome back, Admin!</div>
+                    <div class="welcome-text">Welcome back, <?= e((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'Admin')) ?>!</div>
                 </div>
                 <div class="topbar-actions">
                     <div class="search-box"><span class="search-icon">⌕</span><span>Search</span></div>
                     <button class="icon-button" aria-label="Notifications">◔</button>
                     <button class="icon-button add-button" aria-label="Add" data-open-modal="appointment-modal">＋</button>
-                    <div class="user-chip"><span class="user-name">SV</span><span class="user-role">Admin</span><span class="user-chevron">▾</span></div>
+                    <div class="user-chip"><?= profile_avatar($_SESSION['user'] ?? [], 'user-name', strtoupper(substr((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'SV'), 0, 2))) ?><span class="user-role"><?= e(role_label((string) ($_SESSION['user']['role'] ?? 'admin'))) ?></span><span class="user-chevron">▾</span></div>
                 </div>
             </header>
 
@@ -232,6 +232,6 @@ $statusClasses = [
         </div>
     </div>
 
-    <script src="<?= e(APP_URL) ?>/public/js/main.js"></script>
+    <script src="<?= e(APP_URL) ?>/public/js/main.js?v=<?= e(asset_version('public/js/main.js')) ?>"></script>
 </body>
 </html>

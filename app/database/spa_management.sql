@@ -62,6 +62,7 @@ CREATE TABLE users (
     full_name VARCHAR(150) NOT NULL,
     email VARCHAR(150) NULL UNIQUE,
     phone VARCHAR(30) NULL,
+    profile_image VARCHAR(255) NULL,
     status ENUM('active','inactive','suspended') NOT NULL DEFAULT 'active',
     last_login_at DATETIME NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -527,6 +528,7 @@ CREATE TABLE audit_logs (
 
 INSERT INTO roles (name, description) VALUES
 ('admin', 'Full system access'),
+('manager', 'Spa operations management access'),
 ('staff', 'Operational spa management access'),
 ('receptionist', 'Customer and appointment access');
 

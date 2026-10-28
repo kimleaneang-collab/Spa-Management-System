@@ -11,7 +11,7 @@ if (empty($_SESSION['user'])) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Customers | Relax Spa</title>
-    <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css">
+    <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css?v=<?= e(asset_version('public/css/style.css')) ?>">
 </head>
 <body class="dashboard-page">
     <div class="dashboard-shell">
@@ -54,7 +54,7 @@ if (empty($_SESSION['user'])) {
         </aside>
         <main class="main-panel">
             <header class="topbar">
-                <div class="topbar-left"><div class="welcome-text">Welcome back, Admin!</div></div>
+                <div class="topbar-left"><div class="welcome-text">Welcome back, <?= e((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'Admin')) ?>!</div></div>
                 <div class="topbar-actions">
                     <div class="search-box search-input-wrap">
                         <span class="search-icon">⌕</span>
@@ -63,8 +63,8 @@ if (empty($_SESSION['user'])) {
                     <button class="icon-button" aria-label="Notifications">◔</button>
                     <a class="icon-button add-button" href="<?= e(APP_URL) ?>/?route=customers#add-customer" aria-label="Add customer" title="Add customer">＋</a>
                     <div class="user-chip">
-                        <span class="user-name">SV</span>
-                        <span class="user-role">Admin</span>
+                        <?= profile_avatar($_SESSION['user'] ?? [], 'user-name', strtoupper(substr((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'SV'), 0, 2))) ?>
+                        <span class="user-role"><?= e(role_label((string) ($_SESSION['user']['role'] ?? 'admin'))) ?></span>
                         <form method="post" action="<?= e(APP_URL) ?>/?route=logout" class="logout-form">
                             <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token'] ?? '') ?>">
                             <button class="logout-link" type="submit">Logout</button>
@@ -159,6 +159,6 @@ if (empty($_SESSION['user'])) {
         </div>
     </div>
 
-    <script src="<?= e(APP_URL) ?>/public/js/main.js"></script>
+    <script src="<?= e(APP_URL) ?>/public/js/main.js?v=<?= e(asset_version('public/js/main.js')) ?>"></script>
 </body>
 </html>

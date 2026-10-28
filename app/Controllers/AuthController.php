@@ -48,7 +48,12 @@ final class AuthController
         |--------------------------------------------------------------------------
         | CSRF Protection
         |--------------------------------------------------------------------------
+        |
+        | SECURITY: Validate a session-bound CSRF token before accepting login/logout.
+        | This helps prevent cross-site request forgery attacks.
+        |--------------------------------------------------------------------------
         */
+        // SECURITY: Verify the request token matches the current session token.
         $this->verifyCsrf();
 
         $username = trim(
@@ -66,8 +71,7 @@ final class AuthController
         | Validation
         |--------------------------------------------------------------------------
         */
-        $validUsername = valid_text($username, 3, 100)
-            && preg_match('/^[A-Za-z0-9_.-]{3,100}$/', $username) === 1;
+        $validUsername = valid_username($username);
 
         if (!$validUsername || !valid_login_password($password)) {
 
@@ -84,7 +88,12 @@ final class AuthController
         |--------------------------------------------------------------------------
         | Brute Force Protection
         |--------------------------------------------------------------------------
+        |
+        | SECURITY: Block repeated login attempts from the same username to reduce
+        | password guessing and brute-force attacks.
+        |--------------------------------------------------------------------------
         */
+        // SECURITY: Count failed logins in the last 15 minutes and enforce a lockout.
         $failedAttempts = $this->users->failedAttemptsSince(
             $username,
             self::LOCKOUT_MINUTES
@@ -109,7 +118,12 @@ final class AuthController
         |--------------------------------------------------------------------------
         | Verify Password
         |--------------------------------------------------------------------------
+        |
+        | SECURITY: Validate the submitted password against the stored hash.
+        | Passwords are never compared or stored in plain text.
+        |--------------------------------------------------------------------------
         */
+        // SECURITY: Use password_verify() instead of comparing raw password strings.
         $valid =
             $user !== null
             && $user['status'] === 'active'
@@ -144,7 +158,12 @@ final class AuthController
         |--------------------------------------------------------------------------
         | Rehash Password If Needed
         |--------------------------------------------------------------------------
+        |
+        | SECURITY: Upgrade stored hashes to the current default algorithm when needed.
+        | This keeps password protection strong as algorithms evolve.
+        |--------------------------------------------------------------------------
         */
+        // SECURITY: Rehash legacy password values to keep them aligned with modern standards.
         if (
             password_needs_rehash(
                 $user['password_hash'],
@@ -175,19 +194,30 @@ final class AuthController
         |--------------------------------------------------------------------------
         | Prevent Session Fixation
         |--------------------------------------------------------------------------
+        |
+        | SECURITY: Regenerate the session ID after successful authentication to prevent
+        | session fixation attacks where an attacker reuses a known session ID.
+        |--------------------------------------------------------------------------
         */
+        // SECURITY: Rotate the session ID once the user is authenticated.
         session_regenerate_id(true);
 
         /*
         |--------------------------------------------------------------------------
         | Store Logged-In User
         |--------------------------------------------------------------------------
+        |
+        | SECURITY: Keep only the minimum user identity in the session after login.
+        | Do not store the raw password or any sensitive secret in session state.
+        |--------------------------------------------------------------------------
         */
+        // SECURITY: Store only authorized session data needed for access checks.
         $_SESSION['user'] = [
             'id' => (int) $user['id'],
             'username' => $user['username'],
             'full_name' => $user['full_name'],
             'email' => $user['email'],
+            'profile_image' => $user['profile_image'] ?? null,
             'role_id' => (int) $user['role_id'],
             'role' => $user['role_name']
         ];
@@ -223,11 +253,13 @@ final class AuthController
 
     public function logout(): void
     {
+        // SECURITY: Only allow logout through a POST request to reduce CSRF abuse.
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             exit('Method Not Allowed');
         }
 
+        // SECURITY: Validate the logout request with CSRF before destroying the session.
         $this->verifyCsrf();
         $_SESSION = [];
 

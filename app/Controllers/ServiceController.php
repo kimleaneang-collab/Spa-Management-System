@@ -61,6 +61,9 @@ final class ServiceController
         } catch (Throwable $e) {
         }
 
-        require __DIR__ . '/../Views/services/index.php';
+        $view = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'manager'
+            ? 'index.php'
+            : 'admin.php';
+        require __DIR__ . '/../Views/services/' . $view;
     }
 }

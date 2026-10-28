@@ -26,6 +26,28 @@ final class Appointment
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
+	public function betweenDates(string $startDate, string $endDate): array
+	{
+		$stmt = $this->db->prepare(
+			'SELECT a.id, a.appointment_date, a.start_time, a.status,
+					c.full_name AS customer, t.full_name AS therapist,
+					s.name AS service
+			 FROM appointments a
+			 INNER JOIN customers c ON c.id = a.customer_id
+			 INNER JOIN services s ON s.id = a.service_id
+			 LEFT JOIN therapists t ON t.id = a.therapist_id
+			 WHERE a.appointment_date >= :start_date
+			   AND a.appointment_date < :end_date
+			 ORDER BY a.appointment_date, a.start_time'
+		);
+		$stmt->execute([
+			':start_date' => $startDate,
+			':end_date' => $endDate,
+		]);
+
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+
 	public function find(int $id): ?array
 	{
 		$stmt = $this->db->prepare('SELECT id, customer_id, service_id, therapist_id, room_id, appointment_date, start_time, end_time, status, notes FROM appointments WHERE id = :id');

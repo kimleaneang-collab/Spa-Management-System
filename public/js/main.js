@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const pageTitle = document.querySelector('.page-title');
     const topbarLeft = document.querySelector('.topbar-left');
-    if (pageTitle && topbarLeft && pageTitle.textContent.trim() !== 'DASHBOARD OVERVIEW') {
+    if (pageTitle && topbarLeft && pageTitle.textContent.trim() !== 'DASHBOARD OVERVIEW' && !document.body.classList.contains('service-page') && !document.body.classList.contains('inventory-page') && !document.body.classList.contains('analytics-page')) {
         const title = pageTitle.textContent.trim().toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
         const subtitle = document.querySelector('.page-date')?.textContent.trim() || 'Manage your spa operations.';
         topbarLeft.innerHTML = `<div class="topbar-page-title">${title}</div><div class="topbar-page-subtitle">${subtitle}</div>`;
@@ -9,13 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sidebarMenu = document.querySelector('.sidebar-menu');
     if (sidebarMenu) {
-        const sidebarGroups = [
-            ['dashboard', 'appointments', 'services', 'therapists', 'rooms'],
-            ['customers', 'memberships', 'customer-history'],
-            ['products', 'stock-management', 'suppliers'],
-            ['reports'],
-            ['users-and-roles', 'settings'],
-        ];
         const linksByRoute = new Map();
 
         sidebarMenu.querySelectorAll('.nav-item').forEach((link) => {
@@ -25,22 +18,98 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        sidebarMenu.replaceChildren();
-        sidebarGroups.forEach((routes) => {
-            const section = document.createElement('div');
-            section.className = 'nav-section';
+        const currentRole = (document.body.dataset.role || document.querySelector('.user-role')?.textContent || '').trim().toLowerCase();
+        const isManager = currentRole === 'manager';
+        document.body.classList.toggle('manager-role', isManager);
 
-            routes.forEach((route) => {
+        if (isManager && !document.querySelector('.sidebar-role')) {
+            const userInitials = document.querySelector('.user-name')?.textContent.trim() || 'M';
+            const roleFooter = document.createElement('div');
+            roleFooter.className = 'sidebar-role';
+            const footerLabel = document.createElement('span');
+            footerLabel.textContent = 'Current Role';
+            const roleSelect = document.createElement('div');
+            roleSelect.className = 'role-select';
+            const avatar = document.createElement('span');
+            avatar.className = 'role-avatar';
+            avatar.textContent = userInitials;
+            const roleName = document.createElement('span');
+            roleName.textContent = 'Manager';
+            const chevron = document.createElement('span');
+            chevron.className = 'chevron';
+            chevron.textContent = '▾';
+            roleSelect.append(avatar, roleName, chevron);
+            roleFooter.append(footerLabel, roleSelect);
+            sidebarMenu.parentElement?.append(roleFooter);
+        }
+
+        if (isManager) {
+            const dashboardUrl = linksByRoute.get('dashboard')?.href;
+            if (dashboardUrl) {
+                const addManagerLink = (route, label, icon) => {
+                    if (linksByRoute.has(route)) return;
+                    const link = document.createElement('a');
+                    link.className = 'nav-item';
+                    link.href = `${dashboardUrl.split('?')[0]}?route=${route}`;
+                    link.innerHTML = `<span class="nav-icon">${icon}</span><span>${label}</span>`;
+                    if (new URL(window.location.href).searchParams.get('route') === route) {
+                        link.classList.add('active');
+                    }
+                    linksByRoute.set(route, link);
+                };
+                addManagerLink('calendar', 'Calendar', '▦');
+                addManagerLink('pos', 'POS & Billing', '▤');
+            }
+
+            const managerGroups = [
+                { label: 'Main', routes: ['dashboard', 'appointments', 'customers', 'calendar', 'rooms'] },
+                { label: 'Quick Actions', routes: ['services', 'pos', 'products'] },
+                { label: 'Reports', routes: ['reports'] },
+                { label: 'Settings', routes: ['users-and-roles', 'settings'] },
+            ];
+            const managerLabels = {
+                services: 'Services',
+                products: 'Inventory',
+            };
+            Object.entries(managerLabels).forEach(([route, label]) => {
                 const link = linksByRoute.get(route);
-                if (link) {
-                    section.append(link);
-                }
+                const text = link?.querySelector('span:last-child');
+                if (text) text.textContent = label;
             });
 
-            if (section.children.length > 0) {
-                sidebarMenu.append(section);
-            }
-        });
+            sidebarMenu.replaceChildren();
+            managerGroups.forEach((group) => {
+                const section = document.createElement('div');
+                section.className = 'nav-section';
+                section.dataset.label = group.label;
+
+                group.routes.forEach((route) => {
+                    const link = linksByRoute.get(route);
+                    if (link) section.append(link);
+                });
+
+                if (section.children.length > 0) sidebarMenu.append(section);
+            });
+        } else {
+            const adminGroups = [
+                ['dashboard', 'appointments', 'services', 'therapists', 'rooms'],
+                ['customers', 'memberships', 'customer-history'],
+                ['products', 'stock-management', 'suppliers'],
+                ['reports'],
+                ['users-and-roles', 'settings'],
+            ];
+
+            sidebarMenu.replaceChildren();
+            adminGroups.forEach((routes) => {
+                const section = document.createElement('div');
+                section.className = 'nav-section';
+                routes.forEach((route) => {
+                    const link = linksByRoute.get(route);
+                    if (link) section.append(link);
+                });
+                if (section.children.length > 0) sidebarMenu.append(section);
+            });
+        }
     }
 
     const routeSearchItems = [
@@ -120,20 +189,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.search-box').forEach(attachRouteSearch);
 
-    const toggle = document.querySelector('[data-password-toggle]');
-    const password = document.querySelector('#password');
+    document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
+        const password = toggle.closest('.password-wrap')?.querySelector('input[type="password"], input[type="text"]');
+        const visibleIcon = toggle.querySelector('[data-password-visible]');
+        const hiddenIcon = toggle.querySelector('[data-password-hidden]');
+        if (!password) return;
 
-    if (toggle && password) {
         toggle.addEventListener('click', () => {
             const showing = password.type === 'text';
             password.type = showing ? 'password' : 'text';
-            toggle.textContent = showing ? 'Show' : 'Hide';
-            toggle.setAttribute(
-                'aria-label',
-                showing ? 'Show password' : 'Hide password'
-            );
+            toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+            toggle.setAttribute('aria-pressed', showing ? 'false' : 'true');
+            if (visibleIcon) visibleIcon.hidden = !showing;
+            if (hiddenIcon) hiddenIcon.hidden = showing;
         });
-    }
+    });
 
     const form = document.querySelector('form');
     if (form) {
@@ -148,8 +218,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 username?.setCustomValidity('Username is required.');
             } else if (username.value.trim().length < 3) {
                 username?.setCustomValidity('Username must be at least 3 characters.');
-            } else if (!/^[A-Za-z0-9_.-]+$/.test(username.value.trim())) {
-                username?.setCustomValidity('Username may contain letters, numbers, dots, underscores, and hyphens only.');
+            } else if (!/^[A-Za-z0-9@_.-]+$/.test(username.value.trim())) {
+                username?.setCustomValidity('Username may contain letters, numbers, @, dots, underscores, and hyphens only.');
             }
 
             if (!password?.value) {
@@ -165,6 +235,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const openModalButtons = document.querySelectorAll('[data-open-modal]');
     const closeModalButtons = document.querySelectorAll('[data-close-modal]');
+
+    const profilePhotoInput = document.getElementById('user-profile-photo-input');
+    const profilePhotoImage = document.getElementById('user-profile-photo-image');
+    const profilePhotoInitials = document.getElementById('user-profile-photo-initials');
+    const profilePhotoFilename = document.getElementById('user-profile-photo-filename');
+    let profilePhotoObjectUrl = '';
+    profilePhotoInput?.addEventListener('change', () => {
+        const file = profilePhotoInput.files?.[0];
+        if (!file || !profilePhotoImage || !profilePhotoInitials || !profilePhotoFilename) return;
+
+        if (profilePhotoObjectUrl) URL.revokeObjectURL(profilePhotoObjectUrl);
+        profilePhotoObjectUrl = URL.createObjectURL(file);
+        profilePhotoImage.src = profilePhotoObjectUrl;
+        profilePhotoImage.hidden = false;
+        profilePhotoInitials.hidden = true;
+        profilePhotoFilename.textContent = file.name;
+    });
 
     openModalButtons.forEach((button) => {
         button.addEventListener('click', () => {
@@ -197,6 +284,48 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    const serviceSearch = document.getElementById('service-search');
+    const serviceCategory = document.getElementById('service-category');
+    const serviceCards = [...document.querySelectorAll('#service-grid .service-card')];
+    const noServiceResults = document.getElementById('service-no-results');
+    const filterServices = () => {
+        if (!serviceSearch || !serviceCategory) return;
+        const query = serviceSearch.value.trim().toLowerCase();
+        const category = serviceCategory.value;
+        let visibleCount = 0;
+        serviceCards.forEach((card) => {
+            const matchesQuery = (card.dataset.search || '').includes(query);
+            const matchesCategory = category === 'all' || card.dataset.category === category;
+            const visible = matchesQuery && matchesCategory;
+            card.hidden = !visible;
+            if (visible) visibleCount += 1;
+        });
+        if (noServiceResults) noServiceResults.hidden = visibleCount > 0;
+    };
+    serviceSearch?.addEventListener('input', filterServices);
+    serviceCategory?.addEventListener('change', filterServices);
+
+    const inventorySearch = document.getElementById('inventory-search');
+    const inventoryStatus = document.getElementById('inventory-status');
+    const inventoryRows = [...document.querySelectorAll('#inventory-table tbody tr')];
+    const inventoryEmpty = document.getElementById('inventory-empty');
+    const filterInventory = () => {
+        if (!inventorySearch || !inventoryStatus) return;
+        const query = inventorySearch.value.trim().toLowerCase();
+        const status = inventoryStatus.value;
+        let visibleCount = 0;
+        inventoryRows.forEach((row) => {
+            const matchesQuery = (row.dataset.search || '').includes(query);
+            const matchesStatus = status === 'all' || row.dataset.status === status;
+            const visible = matchesQuery && matchesStatus;
+            row.hidden = !visible;
+            if (visible) visibleCount += 1;
+        });
+        if (inventoryEmpty) inventoryEmpty.hidden = visibleCount > 0;
+    };
+    inventorySearch?.addEventListener('input', filterInventory);
+    inventoryStatus?.addEventListener('change', filterInventory);
 
     const searchInputs = document.querySelectorAll('.search-input');
     searchInputs.forEach((input) => {

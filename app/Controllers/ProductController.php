@@ -68,12 +68,11 @@ final class ProductController
             redirect('products');
         }
 
-        $products = [];
-        try {
-            $products = $productModel->all();
-        } catch (Throwable $e) {
-        }
+        $products = $productModel->all();
 
-        require __DIR__ . '/../Views/inventory/products.php';
+        $view = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'manager'
+            ? 'products.php'
+            : 'admin.php';
+        require __DIR__ . '/../Views/inventory/' . $view;
     }
 }

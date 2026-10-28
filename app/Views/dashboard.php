@@ -5,6 +5,15 @@ declare(strict_types=1);
 if (empty($_SESSION['user'])) {
     redirect('login');
 }
+$managerDashboard = strtolower((string) ($user['role'] ?? '')) === 'manager';
+$dashboardInitials = static function (string $name): string {
+    $parts = preg_split('/\s+/', trim($name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+    if ($parts === []) {
+        return '?';
+    }
+
+    return strtoupper(substr($parts[0], 0, 1) . substr($parts[count($parts) - 1], 0, 1));
+};
 ?>
 <!doctype html>
 <html lang="en">
@@ -12,7 +21,7 @@ if (empty($_SESSION['user'])) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard | Relax Spa</title>
-    <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css">
+    <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css?v=<?= e(asset_version('public/css/style.css')) ?>">
 </head>
 <body class="dashboard-page">
     <div class="dashboard-shell">
@@ -103,8 +112,8 @@ if (empty($_SESSION['user'])) {
             <div class="sidebar-role">
                 <span>Current Role</span>
                 <div class="role-select">
-                    <span class="role-avatar">A</span>
-                    <span><?= e(ucfirst($user['role'])) ?></span>
+                    <?= profile_avatar($user, 'role-avatar', $dashboardInitials((string) ($user['full_name'] ?? $user['username'] ?? 'A'))) ?>
+                    <span><?= e(role_label((string) $user['role'])) ?></span>
                     <span class="chevron">▾</span>
                 </div>
             </div>
@@ -113,7 +122,7 @@ if (empty($_SESSION['user'])) {
         <main class="main-panel">
             <header class="topbar">
                 <div class="topbar-left">
-                    <div class="welcome-text">Welcome back, Admin!</div>
+                    <div class="welcome-text">Welcome back, <?= e((string) ($user['full_name'] ?? $user['username'] ?? 'Admin')) ?>!</div>
                 </div>
 
                 <div class="topbar-actions">
@@ -124,13 +133,110 @@ if (empty($_SESSION['user'])) {
                     <button class="icon-button" aria-label="Notifications">◔</button>
                     <button class="icon-button add-button" aria-label="Add">＋</button>
                     <div class="user-chip">
-                        <span class="user-name">SV</span>
-                        <span class="user-role">Admin</span>
+                        <?= profile_avatar($user, 'user-name', $dashboardInitials((string) ($user['full_name'] ?? $user['username'] ?? 'SV'))) ?>
+                        <span class="user-role"><?= e(role_label((string) ($user['role'] ?? 'admin'))) ?></span>
                         <span class="user-chevron">▾</span>
                     </div>
                 </div>
             </header>
 
+            <?php if ($managerDashboard): ?>
+            <div class="content-wrap manager-dashboard">
+                <div class="manager-dashboard-heading">
+                    <div>
+                        <h1 class="page-title">DASHBOARD</h1>
+                        <div class="page-date">Welcome back — here’s how Relax Spa is doing today.</div>
+                    </div>
+                    <span class="manager-date"><?= e(date('M j, Y')) ?></span>
+                </div>
+
+                <section class="manager-stat-grid" aria-label="Today's spa overview">
+                    <article class="manager-stat-card">
+                        <span class="manager-stat-icon green">▣</span>
+                        <span class="manager-stat-label">Today's Appointments</span>
+                        <strong><?= number_format($todayAppointments) ?></strong>
+                        <small>Scheduled for today</small>
+                    </article>
+                    <article class="manager-stat-card">
+                        <span class="manager-stat-icon blue">$</span>
+                        <span class="manager-stat-label">Revenue Today</span>
+                        <strong>$<?= number_format($todayRevenue, 2) ?></strong>
+                        <small>Paid and partial invoices</small>
+                    </article>
+                    <article class="manager-stat-card">
+                        <span class="manager-stat-icon amber">◷</span>
+                        <span class="manager-stat-label">Pending Bookings</span>
+                        <strong><?= number_format($pendingAppointments) ?></strong>
+                        <small>Awaiting confirmation</small>
+                    </article>
+                    <article class="manager-stat-card">
+                        <span class="manager-stat-icon violet">⌂</span>
+                        <span class="manager-stat-label">Rooms Available</span>
+                        <strong><?= number_format($availableRooms) ?> / <?= number_format($totalRooms) ?></strong>
+                        <small><?= number_format(max(0, $totalRooms - $availableRooms)) ?> currently in use</small>
+                    </article>
+                </section>
+
+                <section class="manager-dashboard-panels">
+                    <article class="manager-dashboard-panel">
+                        <div class="manager-panel-heading">
+                            <h2>Today's Appointments</h2>
+                            <a href="<?= e(APP_URL) ?>/?route=appointments">View appointments</a>
+                        </div>
+                        <?php if ($appointmentRows === []): ?>
+                            <p class="manager-empty">No appointments are scheduled for today.</p>
+                        <?php else: ?>
+                            <div class="manager-appointment-list">
+                                <?php foreach ($appointmentRows as $appointment): ?>
+                                    <?php
+                                        $status = strtolower((string) $appointment['status']);
+                                        $statusClass = match ($status) {
+                                            'confirmed' => 'confirmed',
+                                            'in_progress' => 'in-progress',
+                                            'completed' => 'completed',
+                                            'cancelled' => 'cancelled',
+                                            default => 'pending',
+                                        };
+                                    ?>
+                                    <div class="manager-appointment-row">
+                                        <time><?= e(date('g:i A', strtotime((string) $appointment['start_time']))) ?></time>
+                                        <span class="manager-appointment-avatar"><?= e($dashboardInitials((string) $appointment['full_name'])) ?></span>
+                                        <span class="manager-appointment-info">
+                                            <strong><?= e((string) $appointment['full_name']) ?></strong>
+                                            <small><?= e((string) $appointment['service']) ?> · <?= e((string) $appointment['room']) ?></small>
+                                        </span>
+                                        <span class="manager-appointment-status <?= e($statusClass) ?>"><?= e(ucwords(str_replace('_', ' ', $status))) ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </article>
+
+                    <article class="manager-dashboard-panel">
+                        <div class="manager-panel-heading">
+                            <h2>Notifications</h2>
+                            <a href="<?= e(APP_URL) ?>/?route=inventory-report">View details</a>
+                        </div>
+                        <?php if ($notifications === []): ?>
+                            <p class="manager-empty">You’re all caught up. No new alerts.</p>
+                        <?php else: ?>
+                            <div class="manager-notifications">
+                                <?php foreach (array_slice($notifications, 0, 4) as $notification): ?>
+                                    <?php $notificationClass = strtolower((string) $notification['type']) === 'low stock' ? 'warning' : 'success'; ?>
+                                    <div class="manager-notification">
+                                        <span class="manager-notification-icon <?= e($notificationClass) ?>"><?= $notificationClass === 'warning' ? '!' : '✓' ?></span>
+                                        <span>
+                                            <strong><?= e((string) $notification['type']) ?></strong>
+                                            <small><?= e((string) $notification['message']) ?></small>
+                                        </span>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </article>
+                </section>
+            </div>
+            <?php else: ?>
             <div class="content-wrap">
                 <h1 class="page-title">DASHBOARD OVERVIEW</h1>
                 <div class="page-date">May 16, 2026</div>
@@ -245,8 +351,9 @@ if (empty($_SESSION['user'])) {
                     </table>
                 </section>
             </div>
+            <?php endif; ?>
         </main>
     </div>
-    <script src="<?= e(APP_URL) ?>/public/js/main.js"></script>
+    <script src="<?= e(APP_URL) ?>/public/js/main.js?v=<?= e(asset_version('public/js/main.js')) ?>"></script>
 </body>
 </html>
