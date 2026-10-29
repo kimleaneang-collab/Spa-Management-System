@@ -15,26 +15,39 @@ final class TherapistController
         $therapistModel = new Therapist(Database::connection());
 
         $editingTherapist = null;
+        $therapistFormError = (string) ($_SESSION['therapist_form_error'] ?? '');
+        unset($_SESSION['therapist_form_error']);
         $editId = (int) ($_GET['edit'] ?? 0);
         if ($editId > 0) {
             $editingTherapist = $therapistModel->find($editId);
         }
+        $therapistAccounts = $therapistModel->accountsForAssignment($editId);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['therapist_name'])) {
             $action = (string) ($_POST['action'] ?? 'create');
             $id = (int) ($_POST['id'] ?? 0);
             $name = trim((string) ($_POST['therapist_name'] ?? ''));
             $phone = trim((string) ($_POST['therapist_phone'] ?? ''));
+            $accountInput = trim((string) ($_POST['therapist_user_id'] ?? ''));
+            $userId = $accountInput === '' ? null : filter_var($accountInput, FILTER_VALIDATE_INT);
+
+            if ($accountInput !== '' && ($userId === false || !$therapistModel->accountCanBeAssigned((int) $userId, $id))) {
+                $_SESSION['therapist_form_error'] = 'Choose an active therapist login account that is not already assigned.';
+                $query = $id > 0 ? '&edit=' . $id : '&new=1';
+                header('Location: ' . APP_URL . '/?route=therapists' . $query);
+                exit;
+            }
 
             if (valid_text($name, 2, 150) && valid_phone($phone, true)) {
                 $specialization = trim((string) ($_POST['therapist_specialization'] ?? ''));
+                $bio = trim((string) ($_POST['therapist_bio'] ?? ''));
                 $gender = trim((string) ($_POST['therapist_gender'] ?? ''));
                 $status = trim((string) ($_POST['therapist_status'] ?? 'active'));
-                if (valid_text($specialization, 0, 150) && in_array($gender, ['', 'male', 'female', 'other'], true) && in_array($status, ['active', 'inactive', 'on_leave'], true) && (($action === 'update' && $id > 0) || $action === 'create')) {
+                if (valid_text($specialization, 0, 150) && valid_text($bio, 0, 2000) && in_array($gender, ['', 'male', 'female', 'other'], true) && in_array($status, ['active', 'inactive', 'on_leave'], true) && (($action === 'update' && $id > 0) || $action === 'create')) {
                     if ($action === 'update' && $id > 0) {
-                    $therapistModel->update($id, $name, $phone, $specialization, $gender, $status);
+                        $therapistModel->update($id, $name, $phone, $specialization, $gender, $status, $bio, $userId === false ? null : $userId);
                     } else {
-                    $therapistModel->create($name, $phone, $specialization, $gender, $status);
+                        $therapistModel->create($name, $phone, $specialization, $gender, $status, $bio, $userId === false ? null : $userId);
                     }
                 }
             }

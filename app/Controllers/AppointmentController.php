@@ -12,15 +12,23 @@ final class AppointmentController
             redirect('login');
         }
 
+        $user = $_SESSION['user'];
+        $role = strtolower((string) ($user['role'] ?? ''));
+        $isTherapist = in_array($role, ['staff', 'therapist'], true);
         $appointmentModel = new Appointment(Database::connection());
-
         $editingAppointment = null;
-        $editId = (int) ($_GET['edit'] ?? 0);
+        $editId = $isTherapist ? 0 : (int) ($_GET['edit'] ?? 0);
         if ($editId > 0) {
             $editingAppointment = $appointmentModel->find($editId);
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if ($isTherapist) {
+                http_response_code(403);
+                echo 'Therapists cannot create or modify appointments.';
+                return;
+            }
+
             $action = (string) ($_POST['action'] ?? 'create');
             $id = (int) ($_POST['id'] ?? 0);
             if ($action === 'delete' && $id > 0) {
@@ -29,6 +37,14 @@ final class AppointmentController
             }
 
             $customerId = (int) ($_POST['customer_id'] ?? 0);
+            if ($customerId <= 0 && isset($_POST['customer_search'])) {
+                $customerSearch = trim((string) $_POST['customer_search']);
+                $customerLookup = Database::connection()->prepare(
+                    'SELECT id FROM customers WHERE full_name = :name AND status = \'active\' LIMIT 1'
+                );
+                $customerLookup->execute([':name' => $customerSearch]);
+                $customerId = (int) $customerLookup->fetchColumn();
+            }
             $serviceId = (int) ($_POST['service_id'] ?? 0);
             $therapistId = (int) ($_POST['therapist_id'] ?? 0) ?: null;
             $roomId = (int) ($_POST['room_id'] ?? 0) ?: null;
@@ -92,10 +108,23 @@ final class AppointmentController
         $options = ['customers' => [], 'therapists' => [], 'services' => [], 'rooms' => []];
         $formError = (string) ($_SESSION['form_error'] ?? '');
         unset($_SESSION['form_error']);
-        try {
+        $therapistId = null;
+        if ($isTherapist) {
+            $therapistAppointments = $appointmentModel->forTherapistUser(
+                (int) ($user['id'] ?? 0),
+                (string) ($user['full_name'] ?? $user['username'] ?? '')
+            );
+            $therapistId = $therapistAppointments['therapist_id'];
+            $appointments = $therapistAppointments['appointments'];
+        } else {
             $appointments = $appointmentModel->all();
             $options = $appointmentModel->options();
-        } catch (Throwable $e) {
+        }
+
+        if ($role === 'receptionist'
+            && (string) ($_GET['route'] ?? '') === 'new-appointment') {
+            require __DIR__ . '/../Views/appointments/create.php';
+            return;
         }
 
         require __DIR__ . '/../Views/appointments/index.php';

@@ -727,6 +727,78 @@ input {
     display: block;
 }
 
+.chart-panel {
+    background: #fff;
+}
+
+.revenue-chart {
+    height: 210px;
+    overflow: visible;
+}
+
+.revenue-chart-gridline {
+    stroke: #e8efef;
+    stroke-width: 1;
+}
+
+.revenue-chart-axis-label,
+.revenue-chart-date-label {
+    fill: #74807a;
+    font-size: 10px;
+}
+
+.revenue-chart-area {
+    opacity: 0;
+    animation: revenue-chart-area-in .8s ease-out .25s forwards;
+}
+
+.revenue-chart-line {
+    fill: none;
+    stroke: #32aeb4;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: revenue-chart-line-in 1.5s cubic-bezier(.4, 0, .2, 1) forwards;
+}
+
+.revenue-chart-point {
+    fill: #fff;
+    stroke: #229ca3;
+    stroke-width: 3;
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+    animation: revenue-chart-point-in .35s ease-out forwards;
+    animation-delay: calc(.55s + var(--point-index) * .12s);
+}
+
+@keyframes revenue-chart-line-in {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes revenue-chart-area-in {
+    to { opacity: 1; }
+}
+
+@keyframes revenue-chart-point-in {
+    0% { opacity: 0; transform: scale(0); }
+    70% { opacity: 1; transform: scale(1.25); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .revenue-chart-area,
+    .revenue-chart-line,
+    .revenue-chart-point {
+        animation: none;
+        opacity: 1;
+        stroke-dashoffset: 0;
+        transform: none;
+    }
+}
+
 .service-list {
     display: flex;
     flex-direction: column;
@@ -1188,7 +1260,2539 @@ input {
     }
 
     .panel-grid {
+        grid-template-columns: minmax(0, 1.25fr) minmax(220px, .85fr);
+        gap: 16px;
+    }
+}
+
+@media (max-width: 760px) {
+    .panel-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+body.cashier-dashboard-page {
+    background: #f4f6f7;
+    color: #233039;
+}
+
+.cashier-dashboard-page .sidebar {
+    background: #003b35;
+    border-right: 1px solid #1e554e;
+}
+
+.cashier-dashboard-page .nav-section[data-label]::before {
+    display: block;
+    margin: 18px 14px 8px;
+    color: #a4b7a3;
+    content: attr(data-label);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.cashier-dashboard-page .sidebar-menu .nav-item {
+    color: #f4f4ed;
+}
+
+.cashier-dashboard-page .sidebar-menu .nav-icon {
+    color: #d8dfc5;
+}
+
+.cashier-dashboard-page .sidebar-menu .nav-item.active {
+    color: #173c37;
+    background: #eaf5f1;
+}
+
+.cashier-dashboard-page .sidebar-menu .nav-item.active .nav-icon {
+    color: #173c37;
+}
+
+.cashier-dashboard-page .main-panel {
+    background: #f5f7f8;
+}
+
+.cashier-topbar {
+    min-height: 76px;
+    padding: 0 34px;
+    border-bottom: 1px solid #e9edef;
+    background: #fff;
+}
+
+.cashier-topbar-title {
+    color: #34444a;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.cashier-topbar-date {
+    color: #7c898e;
+    font-size: 13px;
+}
+
+.cashier-dashboard-content {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 34px;
+}
+
+.cashier-dashboard-heading,
+.cashier-transactions-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.cashier-eyebrow {
+    color: #438d7f;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .14em;
+}
+
+.cashier-dashboard-heading h1 {
+    margin: 8px 0 7px;
+    color: #24343a;
+    font-size: clamp(24px, 3vw, 31px);
+    font-weight: 650;
+    letter-spacing: -.03em;
+}
+
+.cashier-dashboard-heading p,
+.cashier-transactions-heading p {
+    margin: 0;
+    color: #829096;
+    font-size: 13px;
+}
+
+.cashier-new-sale {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 17px;
+    border-radius: 8px;
+    background: #347d6e;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 650;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.cashier-new-sale:hover {
+    background: #286b5e;
+}
+
+.cashier-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 15px;
+    margin-top: 27px;
+}
+
+.cashier-stat-card {
+    display: grid;
+    min-height: 147px;
+    padding: 18px;
+    border: 1px solid #e8edef;
+    border-radius: 11px;
+    background: #fff;
+    box-shadow: 0 3px 12px rgb(34 54 61 / 3%);
+}
+
+.cashier-stat-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 9px;
+    font-size: 17px;
+}
+
+.cashier-stat-icon.sales,
+.cashier-stat-icon.membership {
+    background: #e9f5ef;
+    color: #35836b;
+}
+
+.cashier-stat-icon.transactions {
+    background: #edf2fb;
+    color: #5b7fbd;
+}
+
+.cashier-stat-icon.average {
+    background: #f2edfa;
+    color: #8362a9;
+}
+
+.cashier-stat-icon.pending {
+    background: #fff4e6;
+    color: #c28a39;
+}
+
+.cashier-stat-label {
+    margin-top: 14px;
+    color: #78868c;
+    font-size: 12px;
+}
+
+.cashier-stat-card strong {
+    margin-top: 4px;
+    color: #293a40;
+    font-size: 23px;
+    font-weight: 650;
+    letter-spacing: -.02em;
+}
+
+.cashier-stat-card small {
+    margin-top: 4px;
+    color: #a0aaae;
+    font-size: 10px;
+}
+
+.cashier-transactions-panel {
+    margin-top: 24px;
+    overflow: hidden;
+    border: 1px solid #e8edef;
+    border-radius: 11px;
+    background: #fff;
+    box-shadow: 0 3px 12px rgb(34 54 61 / 3%);
+}
+
+.cashier-transactions-heading {
+    min-height: 77px;
+    padding: 17px 21px;
+}
+
+.cashier-transactions-heading h2 {
+    margin: 0 0 5px;
+    color: #293a40;
+    font-size: 16px;
+    font-weight: 650;
+}
+
+.cashier-transactions-heading p {
+    font-size: 11px;
+}
+
+.cashier-transaction-count {
+    padding: 6px 10px;
+    border-radius: 20px;
+    background: #f1f5f4;
+    color: #71817e;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.cashier-table-wrap {
+    overflow-x: auto;
+}
+
+.cashier-transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.cashier-transactions-table thead {
+    background: #f8faf9;
+}
+
+.cashier-transactions-table th {
+    padding: 11px 17px;
+    color: #89969a;
+    font-size: 10px;
+    font-weight: 650;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.cashier-transactions-table td {
+    padding: 13px 17px;
+    border-top: 1px solid #eff2f2;
+    color: #526167;
+    font-size: 12px;
+}
+
+.cashier-transactions-table tbody tr:hover {
+    background: #fbfcfc;
+}
+
+.cashier-transactions-table .cashier-invoice-number {
+    color: #357c6e;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.cashier-transactions-table .cashier-amount {
+    color: #34444a;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.cashier-payment-method {
+    color: #68777c;
+    white-space: nowrap;
+}
+
+.cashier-status {
+    display: inline-flex;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.cashier-status.paid {
+    background: #e9f5ef;
+    color: #348269;
+}
+
+.cashier-status.partial,
+.cashier-status.pending {
+    background: #fff4e5;
+    color: #b17a2d;
+}
+
+.cashier-status.refunded {
+    background: #fcecec;
+    color: #ae5656;
+}
+
+.cashier-transactions-table .cashier-empty-row {
+    padding: 36px 16px;
+    color: #89969a;
+    text-align: center;
+}
+
+.cashier-profile-panel {
+    margin-top: 20px;
+    padding: 18px 21px;
+    border: 1px solid #e8edef;
+    border-radius: 11px;
+    background: #fff;
+    scroll-margin-top: 20px;
+}
+
+.cashier-profile-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.cashier-profile-heading h2 {
+    margin: 0 0 5px;
+    color: #293a40;
+    font-size: 15px;
+    font-weight: 650;
+}
+
+.cashier-profile-heading p {
+    margin: 0;
+    color: #829096;
+    font-size: 11px;
+}
+
+.cashier-profile-role {
+    padding: 6px 10px;
+    border-radius: 20px;
+    background: #e9f5ef;
+    color: #348269;
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.cashier-profile-details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 17px;
+}
+
+.cashier-profile-details div {
+    display: grid;
+    gap: 5px;
+}
+
+.cashier-profile-details span {
+    color: #89969a;
+    font-size: 10px;
+}
+
+.cashier-profile-details strong {
+    overflow-wrap: anywhere;
+    color: #526167;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+@media (max-width: 1200px) {
+    .cashier-stat-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .cashier-topbar {
+        min-height: 64px;
+        padding: 0 15px;
+    }
+
+    .cashier-dashboard-content {
+        padding: 24px 15px;
+    }
+
+    .cashier-dashboard-heading {
+        align-items: flex-start;
+    }
+
+    .cashier-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .cashier-stat-card {
+        min-height: 137px;
+        padding: 14px;
+    }
+
+    .cashier-stat-card strong {
+        font-size: 20px;
+    }
+
+    .cashier-transactions-heading {
+        padding: 15px;
+    }
+
+    .cashier-profile-panel {
+        padding: 16px;
+    }
+
+    .cashier-profile-details {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 420px) {
+    .cashier-dashboard-heading {
+        flex-direction: column;
+    }
+
+    .cashier-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cashier-topbar-date {
+        display: none;
+    }
+}
+
+body.cashier-pos-page {
+    background: #faf9f5;
+    color: #252b29;
+}
+
+body.cashier-pos-page .sidebar {
+    width: 164px;
+    flex-basis: 164px;
+    padding: 14px 8px;
+    background: #003b35;
+}
+
+body.cashier-pos-page .brand-block {
+    padding: 5px 5px 21px;
+}
+
+body.cashier-pos-page .brand-mark {
+    gap: 5px;
+}
+
+body.cashier-pos-page .brand-leaf {
+    width: 28px;
+    height: 28px;
+    font-size: 17px;
+}
+
+body.cashier-pos-page .brand-text .brand-name {
+    font-size: 28px;
+}
+
+body.cashier-pos-page .brand-text .brand-subtitle {
+    padding-left: 14px;
+    font-size: 20px;
+}
+
+body.cashier-pos-page .sidebar-menu {
+    gap: 0;
+}
+
+body.cashier-pos-page .sidebar-menu .nav-section {
+    gap: 3px;
+    margin-bottom: 8px;
+    padding: 0 0 9px;
+}
+
+body.cashier-pos-page .sidebar-menu .nav-section::before {
+    padding: 0 7px 5px;
+    color: #b6c0a3;
+    content: attr(data-label);
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+body.cashier-pos-page .sidebar-menu .nav-item {
+    min-height: 29px;
+    gap: 7px;
+    padding: 6px 7px;
+    color: #f4f4ed;
+    font-size: 10px;
+}
+
+body.cashier-pos-page .sidebar-menu .nav-icon {
+    width: 15px;
+    color: #d8dfc5;
+    font-size: 13px;
+}
+
+body.cashier-pos-page .sidebar-menu .nav-item.active {
+    background: #12675b;
+    color: #fff;
+}
+
+body.cashier-pos-page .sidebar-menu .nav-item.active .nav-icon {
+    color: #e7ddaf;
+}
+
+body.cashier-pos-page .sidebar-role {
+    margin-top: auto;
+}
+
+body.cashier-pos-page .main-panel {
+    width: calc(100% - 164px);
+    margin-left: 164px;
+    background: #faf9f5;
+}
+
+body.cashier-pos-page .cashier-pos-item-card {
+    display: block;
+    min-height: 153px;
+    padding: 0;
+    text-align: left;
+}
+
+body.cashier-pos-page .cashier-pos-item-card .cashier-pos-item-image {
+    display: block;
+    width: 100%;
+    height: 87px;
+    flex: none;
+}
+
+body.cashier-pos-page .cashier-pos-item-card .cashier-pos-item-image img {
+    display: block;
+}
+
+.cashier-pos-topbar {
+    display: flex;
+    min-height: 58px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 8px 27px;
+    border-bottom: 1px solid #eeece7;
+    background: #fff;
+}
+
+.cashier-pos-search {
+    display: flex;
+    width: min(295px, 42vw);
+    min-height: 34px;
+    align-items: center;
+    gap: 9px;
+    padding: 0 11px;
+    border: 1px solid #e8e7e3;
+    border-radius: 6px;
+    background: #f7f7f6;
+    color: #8c9391;
+}
+
+.cashier-pos-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #36413e;
+    font: inherit;
+    font-size: 9px;
+}
+
+.cashier-pos-user {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.cashier-pos-notification,
+.cashier-pos-calendar {
+    color: #d9a83b;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.cashier-pos-user-chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.cashier-pos-user-chip > span:last-child {
+    display: grid;
+    gap: 2px;
+}
+
+.cashier-pos-user-chip strong {
+    color: #34413d;
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.cashier-pos-user-chip small {
+    color: #8a928e;
+    font-size: 9px;
+}
+
+.cashier-pos-content {
+    padding: 21px 28px 30px;
+}
+
+.cashier-pos-heading {
+    margin-bottom: 14px;
+}
+
+.cashier-pos-heading h1 {
+    margin: 0 0 5px;
+    color: #242927;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.cashier-pos-heading p {
+    margin: 0;
+    color: #888d89;
+    font-size: 10px;
+}
+
+.cashier-pos-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.38fr) minmax(310px, .9fr);
+    align-items: start;
+    gap: 18px;
+}
+
+.cashier-pos-catalog {
+    min-width: 0;
+}
+
+.cashier-pos-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 13px;
+}
+
+.cashier-pos-filter {
+    min-height: 24px;
+    padding: 4px 12px;
+    border: 1px solid #e7e5df;
+    border-radius: 20px;
+    background: #fff;
+    color: #7c827e;
+    cursor: pointer;
+    font: inherit;
+    font-size: 9px;
+}
+
+.cashier-pos-filter:hover,
+.cashier-pos-filter.active {
+    border-color: #003b35;
+    background: #003b35;
+    color: #fff;
+}
+
+.cashier-pos-item-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 11px;
+}
+
+.cashier-pos-item-card {
+    display: block;
+    min-width: 0;
+    min-height: 153px;
+    overflow: hidden;
+    padding: 0;
+    border: 1px solid #e6e3dc;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+.cashier-pos-item-card[hidden] {
+    display: none;
+}
+
+.cashier-pos-item-card:hover,
+.cashier-pos-item-card:focus-visible {
+    transform: translateY(-2px);
+    border-color: #87aa88;
+    outline: none;
+    box-shadow: 0 4px 12px rgb(22 61 47 / 10%);
+}
+
+.cashier-pos-item-image {
+    position: relative;
+    display: grid;
+    height: 87px;
+    place-items: center;
+    overflow: hidden;
+    background-color: #e6eee2;
+    color: #5a8265;
+    font-size: 25px;
+}
+
+.cashier-pos-item-image img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.cashier-pos-image-fallback {
+    display: none;
+}
+
+.cashier-pos-item-image.image-failed .cashier-pos-image-fallback,
+.cashier-pos-image-fallback:only-child {
+    display: grid;
+    position: absolute;
+    inset: 0;
+    place-items: center;
+}
+
+.cashier-pos-item-image.product {
+    background-color: #f0e9db;
+    color: #917c51;
+}
+
+.cashier-customers-page {
+    background: #f6f7f8;
+    color: #263638;
+}
+
+.cashier-customers-page .cashier-customers-topbar {
+    justify-content: flex-end;
+    gap: 24px;
+}
+
+.cashier-customers-user {
+    display: grid;
+    gap: 3px;
+}
+
+.cashier-customers-user strong {
+    color: #263638;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.cashier-customers-user small {
+    color: #82908e;
+    font-size: 11px;
+}
+
+.cashier-customers-content {
+    padding-top: 32px;
+}
+
+.cashier-customers-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.cashier-customers-heading .page-title {
+    margin: 0 0 7px;
+    color: #203b38;
+    font-size: 27px;
+    font-weight: 650;
+    letter-spacing: -.4px;
+    text-transform: none;
+}
+
+.cashier-customers-heading p {
+    margin: 0;
+    color: #7a8987;
+    font-size: 13px;
+}
+
+.cashier-customers-heading .primary-button {
+    min-height: 42px;
+    border-color: #087c67;
+    border-radius: 8px;
+    background: #087c67;
+    box-shadow: none;
+    font-weight: 600;
+}
+
+.cashier-customers-panel {
+    overflow: hidden;
+    border: 1px solid #e8edeb;
+    border-radius: 11px;
+    background: #fff;
+    box-shadow: 0 5px 20px rgb(26 64 57 / 4%);
+}
+
+.cashier-customers-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 22px;
+}
+
+.cashier-customers-search {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: min(100%, 340px);
+    height: 39px;
+    padding: 0 11px;
+    border: 1px solid #e1e8e5;
+    border-radius: 7px;
+    color: #83918e;
+}
+
+.cashier-customers-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    color: #263638;
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+}
+
+.cashier-customers-count {
+    color: #82908e;
+    font-size: 12px;
+}
+
+.cashier-customers-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.cashier-customers-table th {
+    height: 46px;
+    padding: 0 19px;
+    border-top: 1px solid #edf0ef;
+    border-bottom: 1px solid #edf0ef;
+    background: #f8faf9;
+    color: #778582;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .35px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.cashier-customers-table td {
+    height: 67px;
+    padding: 10px 19px;
+    border-bottom: 1px solid #edf0ef;
+    color: #53615f;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.cashier-customers-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.cashier-customer-identity {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.cashier-customer-identity strong {
+    color: #263a38;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.cashier-customer-avatar {
+    display: grid;
+    flex: 0 0 37px;
+    width: 37px;
+    height: 37px;
+    place-items: center;
+    border-radius: 50%;
+    background: #e6f2ec;
+    color: #16725e;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.cashier-membership-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 25px;
+    padding: 0 9px;
+    border-radius: 20px;
+    background: #f0f2f1;
+    color: #75817e;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.cashier-membership-badge.is-member {
+    background: #fff3dc;
+    color: #a77722;
+}
+
+.cashier-customer-view {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #087c67;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.cashier-customer-view:hover {
+    color: #045b4d;
+    text-decoration: underline;
+}
+
+.cashier-customers-table .cashier-customers-empty {
+    height: 100px;
+    color: #82908e;
+    text-align: center;
+}
+
+.cashier-customer-details {
+    display: grid;
+    gap: 15px;
+    margin: 0;
+}
+
+.cashier-customer-details div {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #edf0ef;
+}
+
+.cashier-customer-details div:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.cashier-customer-details dt {
+    color: #82908e;
+    font-size: 13px;
+}
+
+.cashier-customer-details dd {
+    margin: 0;
+    color: #263a38;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+@media (max-width: 720px) {
+    .cashier-customers-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .cashier-customers-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .cashier-customers-search {
+        width: 100%;
+    }
+
+    .cashier-customers-table {
+        min-width: 700px;
+    }
+}
+
+.cashier-receipts-page {
+    background: #faf9f6;
+    color: #333b39;
+}
+
+.cashier-receipts-page .main-panel {
+    background: #faf9f6;
+}
+
+.cashier-receipts-topbar {
+    justify-content: flex-end;
+    gap: 18px;
+    min-height: 51px;
+    padding: 0 30px;
+    background: #fff;
+}
+
+.cashier-receipts-topbar .search-box {
+    display: flex;
+    width: min(295px, 42vw);
+    height: 30px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    border: 1px solid #eceeed;
+    border-radius: 5px;
+    background: #f7f7f6;
+    color: #909794;
+}
+
+.cashier-receipts-topbar .search-box input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #454d4a;
+    font: inherit;
+    font-size: 9px;
+}
+
+.cashier-receipts-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #d7a977;
+    font-size: 14px;
+}
+
+.cashier-receipts-user {
+    display: grid;
+    gap: 2px;
+}
+
+.cashier-receipts-user strong {
+    color: #3b4542;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.cashier-receipts-user small {
+    color: #929b98;
+    font-size: 9px;
+}
+
+.cashier-receipts-content {
+    padding: 35px 27px;
+}
+
+.cashier-receipts-heading {
+    margin-bottom: 15px;
+}
+
+.cashier-receipts-heading .page-title {
+    margin: 0 0 6px;
+    color: #222927;
+    font-size: 19px;
+    font-weight: 650;
+    letter-spacing: -.2px;
+    text-transform: none;
+}
+
+.cashier-receipts-heading p {
+    margin: 0;
+    color: #969b98;
+    font-size: 10px;
+}
+
+.cashier-receipts-panel {
+    overflow: hidden;
+    padding: 10px 19px 0;
+    border: 1px solid #d8d9d7;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.cashier-receipts-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+    text-align: left;
+}
+
+.cashier-receipts-table th {
+    height: 37px;
+    border-bottom: 1px solid #d9dcda;
+    color: #8b908e;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.cashier-receipts-table td {
+    height: 57px;
+    border-bottom: 1px solid #dedfdd;
+    color: #858b88;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.cashier-receipts-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.cashier-receipt-channel {
+    color: #878d8a;
+}
+
+.cashier-receipt-view {
+    padding: 4px 12px;
+    border: 0;
+    background: transparent;
+    color: #287c42;
+    cursor: pointer;
+    font: inherit;
+    font-size: 11px;
+}
+
+.cashier-receipt-view:hover {
+    text-decoration: underline;
+}
+
+.cashier-receipts-table .cashier-receipts-empty {
+    height: 100px;
+    color: #858b88;
+    text-align: center;
+}
+
+.cashier-receipt-details {
+    display: grid;
+    gap: 13px;
+    margin: 0;
+}
+
+.cashier-receipt-details div {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 15px;
+}
+
+.cashier-receipt-details dt {
+    color: #7d8985;
+    font-size: 13px;
+}
+
+.cashier-receipt-details dd {
+    margin: 0;
+    color: #273a36;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+@media (max-width: 700px) {
+    .cashier-receipts-content {
+        padding: 25px 16px;
+    }
+
+    .cashier-receipts-panel {
+        overflow-x: auto;
+        padding-right: 14px;
+        padding-left: 14px;
+    }
+
+    .cashier-receipts-table {
+        min-width: 650px;
+    }
+
+    .cashier-receipts-topbar .search-box {
+        width: min(220px, 48vw);
+    }
+}
+
+@media print {
+    body.cashier-printing-receipt > *:not(#cashier-receipt-modal) {
+        display: none !important;
+    }
+
+    body.cashier-printing-receipt #cashier-receipt-modal {
+        position: static;
+        display: block !important;
+        padding: 0;
+        background: #fff;
+    }
+
+    body.cashier-printing-receipt .cashier-receipt-detail {
+        width: 100%;
+        max-width: none;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+    }
+
+    body.cashier-printing-receipt .cashier-receipt-detail .modal-close,
+    body.cashier-printing-receipt .cashier-receipt-detail .modal-actions {
+        display: none;
+    }
+}
+
+.cashier-services-page {
+    background: #faf9f6;
+}
+
+.cashier-services-page .main-panel {
+    background: #faf9f6;
+}
+
+.cashier-services-topbar {
+    justify-content: flex-end;
+    gap: 18px;
+    min-height: 51px;
+    padding: 0 30px;
+    background: #fff;
+}
+
+.cashier-services-global-search {
+    display: flex;
+    width: min(295px, 42vw);
+    height: 30px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    border: 1px solid #eceeed;
+    border-radius: 5px;
+    background: #f7f7f6;
+    color: #909794;
+}
+
+.cashier-services-global-search input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #454d4a;
+    font: inherit;
+    font-size: 9px;
+}
+
+.cashier-services-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #d7a977;
+    font-size: 14px;
+}
+
+.cashier-services-user {
+    display: grid;
+    gap: 2px;
+}
+
+.cashier-services-user strong {
+    color: #3b4542;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.cashier-services-user small {
+    color: #929b98;
+    font-size: 9px;
+}
+
+.cashier-services-content {
+    padding: 20px 30px 35px;
+}
+
+.cashier-services-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.cashier-services-heading h1 {
+    margin: 0 0 4px;
+    color: #202725;
+    font-size: 19px;
+    font-weight: 650;
+    letter-spacing: -.2px;
+}
+
+.cashier-services-heading p {
+    margin: 0;
+    color: #888e8b;
+    font-size: 10px;
+}
+
+.cashier-services-add {
+    min-width: 131px;
+    height: 33px;
+    border: 0;
+    border-radius: 5px;
+    background: #b9911d;
+    color: #fff;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 650;
+    opacity: 1;
+}
+
+.cashier-services-add:disabled {
+    cursor: not-allowed;
+}
+
+.cashier-service-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 27px;
+}
+
+.cashier-service-categories button {
+    min-width: 44px;
+    height: 30px;
+    padding: 0 17px;
+    border: 1px solid #e3e3e0;
+    border-radius: 20px;
+    background: #fff;
+    color: #737b77;
+    cursor: pointer;
+    font: inherit;
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+.cashier-service-categories button.active {
+    border-color: #087c67;
+    background: #087c67;
+    color: #fff;
+}
+
+.cashier-service-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.cashier-service-card {
+    overflow: hidden;
+    min-width: 0;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgb(34 49 43 / 5%);
+}
+
+.cashier-service-card[hidden],
+.cashier-service-no-results[hidden] {
+    display: none;
+}
+
+.cashier-service-card img {
+    display: block;
+    width: 100%;
+    height: 91px;
+    object-fit: cover;
+    object-position: center;
+    background: #ebe6db;
+}
+
+.cashier-service-card-body {
+    min-height: 67px;
+    padding: 7px 11px 9px;
+}
+
+.cashier-service-card h2 {
+    overflow: hidden;
+    margin: 0 0 4px;
+    color: #252b28;
+    font-size: 10px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cashier-service-card p {
+    overflow: hidden;
+    margin: 0 0 5px;
+    color: #999e9b;
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cashier-service-card-body > strong {
+    color: #252b28;
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.cashier-service-empty,
+.cashier-service-no-results {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 34px 16px;
+    color: #888e8b;
+    font-size: 12px;
+    text-align: center;
+}
+
+@media (max-width: 900px) {
+    .cashier-service-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .cashier-services-content {
+        padding: 22px 16px;
+    }
+
+    .cashier-services-add {
+        min-width: 104px;
+    }
+
+    .cashier-service-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .cashier-services-topbar {
+        gap: 8px;
+        padding: 0 12px;
+    }
+
+    .cashier-services-global-search {
+        width: min(205px, 45vw);
+    }
+}
+
+@media (max-width: 420px) {
+    .cashier-service-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.cashier-products-page {
+    background: #faf9f6;
+}
+
+.cashier-products-page .main-panel {
+    background: #faf9f6;
+}
+
+.cashier-products-topbar {
+    justify-content: flex-end;
+    gap: 18px;
+    min-height: 51px;
+    padding: 0 30px;
+    background: #fff;
+}
+
+.cashier-products-search {
+    display: flex;
+    width: min(295px, 42vw);
+    height: 30px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    border: 1px solid #eceeed;
+    border-radius: 5px;
+    background: #f7f7f6;
+    color: #909794;
+}
+
+.cashier-products-search input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #454d4a;
+    font: inherit;
+    font-size: 9px;
+}
+
+.cashier-products-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #d7a977;
+    font-size: 14px;
+}
+
+.cashier-products-user {
+    display: grid;
+    gap: 2px;
+}
+
+.cashier-products-user strong {
+    color: #3b4542;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.cashier-products-user small {
+    color: #929b98;
+    font-size: 9px;
+}
+
+.cashier-products-content {
+    padding: 30px;
+}
+
+.cashier-products-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 27px;
+}
+
+.cashier-products-heading h1 {
+    margin: 0 0 6px;
+    color: #202725;
+    font-size: 19px;
+    font-weight: 650;
+    letter-spacing: -.2px;
+}
+
+.cashier-products-heading p {
+    margin: 0;
+    color: #929895;
+    font-size: 10px;
+}
+
+.cashier-products-add {
+    min-width: 131px;
+    height: 33px;
+    border: 0;
+    border-radius: 5px;
+    background: #b9911d;
+    color: #fff;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 650;
+    opacity: 1;
+}
+
+.cashier-products-add:disabled {
+    cursor: not-allowed;
+}
+
+.cashier-products-panel {
+    overflow: hidden;
+    padding: 10px 26px 0;
+    border-radius: 9px;
+    background: #fff;
+}
+
+.cashier-products-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    text-align: left;
+}
+
+.cashier-products-table th {
+    height: 48px;
+    border-bottom: 1px solid #dedfdd;
+    color: #858b88;
+    font-size: 9px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.cashier-products-table td {
+    height: 49px;
+    border-bottom: 1px solid #dedfdd;
+    color: #858b88;
+    font-size: 10px;
+}
+
+.cashier-products-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.cashier-products-table th:nth-child(1),
+.cashier-products-table td:nth-child(1) {
+    width: 23%;
+}
+
+.cashier-products-table th:nth-child(2),
+.cashier-products-table td:nth-child(2) {
+    width: 18%;
+}
+
+.cashier-products-table th:nth-child(3),
+.cashier-products-table td:nth-child(3) {
+    width: 25%;
+}
+
+.cashier-products-table th:nth-child(4),
+.cashier-products-table td:nth-child(4) {
+    width: 20%;
+}
+
+.cashier-products-table th:nth-child(5),
+.cashier-products-table td:nth-child(5) {
+    width: 14%;
+    text-align: center;
+}
+
+.cashier-products-table tr[data-cashier-product-row][hidden],
+.cashier-products-table tr[data-cashier-product-no-results][hidden] {
+    display: none;
+}
+
+.cashier-product-status {
+    display: inline-flex;
+    min-width: 71px;
+    min-height: 21px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 9px;
+    border-radius: 20px;
+    font-size: 9px;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.cashier-product-status.in-stock {
+    background: #e7f2eb;
+    color: #37774a;
+}
+
+.cashier-product-status.low-stock {
+    background: #fff2d6;
+    color: #bd8a12;
+}
+
+.cashier-product-status.out-of-stock,
+.cashier-product-status.inactive {
+    background: #f5e7e5;
+    color: #a64e43;
+}
+
+.cashier-products-table .cashier-products-empty {
+    height: 85px;
+    color: #858b88;
+    text-align: center;
+}
+
+@media (max-width: 700px) {
+    .cashier-products-content {
+        padding: 24px 16px;
+    }
+
+    .cashier-products-heading {
+        flex-direction: column;
+        margin-bottom: 20px;
+    }
+
+    .cashier-products-panel {
+        overflow-x: auto;
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+
+    .cashier-products-table {
+        min-width: 620px;
+    }
+
+    .cashier-products-topbar {
+        gap: 8px;
+        padding: 0 12px;
+    }
+
+    .cashier-products-search {
+        width: min(205px, 45vw);
+    }
+}
+
+.cashier-memberships-page {
+    background: #faf9f6;
+}
+
+.cashier-memberships-page .main-panel {
+    background: #faf9f6;
+}
+
+.cashier-memberships-topbar {
+    justify-content: flex-end;
+    gap: 18px;
+    min-height: 51px;
+    padding: 0 30px;
+    background: #fff;
+}
+
+.cashier-memberships-search {
+    display: flex;
+    width: min(295px, 42vw);
+    height: 30px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    border: 1px solid #eceeed;
+    border-radius: 5px;
+    background: #f7f7f6;
+    color: #909794;
+}
+
+.cashier-memberships-search input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #454d4a;
+    font: inherit;
+    font-size: 9px;
+}
+
+.cashier-memberships-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #d7a977;
+    font-size: 14px;
+}
+
+.cashier-memberships-user {
+    display: grid;
+    gap: 2px;
+}
+
+.cashier-memberships-user strong {
+    color: #3b4542;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.cashier-memberships-user small {
+    color: #929b98;
+    font-size: 9px;
+}
+
+.cashier-memberships-content {
+    padding: 13px 27px 35px;
+}
+
+.cashier-memberships-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 27px;
+}
+
+.cashier-memberships-heading h1 {
+    margin: 0 0 5px;
+    color: #202725;
+    font-size: 19px;
+    font-weight: 650;
+    letter-spacing: -.2px;
+}
+
+.cashier-memberships-heading p {
+    margin: 0;
+    color: #929895;
+    font-size: 10px;
+}
+
+.cashier-memberships-add {
+    min-width: 131px;
+    height: 33px;
+    border: 0;
+    border-radius: 5px;
+    background: #b9911d;
+    color: #fff;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 650;
+    opacity: 1;
+}
+
+.cashier-memberships-add:disabled {
+    cursor: not-allowed;
+}
+
+.cashier-membership-tiers {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 21px;
+}
+
+.cashier-membership-tier {
+    display: flex;
+    min-height: 147px;
+    box-sizing: border-box;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 20px 12px;
+    border-radius: 8px;
+    color: #fff;
+}
+
+.cashier-membership-tier.bronze {
+    background: #80502e;
+}
+
+.cashier-membership-tier.silver {
+    background: #74808a;
+}
+
+.cashier-membership-tier.gold {
+    background: #a58215;
+}
+
+.cashier-membership-tier.platinum,
+.cashier-membership-tier.default {
+    background: #176557;
+}
+
+.cashier-membership-tier h2 {
+    margin: 0 0 9px;
+    font-size: 14px;
+    font-weight: 650;
+}
+
+.cashier-membership-tier > strong {
+    margin-bottom: 4px;
+    font-size: 24px;
+    font-weight: 650;
+    line-height: 1;
+}
+
+.cashier-membership-tier > span,
+.cashier-membership-tier p,
+.cashier-membership-tier small {
+    font-size: 10px;
+}
+
+.cashier-membership-tier > span {
+    margin-bottom: 9px;
+    font-weight: 600;
+}
+
+.cashier-membership-tier p {
+    margin: 0 0 3px;
+    font-weight: 600;
+}
+
+.cashier-membership-tier small {
+    font-weight: 600;
+}
+
+.cashier-members-table-panel {
+    overflow: hidden;
+    padding: 8px 23px 0;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.cashier-members-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.cashier-members-table th {
+    height: 43px;
+    border-bottom: 1px solid #dedfdd;
+    color: #858b88;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.cashier-members-table td {
+    height: 65px;
+    border-bottom: 1px solid #dedfdd;
+    color: #777e7a;
+    font-size: 11px;
+}
+
+.cashier-members-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.cashier-member-identity {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.cashier-member-avatar {
+    display: grid;
+    width: 25px;
+    height: 25px;
+    flex: 0 0 25px;
+    place-items: center;
+    border-radius: 50%;
+    background: #f0e7f6;
+    color: #733eb2;
+    font-size: 9px;
+    font-weight: 650;
+}
+
+.cashier-member-tier {
+    display: inline-flex;
+    min-width: 43px;
+    min-height: 21px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    border-radius: 20px;
+    background: #eceeed;
+    color: #686f6c;
+    font-size: 9px;
+}
+
+.cashier-member-tier.gold {
+    background: #f3e7a0;
+    color: #6b5b13;
+}
+
+.cashier-member-tier.bronze {
+    background: #f1e4dc;
+    color: #80502e;
+}
+
+.cashier-member-tier.platinum,
+.cashier-member-tier.default {
+    background: #e2f0ec;
+    color: #176557;
+}
+
+.cashier-members-table tr[data-cashier-membership-row][hidden],
+.cashier-members-table tr[data-cashier-membership-no-results][hidden] {
+    display: none;
+}
+
+.cashier-members-table .cashier-members-empty,
+.cashier-memberships-empty {
+    height: 85px;
+    color: #858b88;
+    text-align: center;
+}
+
+.cashier-memberships-empty {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 20px;
+}
+
+@media (max-width: 700px) {
+    .cashier-memberships-content {
+        padding: 22px 16px;
+    }
+
+    .cashier-memberships-heading {
+        flex-direction: column;
+        margin-bottom: 20px;
+    }
+
+    .cashier-membership-tiers {
+        grid-template-columns: 1fr;
+    }
+
+    .cashier-members-table-panel {
+        overflow-x: auto;
+        padding-right: 14px;
+        padding-left: 14px;
+    }
+
+    .cashier-members-table {
+        min-width: 560px;
+    }
+
+    .cashier-memberships-topbar {
+        gap: 8px;
+        padding: 0 12px;
+    }
+
+    .cashier-memberships-search {
+        width: min(205px, 45vw);
+    }
+}
+
+.cashier-profile-page {
+    background: #faf9f6;
+}
+
+.cashier-profile-page .main-panel {
+    background: #faf9f6;
+}
+
+.cashier-profile-topbar {
+    justify-content: flex-end;
+    gap: 18px;
+    min-height: 51px;
+    padding: 0 30px;
+    background: #fff;
+}
+
+.cashier-profile-search {
+    display: flex;
+    width: min(295px, 42vw);
+    height: 30px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    border: 1px solid #eceeed;
+    border-radius: 5px;
+    background: #f7f7f6;
+    color: #909794;
+}
+
+.cashier-profile-search input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #454d4a;
+    font: inherit;
+    font-size: 9px;
+}
+
+.cashier-profile-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #d7a977;
+    font-size: 14px;
+}
+
+.cashier-profile-user {
+    display: grid;
+    gap: 2px;
+}
+
+.cashier-profile-user strong {
+    color: #3b4542;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.cashier-profile-user small {
+    color: #929b98;
+    font-size: 9px;
+}
+
+.cashier-profile-content {
+    padding: 16px 29px 35px;
+}
+
+.cashier-profile-heading {
+    margin-bottom: 20px;
+}
+
+.cashier-profile-heading h1 {
+    margin: 0 0 5px;
+    color: #202725;
+    font-size: 19px;
+    font-weight: 650;
+    letter-spacing: -.2px;
+}
+
+.cashier-profile-heading p {
+    margin: 0;
+    color: #929895;
+    font-size: 10px;
+}
+
+.cashier-profile-message {
+    margin-bottom: 14px;
+    padding: 10px 13px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.cashier-profile-message.error {
+    background: #fae9e7;
+    color: #9c3e35;
+}
+
+.cashier-profile-message.success {
+    background: #e6f3eb;
+    color: #246843;
+}
+
+.cashier-profile-identity {
+    display: flex;
+    min-height: 102px;
+    box-sizing: border-box;
+    align-items: center;
+    gap: 16px;
+    margin: 0 1px 22px;
+    padding: 16px 19px;
+    border: 1px solid #dcdedc;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.cashier-profile-avatar {
+    display: grid;
+    width: 51px;
+    height: 51px;
+    flex: 0 0 51px;
+    place-items: center;
+    border-radius: 50%;
+    background: #cfe0d2;
+    color: #176557;
+    font-size: 14px;
+    font-weight: 650;
+}
+
+.cashier-profile-identity h2 {
+    margin: 0 0 6px;
+    color: #252a28;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.cashier-profile-identity p {
+    margin: 0;
+    color: #858b88;
+    font-size: 10px;
+}
+
+.cashier-profile-form-panel {
+    min-height: 377px;
+    box-sizing: border-box;
+    padding: 22px 34px;
+    border: 1px solid #e1e3e1;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.cashier-profile-form-panel > h2 {
+    margin: 0 0 15px;
+    color: #242927;
+    font-size: 14px;
+    font-weight: 650;
+}
+
+.cashier-profile-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 23px;
+}
+
+.cashier-profile-fields label {
+    display: grid;
+    min-width: 0;
+    gap: 6px;
+    color: #999e9b;
+    font-size: 10px;
+}
+
+.cashier-profile-fields input {
+    width: 100%;
+    height: 39px;
+    box-sizing: border-box;
+    padding: 0 14px;
+    border: 1px solid #d9dcda;
+    border-radius: 6px;
+    outline-color: #176557;
+    background: #fff;
+    color: #555d59;
+    font: inherit;
+    font-size: 11px;
+}
+
+.cashier-profile-fields input[readonly] {
+    background: #fbfbfa;
+}
+
+.cashier-profile-save {
+    min-height: 40px;
+    margin-top: 16px;
+    padding: 0 17px;
+    border: 0;
+    border-radius: 5px;
+    background: #126250;
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.cashier-profile-save:hover {
+    background: #0c5142;
+}
+
+@media (max-width: 700px) {
+    .cashier-profile-content {
+        padding: 22px 16px;
+    }
+
+    .cashier-profile-form-panel {
+        min-height: auto;
+        padding: 20px;
+    }
+
+    .cashier-profile-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cashier-profile-topbar {
+        gap: 8px;
+        padding: 0 12px;
+    }
+
+    .cashier-profile-search {
+        width: min(205px, 45vw);
+    }
+}
+
+.cashier-pos-item-copy {
+    display: grid;
+    gap: 3px;
+    padding: 7px 10px 8px;
+}
+
+.cashier-pos-item-copy strong {
+    overflow: hidden;
+    color: #252a27;
+    font-size: 10px;
+    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cashier-pos-item-copy small {
+    color: #878d88;
+    font-size: 9px;
+}
+
+.cashier-pos-item-copy > span {
+    margin-top: 2px;
+    color: #20713a;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.cashier-pos-empty {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 24px 12px;
+    color: #818985;
+    font-size: 11px;
+    text-align: center;
+}
+
+.cashier-pos-cart {
+    position: sticky;
+    top: 14px;
+    min-width: 0;
+    padding: 17px 18px;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: 0 3px 14px rgb(41 48 43 / 5%);
+}
+
+.cashier-pos-cart-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.cashier-pos-cart-heading h2 {
+    margin: 0;
+    color: #252a27;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.cashier-pos-cart-heading h2 span {
+    font-size: 13px;
+}
+
+.cashier-pos-cart-heading .pos-clear {
+    color: #d46b68;
+    font-size: 9px;
+}
+
+.cashier-pos-customer-label {
+    display: block;
+    margin-bottom: 4px;
+    color: #707873;
+    font-size: 9px;
+    font-weight: 650;
+}
+
+.cashier-pos-cart select {
+    width: 100%;
+    min-height: 32px;
+    padding: 6px 8px;
+    border: 1px solid #e4e4df;
+    border-radius: 5px;
+    background: #fff;
+    color: #444c48;
+    font: inherit;
+    font-size: 10px;
+}
+
+.cashier-pos-cart-items {
+    max-height: 220px;
+    overflow-y: auto;
+    margin-top: 4px;
+}
+
+.cashier-pos-cart-empty {
+    margin: 0;
+    padding: 14px 2px;
+    color: #969b97;
+    font-size: 10px;
+}
+
+.cashier-pos-cart-items .pos-cart-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 7px;
+    padding: 10px 3px;
+    border-bottom-color: #eeece7;
+}
+
+.cashier-pos-cart-items .pos-quantity-control {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.cashier-pos-cart-items .pos-line-total {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+}
+
+.cashier-pos-cart-items .pos-cart-description {
+    grid-row: 1 / span 2;
+}
+
+.cashier-pos-cart-items .pos-cart-description strong {
+    color: #4a514d;
+    font-size: 10px;
+}
+
+.cashier-pos-cart-items .pos-cart-description small {
+    color: #a0a5a1;
+    font-size: 9px;
+}
+
+.cashier-pos-totals {
+    display: grid;
+    gap: 8px;
+    margin-top: 6px;
+    padding-top: 12px;
+    border-top: 1px solid #e9e7e2;
+}
+
+.cashier-pos-totals > div,
+.cashier-pos-totals > label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: #929792;
+    font-size: 9px;
+}
+
+.cashier-pos-totals > div strong {
+    color: #656c67;
+    font-size: 9px;
+    font-weight: 500;
+}
+
+.cashier-pos-totals > label input {
+    width: 90px;
+    padding: 3px 5px;
+    border: 0;
+    background: transparent;
+    color: #656c67;
+    font: inherit;
+    font-size: 9px;
+    text-align: right;
+}
+
+.cashier-pos-grand-total {
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px solid #e9e7e2;
+    color: #202522 !important;
+    font-size: 14px !important;
+    font-weight: 700;
+}
+
+.cashier-pos-totals .cashier-pos-grand-total strong {
+    color: #18702d;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.cashier-pos-payment {
+    margin-top: 13px;
+}
+
+.cashier-pos-payment-label {
+    display: block;
+    margin-bottom: 6px;
+    color: #727a75;
+    font-size: 9px;
+    font-weight: 650;
+}
+
+.cashier-pos-payment-options {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.cashier-pos-payment-options button {
+    min-height: 31px;
+    padding: 5px 3px;
+    border: 1px solid #e7e7e2;
+    border-radius: 5px;
+    background: #fff;
+    color: #858b87;
+    cursor: pointer;
+    font: inherit;
+    font-size: 9px;
+}
+
+.cashier-pos-payment-options button.active {
+    border-color: #b9d1b6;
+    background: #eaf3e7;
+    color: #32734b;
+}
+
+.cashier-pos-charge {
+    width: 100%;
+    min-height: 36px;
+    margin-top: 12px;
+    border: 0;
+    border-radius: 6px;
+    background: #cda41d;
+    color: #1d211c;
+    cursor: pointer;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.cashier-pos-charge:hover {
+    background: #bd9412;
+}
+
+@media (max-width: 1050px) {
+    .cashier-pos-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(280px, .9fr);
+        gap: 13px;
+    }
+
+    .cashier-pos-content {
+        padding-right: 18px;
+        padding-left: 18px;
+    }
+}
+
+@media (max-width: 900px) {
+    body.cashier-pos-page .sidebar {
+        position: static;
+        width: 100%;
+        flex-basis: auto;
+        height: auto;
+        max-height: none;
+        overflow: visible;
+    }
+
+    body.cashier-pos-page .main-panel {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .cashier-pos-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .cashier-pos-cart {
+        position: static;
+    }
+}
+
+@media (max-width: 560px) {
+    .cashier-pos-topbar {
+        padding: 8px 12px;
+    }
+
+    .cashier-pos-search {
+        width: auto;
+        flex: 1;
+    }
+
+    .cashier-pos-user {
+        gap: 8px;
+    }
+
+    .cashier-pos-user-chip strong {
+        max-width: 72px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .cashier-pos-content {
+        padding: 18px 12px;
+    }
+
+    .cashier-pos-item-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    body.cashier-pos-page .cashier-pos-item-card .cashier-pos-item-image {
+        height: 82px;
     }
 }
 
@@ -1232,6 +3836,637 @@ input {
         align-items: stretch;
         gap: 12px;
         padding: 14px 16px;
+    }
+
+    .receptionist-role .content-wrap {
+        width: 100%;
+        max-width: 1180px;
+        box-sizing: border-box;
+        margin-inline: auto;
+    }
+
+    .receptionist-role .page-title {
+        color: #173d35;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(24px, 2.2vw, 32px);
+    }
+
+    .receptionist-customers-heading {
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .receptionist-customer-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .receptionist-customer-toolbar label {
+        display: block;
+    }
+
+    .receptionist-customer-search {
+        flex: 1 1 320px;
+    }
+
+    .receptionist-customer-toolbar input,
+    .receptionist-customer-toolbar select {
+        width: 100%;
+        min-height: 40px;
+        padding: 0 12px;
+        border: 1px solid #e4dfd5;
+        border-radius: 8px;
+        background: #fff;
+        color: #25372f;
+        font: inherit;
+        font-size: 12px;
+    }
+
+    .receptionist-membership-filter {
+        flex: 0 1 190px;
+    }
+
+    .receptionist-customer-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .receptionist-customer-card {
+        min-width: 0;
+        padding: 15px;
+        border: 1px solid #e9e1d6;
+        border-radius: 11px;
+        background: #fff;
+        box-shadow: 0 3px 10px rgba(32, 44, 37, .045);
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .receptionist-customer-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 7px 18px rgba(32, 44, 37, .09);
+    }
+
+    .receptionist-customer-card-header {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .receptionist-customer-card-header .receptionist-customer-avatar {
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .receptionist-customer-identity {
+        display: grid;
+        min-width: 0;
+        flex: 1;
+        gap: 4px;
+    }
+
+    .receptionist-customer-identity strong {
+        overflow: hidden;
+        color: #203c33;
+        font-size: 13px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .receptionist-customer-identity small {
+        overflow: hidden;
+        color: #858b7d;
+        font-size: 10px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .receptionist-customer-card-header > a {
+        display: grid;
+        flex: 0 0 30px;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        border-radius: 8px;
+        background: #e8f2eb;
+        color: #286347;
+        font-size: 18px;
+        text-decoration: none;
+    }
+
+    .receptionist-customer-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid #f0ece4;
+    }
+
+    .receptionist-customer-metrics > span {
+        display: grid;
+        min-width: 0;
+        gap: 4px;
+    }
+
+    .receptionist-customer-metrics strong {
+        overflow: hidden;
+        color: #244b3e;
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .receptionist-customer-metrics small {
+        color: #92958b;
+        font-size: 9px;
+    }
+
+    .receptionist-customer-empty {
+        grid-column: 1 / -1;
+        padding: 32px 16px;
+        border: 1px dashed #d8d3ca;
+        border-radius: 10px;
+        color: #777d71;
+        text-align: center;
+    }
+
+    .receptionist-workspace {
+        padding: 22px;
+        background: #f8f5ee;
+    }
+
+    .receptionist-form-heading {
+        margin-bottom: 15px;
+    }
+
+    .receptionist-booking-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 290px);
+        align-items: start;
+        gap: 14px;
+    }
+
+    .receptionist-form-card,
+    .receptionist-booking-summary {
+        min-width: 0;
+        border: 1px solid #e9e1d6;
+        border-radius: 11px;
+        background: #fff;
+        box-shadow: 0 3px 10px rgba(32, 44, 37, .045);
+    }
+
+    .receptionist-form-card {
+        padding: 19px;
+    }
+
+    .receptionist-form-section + .receptionist-form-section {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid #f0ece4;
+    }
+
+    .receptionist-form-section h2,
+    .receptionist-booking-summary h2 {
+        margin: 0 0 12px;
+        color: #1b4439;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 16px;
+    }
+
+    .receptionist-form-section label {
+        display: grid;
+        min-width: 0;
+        gap: 6px;
+        color: #535e54;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .receptionist-form-section label > span:not(.visually-hidden) {
+        display: block;
+    }
+
+    .receptionist-form-section input,
+    .receptionist-form-section select,
+    .receptionist-form-section textarea {
+        width: 100%;
+        min-height: 39px;
+        box-sizing: border-box;
+        padding: 9px 10px;
+        border: 1px solid #e2ded5;
+        border-radius: 7px;
+        background: #fff;
+        color: #27372f;
+        font: inherit;
+        font-size: 12px;
+    }
+
+    .receptionist-form-section textarea {
+        min-height: 90px;
+        resize: vertical;
+    }
+
+    .receptionist-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .receptionist-form-link {
+        display: inline-block;
+        margin-top: 8px;
+        color: #347653;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .receptionist-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 18px;
+    }
+
+    .receptionist-booking-summary {
+        padding: 17px;
+    }
+
+    .receptionist-booking-summary h2 {
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f0ece4;
+    }
+
+    .receptionist-booking-summary dl {
+        display: grid;
+        gap: 13px;
+        margin: 0;
+    }
+
+    .receptionist-booking-summary dl > div {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .receptionist-booking-summary dt {
+        color: #858b7d;
+        font-size: 10px;
+    }
+
+    .receptionist-booking-summary dd {
+        max-width: 62%;
+        margin: 0;
+        color: #34463b;
+        font-size: 10px;
+        font-weight: 600;
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+
+    .receptionist-booking-summary .summary-total {
+        margin-top: 3px;
+        padding-top: 12px;
+        border-top: 1px solid #f0ece4;
+    }
+
+    .receptionist-booking-summary .summary-total dd {
+        color: #286347;
+        font-size: 14px;
+    }
+
+    .receptionist-role .room-grid {
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 12px;
+    }
+
+    .receptionist-room-card {
+        position: relative;
+        overflow: hidden;
+        padding: 16px;
+        border: 1px solid #e9e1d6;
+        border-radius: 11px;
+        background: #fff;
+    }
+
+    .receptionist-room-card .room-icon {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        border-radius: 9px;
+        background: #e8f2eb;
+        color: #286347;
+    }
+
+    .receptionist-role .data-table tbody tr[hidden],
+    .receptionist-customer-card[hidden] {
+        display: none;
+    }
+
+    .receptionist-role .data-table td form {
+        display: none !important;
+    }
+
+    @media (max-width: 900px) {
+        .receptionist-customer-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .receptionist-booking-layout {
+            grid-template-columns: minmax(0, 1fr) 240px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .receptionist-customer-grid,
+        .receptionist-booking-layout {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .receptionist-booking-summary {
+            grid-row: 1;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .receptionist-role .content-wrap,
+        .receptionist-workspace {
+            padding: 14px;
+        }
+
+        .receptionist-customer-toolbar {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .receptionist-membership-filter {
+            flex-basis: auto;
+        }
+
+        .receptionist-form-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .receptionist-form-card {
+            padding: 14px;
+        }
+    }
+
+    .receptionist-appointments-page {
+        padding: 26px 18px;
+        background: #f3efe5;
+    }
+
+    .receptionist-appointments-page .page-heading {
+        margin-bottom: 14px;
+    }
+
+    .receptionist-appointments-page .page-title {
+        margin: 0;
+        font-size: clamp(24px, 2vw, 30px);
+    }
+
+    .receptionist-appointments-page .page-date {
+        margin-top: 3px;
+        color: #777d71;
+        font-size: 11px;
+    }
+
+    .receptionist-appointments-page .page-heading > .primary-button {
+        flex: 0 0 auto;
+        padding: 10px 14px;
+        border-radius: 6px;
+        font-size: 11px;
+        text-decoration: none;
+    }
+
+    .receptionist-appointment-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .receptionist-appointment-toolbar label {
+        display: flex;
+        min-width: 0;
+        min-height: 36px;
+        align-items: center;
+        gap: 7px;
+        padding: 0 10px;
+        border: 1px solid #eee9e1;
+        border-radius: 6px;
+        background: #fffdfb;
+        color: #6f786e;
+        font-size: 12px;
+    }
+
+    .receptionist-appointment-toolbar label > span[aria-hidden="true"] {
+        flex: 0 0 auto;
+    }
+
+    .receptionist-appointment-toolbar input,
+    .receptionist-appointment-toolbar select {
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: #39453d;
+        font: inherit;
+        font-size: 10px;
+    }
+
+    .receptionist-appointment-toolbar input[type="search"] {
+        width: 100%;
+    }
+
+    .receptionist-appointment-search {
+        flex: 1 1 420px;
+    }
+
+    .receptionist-appointment-date {
+        flex: 0 0 auto;
+    }
+
+    .receptionist-appointment-status-select {
+        flex: 0 0 130px;
+    }
+
+    .receptionist-appointment-status-select select {
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .receptionist-appointment-panel {
+        overflow: hidden;
+        min-height: 420px;
+        border: 1px solid #d9d4cc;
+        border-radius: 9px;
+        background: #fffdfb;
+    }
+
+    .receptionist-appointment-panel .toolbar-row {
+        min-height: 55px;
+        padding: 8px 10px;
+        border-bottom: 0;
+    }
+
+    .receptionist-appointment-panel .toolbar-pills {
+        flex-wrap: wrap;
+        gap: 3px;
+        padding: 4px;
+        border-radius: 6px;
+        background: #f3efe5;
+    }
+
+    .receptionist-appointment-panel .toolbar-pills .pill {
+        padding: 7px 10px;
+        border: 0;
+        border-radius: 5px;
+        background: transparent;
+        color: #62685f;
+        font-size: 9px;
+    }
+
+    .receptionist-appointment-panel .toolbar-pills .pill.active {
+        background: #fffdfb;
+        color: #313c34;
+        box-shadow: 0 1px 3px rgba(32, 44, 37, .1);
+    }
+
+    .receptionist-appointment-panel .table-wrap {
+        overflow-x: auto;
+    }
+
+    .receptionist-appointment-table {
+        min-width: 760px;
+        border-collapse: collapse;
+    }
+
+    .receptionist-appointment-table thead th {
+        padding: 11px 10px;
+        border-bottom: 1px solid #d9d4cc;
+        background: #fffdfb;
+        color: #62645e;
+        font-size: 8px;
+        font-weight: 700;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    .receptionist-appointment-table tbody td {
+        height: 52px;
+        padding: 7px 10px;
+        border-bottom: 1px solid #e6e1d9;
+        color: #50534e;
+        font-size: 9px;
+        white-space: nowrap;
+    }
+
+    .receptionist-appointment-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .receptionist-appointment-customer {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #454942;
+    }
+
+    .receptionist-appointment-avatar {
+        display: inline-grid;
+        flex: 0 0 22px;
+        width: 22px;
+        height: 22px;
+        place-items: center;
+        border-radius: 50%;
+        background: #dce8f4;
+        color: #4a79a4;
+        font-size: 8px;
+        font-weight: 700;
+    }
+
+    .receptionist-appointment-table tbody tr:nth-child(4n + 2) .receptionist-appointment-avatar {
+        background: #f3d9ef;
+        color: #a64b99;
+    }
+
+    .receptionist-appointment-table tbody tr:nth-child(4n + 3) .receptionist-appointment-avatar {
+        background: #e8e0f2;
+        color: #8160a0;
+    }
+
+    .receptionist-appointment-table tbody tr:nth-child(4n + 4) .receptionist-appointment-avatar {
+        background: #dff0dc;
+        color: #4d9154;
+    }
+
+    .receptionist-appointment-table .status-pill {
+        padding: 3px 7px;
+        border-radius: 10px;
+        font-size: 8px;
+        font-weight: 600;
+    }
+
+    .receptionist-appointment-actions {
+        width: 32px;
+        text-align: center;
+    }
+
+    .receptionist-appointment-actions > a {
+        display: inline-grid;
+        width: 26px;
+        height: 28px;
+        place-items: center;
+        border-radius: 5px;
+        color: #8a8b86;
+        font-size: 17px;
+        line-height: 1;
+        text-decoration: none;
+    }
+
+    .receptionist-appointment-actions > a:hover {
+        background: #f2efe9;
+        color: #23473b;
+    }
+
+    .receptionist-appointment-table .appointment-no-results td {
+        padding: 28px;
+        color: #777d71;
+        text-align: center;
+    }
+
+    .receptionist-appointment-table [hidden] {
+        display: none;
+    }
+
+    @media (max-width: 650px) {
+        .receptionist-appointments-page {
+            padding: 18px 12px;
+        }
+
+        .receptionist-appointment-toolbar {
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+
+        .receptionist-appointment-search {
+            flex-basis: 100%;
+        }
+
+        .receptionist-appointment-date,
+        .receptionist-appointment-status-select {
+            flex: 1 1 140px;
+        }
     }
 
     .topbar-actions {
@@ -1931,6 +5166,49 @@ body.manager-role .nav-section::before {
 .settings-fields select {
     width: 100%;
     height: 38px;
+    padding: 0 10px;
+    border: 1px solid #ddd8d0;
+    border-radius: 7px;
+    background: #fffdfb;
+    color: #3a403c;
+    font-size: 11px;
+}
+
+.manager-profile-avatar {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 50%;
+    background: #e7eee8;
+    color: #075148;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.manager-profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.manager-profile-fields > div {
+    display: grid;
+    gap: 5px;
+}
+
+.manager-profile-label {
+    color: #172f2b;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.manager-profile-value {
+    display: flex;
+    min-height: 38px;
+    align-items: center;
     padding: 0 10px;
     border: 1px solid #ddd8d0;
     border-radius: 7px;
@@ -2841,6 +6119,443 @@ body.manager-role .nav-section::before {
     font-size: 12px;
 }
 
+.receptionist-dashboard {
+    display: grid;
+    gap: 12px;
+    padding: 20px;
+    background: #f8f5ee;
+}
+
+body[data-role="receptionist"] .manager-dashboard-heading,
+body[data-role="receptionist"] .manager-stat-grid,
+body[data-role="receptionist"] .manager-dashboard-panels > .manager-dashboard-panel:last-child,
+body[data-role="receptionist"] .manager-dashboard-panels > .manager-dashboard-panel > .manager-panel-heading {
+    display: none;
+}
+
+body[data-role="receptionist"] .manager-dashboard-panels,
+body[data-role="receptionist"] .manager-dashboard-panels > .manager-dashboard-panel:first-child {
+    display: contents;
+}
+
+body[data-role="receptionist"] .receptionist-dashboard {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.receptionist-dashboard-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.receptionist-dashboard-heading h1 {
+    margin: 0;
+    color: #173d35;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(22px, 2.2vw, 30px);
+}
+
+.receptionist-dashboard-heading p {
+    margin: 4px 0 0;
+    color: #777d71;
+    font-size: 12px;
+}
+
+.receptionist-date {
+    flex: 0 0 auto;
+    padding: 8px 11px;
+    border: 1px solid #e8e1d5;
+    border-radius: 8px;
+    background: #fff;
+    color: #777d71;
+    font-size: 11px;
+}
+
+.receptionist-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.receptionist-stat-card,
+.receptionist-panel {
+    min-width: 0;
+    border: 1px solid #e9e1d6;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(32, 44, 37, .05);
+}
+
+.receptionist-stat-card {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    column-gap: 7px;
+    align-content: center;
+    min-height: 76px;
+    padding: 9px;
+}
+
+.receptionist-stat-icon {
+    display: grid;
+    grid-row: span 2;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.receptionist-stat-icon.green {
+    background: #e4f2e7;
+    color: #318254;
+}
+
+.receptionist-stat-icon.blue {
+    background: #e8efff;
+    color: #3e6dc6;
+}
+
+.receptionist-stat-icon.amber {
+    background: #fff1d2;
+    color: #b47d1b;
+}
+
+.receptionist-stat-icon.violet {
+    background: #f0e7fb;
+    color: #8155ae;
+}
+
+.receptionist-stat-label {
+    overflow: hidden;
+    align-self: center;
+    color: #777d71;
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.receptionist-stat-card strong {
+    align-self: start;
+    margin-top: 3px;
+    color: #153f36;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 19px;
+    line-height: 1;
+}
+
+.receptionist-stat-card small {
+    grid-column: 2;
+    overflow: hidden;
+    margin-top: 4px;
+    color: #96998f;
+    font-size: 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.receptionist-panel-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr) minmax(0, .78fr);
+    align-items: start;
+    gap: 8px;
+}
+
+.receptionist-panel {
+    overflow: hidden;
+}
+
+.receptionist-panel-heading {
+    display: flex;
+    min-height: 38px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px 11px;
+    border-bottom: 1px solid #eee8dd;
+}
+
+.receptionist-panel-heading h2 {
+    overflow: hidden;
+    margin: 0;
+    color: #183f39;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.receptionist-panel-heading a {
+    flex: 0 0 auto;
+    color: #858b7d;
+    font-size: 9px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.receptionist-panel-heading a:hover {
+    color: #183f39;
+}
+
+.receptionist-alert-count {
+    display: grid;
+    min-width: 20px;
+    height: 20px;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff1d2;
+    color: #a87314;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.receptionist-appointment-list,
+.receptionist-schedule-list,
+.receptionist-alert-list,
+.receptionist-customer-list {
+    padding: 0 10px;
+}
+
+.receptionist-appointment {
+    display: grid;
+    grid-template-columns: 42px 25px minmax(0, 1fr) auto;
+    min-height: 48px;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid #f0ece4;
+}
+
+.receptionist-appointment:last-child,
+.receptionist-customer:last-child {
+    border-bottom: 0;
+}
+
+.receptionist-appointment > time,
+.receptionist-customer time {
+    color: #788273;
+    font-size: 8px;
+    white-space: nowrap;
+}
+
+.receptionist-customer-avatar {
+    display: grid;
+    flex: 0 0 25px;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #e8f0ed;
+    color: #295448;
+    font-size: 8px;
+    font-weight: 700;
+}
+
+.receptionist-appointment-info,
+.receptionist-alert > span:last-child {
+    min-width: 0;
+}
+
+.receptionist-appointment-info strong,
+.receptionist-appointment-info small,
+.receptionist-alert strong,
+.receptionist-alert small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.receptionist-appointment-info strong,
+.receptionist-alert strong {
+    color: #27372f;
+    font-size: 9px;
+}
+
+.receptionist-appointment-info small,
+.receptionist-alert small {
+    margin-top: 2px;
+    color: #8a8e85;
+    font-size: 8px;
+}
+
+.receptionist-appointment .manager-appointment-status {
+    padding: 3px 5px;
+    font-size: 7px;
+}
+
+.receptionist-schedule-item {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 7px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0ece4;
+}
+
+.receptionist-schedule-item:last-child,
+.receptionist-alert:last-child {
+    border-bottom: 0;
+}
+
+.receptionist-schedule-item time {
+    padding-top: 2px;
+    color: #788273;
+    font-size: 8px;
+    white-space: nowrap;
+}
+
+.receptionist-schedule-item > span {
+    min-width: 0;
+    padding: 6px 7px;
+    border-left: 2px solid #4a9d77;
+    border-radius: 4px;
+    background: #eff7f0;
+}
+
+.receptionist-schedule-item strong,
+.receptionist-schedule-item small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.receptionist-schedule-item strong {
+    color: #27372f;
+    font-size: 8px;
+}
+
+.receptionist-schedule-item small {
+    margin-top: 3px;
+    color: #8a8e85;
+    font-size: 7px;
+}
+
+.receptionist-alert {
+    display: flex;
+    min-height: 48px;
+    align-items: center;
+    gap: 7px;
+    border-bottom: 1px solid #f0ece4;
+    text-decoration: none;
+}
+
+.receptionist-alert-icon {
+    display: grid;
+    flex: 0 0 22px;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff1d2;
+    color: #a87314;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.receptionist-bottom-grid {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    align-items: stretch;
+    gap: 8px;
+}
+
+.receptionist-customer {
+    display: grid;
+    grid-template-columns: 25px minmax(0, 1fr) auto;
+    min-height: 39px;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #f0ece4;
+}
+
+.receptionist-customer strong {
+    overflow: hidden;
+    color: #27372f;
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.receptionist-action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 9px;
+}
+
+.receptionist-action-grid a {
+    display: flex;
+    min-height: 48px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: 1px solid #eee8dd;
+    border-radius: 7px;
+    color: #18433b;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color .15s ease, border-color .15s ease, transform .15s ease;
+}
+
+.receptionist-action-grid a:hover {
+    transform: translateY(-1px);
+    border-color: #b9d1c5;
+    background: #f5faf6;
+}
+
+.receptionist-action-grid a > span {
+    font-size: 13px;
+}
+
+.receptionist-action-grid strong {
+    color: #27372f;
+    font-size: 8px;
+}
+
+@media (max-width: 1100px) {
+    .receptionist-stat-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .receptionist-panel-grid {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, .9fr);
+    }
+
+    .receptionist-panel-grid > .receptionist-panel:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 760px) {
+    .receptionist-dashboard {
+        padding: 16px 10px;
+    }
+
+    .receptionist-panel-grid,
+    .receptionist-bottom-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .receptionist-panel-grid > .receptionist-panel:last-child {
+        grid-column: auto;
+    }
+}
+
+@media (max-width: 520px) {
+    .receptionist-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .receptionist-dashboard-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
 .manager-calendar {
     min-height: calc(100vh - 60px);
     padding: 22px 20px;
@@ -3385,6 +7100,157 @@ body.manager-role .nav-section::before {
     .pos-catalog,
     .pos-cart {
         padding: 11px;
+    }
+}
+
+body[data-role="receptionist"] .receptionist-calendar {
+    min-height: calc(100vh - 60px);
+    padding: 20px 18px 12px;
+    background: #f3efe5;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .page-heading {
+    align-items: center;
+    margin: 0 0 12px;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .page-title {
+    margin: 0;
+    color: #141a16;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(24px, 2vw, 30px);
+    letter-spacing: 0;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .page-date {
+    margin-top: 3px;
+    color: #697067;
+    font-size: 10px;
+}
+
+body[data-role="receptionist"] .receptionist-calendar-new {
+    flex: 0 0 auto;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 10px;
+    text-decoration: none;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-panel {
+    border-color: #bdb8b0;
+    border-radius: 14px;
+    background: #fffdfb;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-toolbar {
+    min-height: 43px;
+    padding: 7px 10px;
+    border-bottom: 0;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-toolbar h2 {
+    color: #1b4038;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-navigation {
+    gap: 6px;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-navigation a {
+    min-width: 23px;
+    height: 23px;
+    padding: 0 5px;
+    border-color: #c9c4bc;
+    border-radius: 5px;
+    font-size: 13px;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-navigation .calendar-today {
+    padding-inline: 9px;
+    font-size: 10px;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-weekdays > div {
+    padding: 7px 4px;
+    border-color: #cac5bd;
+    color: #656962;
+    font-size: 8px;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-day {
+    min-height: clamp(72px, 10.1vh, 105px);
+    padding: 5px;
+    border-color: #d3cec7;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-day-number {
+    margin-bottom: 5px;
+    color: #626760;
+    font-size: 9px;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-day.outside-month .calendar-day-number {
+    color: #c2c0ba;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-day.is-today .calendar-day-number {
+    min-width: 18px;
+    height: 18px;
+    background: #17473d;
+    color: #fff;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-event {
+    margin: 2px 0;
+    padding: 3px 4px;
+    border-radius: 3px;
+    font-size: 7px;
+    line-height: 1.15;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-event time {
+    font-weight: 700;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .event-pending {
+    background: #fff1d2;
+    color: #286653;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .event-confirmed,
+body[data-role="receptionist"] .receptionist-calendar .event-completed {
+    background: #e4f2e7;
+    color: #286653;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .event-in-progress {
+    background: #e8efff;
+    color: #426db6;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .event-cancelled {
+    background: #fae7e4;
+    color: #a75449;
+}
+
+body[data-role="receptionist"] .receptionist-calendar .calendar-more {
+    font-size: 8px;
+}
+
+@media (max-width: 600px) {
+    body[data-role="receptionist"] .receptionist-calendar {
+        padding: 16px 10px;
+    }
+
+    body[data-role="receptionist"] .receptionist-calendar .calendar-day {
+        min-height: 72px;
+        padding: 3px;
+    }
+
+    body[data-role="receptionist"] .receptionist-calendar .calendar-event {
+        font-size: 6px;
     }
 }
 
@@ -4462,5 +8328,2938 @@ body.manager-role .nav-section::before {
 
     .analytics-chart-column {
         width: min(100%, 20px);
+    }
+}
+
+body[data-role="receptionist"] .receptionist-customers-page {
+    width: 100%;
+    max-width: 1180px;
+    box-sizing: border-box;
+    margin-inline: auto;
+    padding: 22px 18px;
+    background: #f3efe5;
+}
+
+body[data-role="receptionist"] .receptionist-customers-heading {
+    margin-bottom: 12px;
+}
+
+body[data-role="receptionist"] .receptionist-customers-heading .page-title {
+    margin: 0;
+    color: #141a16;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(24px, 2vw, 30px);
+}
+
+body[data-role="receptionist"] .receptionist-customers-heading .page-date {
+    margin-top: 3px;
+    color: #777d71;
+    font-size: 11px;
+}
+
+body[data-role="receptionist"] .receptionist-customers-heading > .primary-button {
+    flex: 0 0 auto;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    text-decoration: none;
+}
+
+body[data-role="receptionist"] .receptionist-customer-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+body[data-role="receptionist"] .receptionist-customer-toolbar label {
+    display: flex;
+    min-width: 0;
+    min-height: 36px;
+    align-items: center;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 6px;
+    background: #fffdfb;
+}
+
+body[data-role="receptionist"] .receptionist-customer-search {
+    flex: 1 1 auto;
+}
+
+body[data-role="receptionist"] .receptionist-membership-filter {
+    flex: 0 0 170px;
+}
+
+body[data-role="receptionist"] .receptionist-customer-toolbar input,
+body[data-role="receptionist"] .receptionist-customer-toolbar select {
+    min-width: 0;
+    min-height: 34px;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #555d56;
+    font: inherit;
+    font-size: 10px;
+}
+
+body[data-role="receptionist"] .receptionist-customer-toolbar input {
+    width: 100%;
+}
+
+body[data-role="receptionist"] .receptionist-membership-filter select {
+    width: 100%;
+    cursor: pointer;
+}
+
+body[data-role="receptionist"] .receptionist-customer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px 38px;
+    padding: 0 12px;
+}
+
+body[data-role="receptionist"] .receptionist-customer-card {
+    min-width: 0;
+    min-height: 156px;
+    box-sizing: border-box;
+    padding: 22px;
+    border: 0;
+    border-radius: 12px;
+    background: #fffdfb;
+    box-shadow: none;
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+body[data-role="receptionist"] .receptionist-customer-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 18px rgba(32, 44, 37, .08);
+}
+
+body[data-role="receptionist"] .receptionist-customer-card-header {
+    gap: 10px;
+}
+
+body[data-role="receptionist"] .receptionist-customer-card-header .receptionist-customer-avatar {
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    color: #fff;
+    font-size: 11px;
+}
+
+body[data-role="receptionist"] .receptionist-customer-avatar.tone-1 {
+    background: #df8c79;
+}
+
+body[data-role="receptionist"] .receptionist-customer-avatar.tone-2 {
+    background: #8fc89b;
+}
+
+body[data-role="receptionist"] .receptionist-customer-avatar.tone-3 {
+    background: #ac90c5;
+}
+
+body[data-role="receptionist"] .receptionist-customer-avatar.tone-4 {
+    background: #e2bd62;
+}
+
+body[data-role="receptionist"] .receptionist-customer-avatar.tone-5 {
+    background: #78a8d7;
+}
+
+body[data-role="receptionist"] .receptionist-customer-identity {
+    gap: 3px;
+}
+
+body[data-role="receptionist"] .receptionist-customer-identity strong {
+    color: #252a26;
+    font-size: 11px;
+}
+
+body[data-role="receptionist"] .receptionist-customer-identity small {
+    color: #868780;
+    font-size: 8px;
+}
+
+body[data-role="receptionist"] .receptionist-customer-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 12px;
+    border-top: 1px solid #dcd8d1;
+}
+
+body[data-role="receptionist"] .receptionist-customer-metrics > span {
+    gap: 1px;
+}
+
+body[data-role="receptionist"] .receptionist-customer-metrics > span:nth-child(2) {
+    text-align: center;
+}
+
+body[data-role="receptionist"] .receptionist-customer-metrics > span:last-child {
+    text-align: right;
+}
+
+body[data-role="receptionist"] .receptionist-customer-metrics strong {
+    color: #222521;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+body[data-role="receptionist"] .receptionist-customer-metrics small {
+    color: #989991;
+    font-size: 8px;
+    text-transform: uppercase;
+}
+
+body[data-role="receptionist"] .receptionist-customer-empty {
+    grid-column: 1 / -1;
+    padding: 28px 16px;
+    border: 1px dashed #d8d3ca;
+    border-radius: 10px;
+    color: #777d71;
+    text-align: center;
+}
+
+@media (max-width: 760px) {
+    body[data-role="receptionist"] .receptionist-customer-grid {
+        gap: 16px;
+        padding: 0;
+    }
+
+    body[data-role="receptionist"] .receptionist-customer-card {
+        padding: 17px;
+    }
+}
+
+@media (max-width: 560px) {
+    body[data-role="receptionist"] .receptionist-customers-page {
+        padding: 16px 12px;
+    }
+
+    body[data-role="receptionist"] .receptionist-customer-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body[data-role="receptionist"] .receptionist-customer-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+        margin-bottom: 16px;
+    }
+
+    body[data-role="receptionist"] .receptionist-membership-filter {
+        flex-basis: auto;
+    }
+}
+
+body[data-role="receptionist"] .receptionist-rooms-page {
+    min-height: calc(100vh - 60px);
+    box-sizing: border-box;
+    padding: 22px 24px;
+    background: #f3efe5;
+}
+
+body[data-role="receptionist"] .receptionist-rooms-heading {
+    align-items: flex-end;
+    margin-bottom: 22px;
+}
+
+body[data-role="receptionist"] .receptionist-rooms-heading .page-title {
+    margin: 0;
+    color: #141a16;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(24px, 2vw, 30px);
+    letter-spacing: 0;
+}
+
+body[data-role="receptionist"] .receptionist-rooms-heading .page-date {
+    margin-top: 3px;
+    color: #697067;
+    font-size: 10px;
+}
+
+body[data-role="receptionist"] .receptionist-rooms-date {
+    display: flex;
+    min-height: 28px;
+    align-items: center;
+    gap: 7px;
+    padding: 0 9px;
+    border-radius: 6px;
+    background: #fffdfb;
+    color: #555d56;
+    font-size: 9px;
+}
+
+body[data-role="receptionist"] .receptionist-room-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px clamp(22px, 6vw, 64px);
+    padding: 0 22px;
+}
+
+body[data-role="receptionist"] .receptionist-room-card {
+    min-width: 0;
+    overflow: hidden;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: none;
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+body[data-role="receptionist"] .receptionist-room-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(24, 47, 38, .1);
+}
+
+body[data-role="receptionist"] .receptionist-room-card-top {
+    position: relative;
+    display: grid;
+    min-height: 45px;
+    place-items: center;
+    background: #073629;
+}
+
+body[data-role="receptionist"] .receptionist-room-icon {
+    color: #b6ae7d;
+    font-size: 22px;
+    line-height: 1;
+}
+
+body[data-role="receptionist"] .receptionist-room-status {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: #edf7ee;
+    color: #388259;
+    font-size: 7px;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+body[data-role="receptionist"] .receptionist-room-status.status-occupied {
+    background: #fff0ed;
+    color: #dd5b50;
+}
+
+body[data-role="receptionist"] .receptionist-room-status.status-cleaning,
+body[data-role="receptionist"] .receptionist-room-status.status-maintenance {
+    background: #fff2d6;
+    color: #946c22;
+}
+
+body[data-role="receptionist"] .receptionist-room-card-body {
+    padding: 9px 12px 7px;
+}
+
+body[data-role="receptionist"] .receptionist-room-card-body h2 {
+    overflow: hidden;
+    margin: 0;
+    color: #242a25;
+    font-size: 10px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body[data-role="receptionist"] .receptionist-room-card-body p {
+    overflow: hidden;
+    margin: 2px 0 8px;
+    color: #a0a29b;
+    font-size: 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body[data-role="receptionist"] .receptionist-room-assignment {
+    display: flex;
+    min-height: 17px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border-top: 1px solid #e6e3de;
+    color: #c1c2bd;
+    font-size: 7px;
+}
+
+body[data-role="receptionist"] .receptionist-room-assignment > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body[data-role="receptionist"] .receptionist-room-assignment > span:last-child {
+    text-align: right;
+}
+
+body[data-role="receptionist"] .receptionist-room-empty {
+    grid-column: 1 / -1;
+    color: #777d71;
+    text-align: center;
+}
+
+@media (max-width: 850px) {
+    body[data-role="receptionist"] .receptionist-room-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        padding: 0;
+    }
+}
+
+@media (max-width: 520px) {
+    body[data-role="receptionist"] .receptionist-rooms-page {
+        padding: 16px 12px;
+    }
+
+    body[data-role="receptionist"] .receptionist-rooms-heading {
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    body[data-role="receptionist"] .receptionist-room-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-page {
+    min-height: calc(100vh - 60px);
+    padding: 28px clamp(18px, 4vw, 46px);
+    background: #f3efe5;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-page .receptionist-form-heading {
+    margin-bottom: 38px;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-page .page-title {
+    margin: 0;
+    color: #141a16;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(24px, 2vw, 30px);
+    letter-spacing: 0;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-page .page-date {
+    margin-top: 3px;
+    margin-bottom: 0;
+    color: #666b63;
+    font-size: 10px;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(210px, 226px);
+    gap: 30px;
+    max-width: 796px;
+    margin: 0;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-card {
+    padding: 14px 18px 17px;
+    border: 1px solid #d6d1c9;
+    border-radius: 17px;
+    background: #fffdfb;
+    box-shadow: none;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-section + .receptionist-form-section {
+    margin-top: 27px;
+    padding-top: 0;
+    border-top: 0;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-section h2 {
+    margin-top: 0;
+    margin-bottom: 9px;
+    color: #096552;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+body[data-role="receptionist"] .receptionist-customer-fields {
+    gap: 26px;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-section label {
+    display: grid;
+    min-width: 0;
+    gap: 6px;
+    color: #595c57;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-section input,
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-section select,
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-section textarea {
+    box-sizing: border-box;
+    min-height: 34px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: #f3efe5;
+    color: #3e433e;
+    font: inherit;
+    font-size: 10px;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-section input::placeholder,
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-section textarea::placeholder {
+    color: #999991;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-section input[readonly] {
+    color: #7d7e78;
+}
+
+body[data-role="receptionist"] .receptionist-customer-picker-help {
+    display: block;
+    margin-top: 6px;
+    color: #898b84;
+    font-size: 9px;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-link {
+    margin-top: 7px;
+    font-size: 9px;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 13px;
+    column-gap: 26px;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-section textarea {
+    min-height: 64px;
+    resize: vertical;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-booking-summary-card {
+    align-self: start;
+    padding: 14px 15px 11px;
+    border: 0;
+    border-radius: 15px;
+    background: #00392d;
+    box-shadow: none;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-booking-summary-card h2 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    padding: 0;
+    border: 0;
+    color: #fffdf7;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-booking-summary-card dl {
+    display: grid;
+    gap: 0;
+    margin: 0;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-booking-summary-card dl > div {
+    display: flex;
+    min-height: 30px;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, .25);
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-booking-summary-card dt {
+    color: #b7c8c0;
+    font-size: 9px;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-booking-summary-card dd {
+    max-width: 62%;
+    margin: 0;
+    color: #fffdf7;
+    font-size: 9px;
+    overflow-wrap: anywhere;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-booking-summary-card .summary-total {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-booking-summary-card .summary-total dt,
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-booking-summary-card .summary-total dd {
+    color: #e6bb65;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-actions .secondary-button,
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-actions .primary-button {
+    display: inline-flex;
+    min-height: 29px;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 0 11px;
+    border: 0;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-actions .secondary-button {
+    background: #fffdfb;
+    color: #77766f;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-actions .primary-button {
+    background: #00392d;
+    color: #fff;
+}
+
+body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-booking-summary-card .receptionist-form-actions .primary-button {
+    flex: 1;
+    background: #005140;
+}
+
+@media (max-width: 700px) {
+    body[data-role="receptionist"] .receptionist-new-appointment-page {
+        padding: 20px 14px;
+    }
+
+    body[data-role="receptionist"] .receptionist-new-appointment-page .receptionist-form-heading {
+        margin-bottom: 20px;
+    }
+
+    body[data-role="receptionist"] .receptionist-new-appointment-form {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-booking-summary-card {
+        grid-row: 1;
+    }
+}
+
+@media (max-width: 460px) {
+    body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-card {
+        padding: 14px;
+    }
+
+    body[data-role="receptionist"] .receptionist-customer-fields,
+    body[data-role="receptionist"] .receptionist-new-appointment-form .receptionist-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+    }
+}
+
+body.receptionist-booking-page .sidebar-menu .nav-section::before {
+    content: attr(data-label);
+    color: #92a88b;
+    font-size: 11px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+body.receptionist-booking-page .topbar {
+    justify-content: flex-start;
+    padding-right: 6px;
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+    body.receptionist-booking-page .sidebar {
+        width: 176px;
+        flex-basis: 176px;
+    }
+
+    body.receptionist-booking-page .main-panel {
+        width: calc(100% - 176px);
+        margin-left: 176px;
+    }
+}
+
+body.receptionist-booking-page .receptionist-topbar-actions {
+    min-width: 0;
+    flex: 1;
+    justify-content: space-between;
+    margin-left: clamp(0px, 11.4vw, 123px);
+}
+
+body.receptionist-booking-page .receptionist-topbar-actions .search-box {
+    min-width: 220px;
+    flex: 0 1 343px;
+    box-sizing: border-box;
+    height: 45px;
+    border-radius: 8px;
+}
+
+body.receptionist-booking-page .receptionist-topbar-actions .search-icon {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+}
+
+body.receptionist-booking-page .receptionist-topbar-actions .search-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: #50534f;
+    stroke-width: 1.8;
+}
+
+.receptionist-topbar-tools {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 8px;
+}
+
+body.receptionist-booking-page .receptionist-topbar-tools .icon-button {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border: 0;
+    border-radius: 8px;
+    background: #f0efed;
+    color: #171a18;
+}
+
+.receptionist-topbar-tools .icon-button svg {
+    width: 21px;
+    height: 21px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+}
+
+body.receptionist-booking-page .receptionist-user-chip {
+    min-height: 43px;
+    gap: 8px;
+    padding: 4px 8px;
+}
+
+body.receptionist-booking-page .receptionist-user-chip .user-name {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    background: #9acbff;
+    color: #fff;
+}
+
+.receptionist-user-details {
+    display: grid;
+    min-width: 0;
+    gap: 1px;
+}
+
+.receptionist-user-full-name {
+    overflow: hidden;
+    color: #292c29;
+    font-size: 12px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.receptionist-booking-page .receptionist-user-chip .user-role {
+    color: #8a8984;
+    font-size: 10px;
+    font-weight: 400;
+}
+
+@media (max-width: 760px) {
+    body.receptionist-booking-page .receptionist-topbar-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        margin-left: 0;
+    }
+
+    body.receptionist-booking-page .receptionist-topbar-actions .search-box {
+        min-width: 0;
+        flex: 1 1 100%;
+    }
+
+    body.receptionist-booking-page .receptionist-topbar-tools {
+        margin-left: auto;
+    }
+}
+
+.sidebar-logout-form {
+    margin-top: 8px;
+}
+
+.sidebar-logout-button {
+    display: flex;
+    width: 100%;
+    min-height: 34px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, .2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .06);
+    color: #f4f4ed;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease;
+}
+
+.sidebar-logout-button:hover,
+.sidebar-logout-button:focus-visible {
+    border-color: #9aae91;
+    background: rgba(255, 255, 255, .14);
+}
+
+.sidebar-logout-button:focus-visible {
+    outline: 2px solid #e3d99f;
+    outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+    .sidebar-role {
+        display: block;
+        margin-top: 10px;
+        padding: 9px 7px 0;
+        border-top: 1px solid rgba(255, 255, 255, .2);
+    }
+
+    .sidebar-logout-button {
+        justify-content: flex-start;
+    }
+}
+
+body[data-role="receptionist"] .receptionist-register-form {
+    align-items: start;
+}
+
+body[data-role="receptionist"] .receptionist-register-form .receptionist-register-card {
+    padding: 14px 18px 26px;
+}
+
+body[data-role="receptionist"] .receptionist-register-form .receptionist-profile-photo-section h2 {
+    margin-bottom: 13px;
+}
+
+body[data-role="receptionist"] .receptionist-photo-upload {
+    position: relative;
+    display: grid;
+    min-height: 98px;
+    overflow: hidden;
+    place-items: center;
+    border-radius: 15px;
+    background: #f3efe5;
+    color: #242522;
+    cursor: pointer;
+    text-align: center;
+}
+
+body[data-role="receptionist"] .receptionist-photo-upload:focus-within {
+    outline: 2px solid #096552;
+    outline-offset: 2px;
+}
+
+body[data-role="receptionist"] .receptionist-register-form .receptionist-photo-upload input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.receptionist-photo-upload-prompt {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+}
+
+.receptionist-photo-upload-prompt svg {
+    width: 22px;
+    height: 22px;
+    margin-bottom: 6px;
+    fill: none;
+    stroke: #d3b444;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+}
+
+.receptionist-photo-upload-prompt strong {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.receptionist-photo-upload-prompt small {
+    color: #888782;
+    font-size: 10px;
+}
+
+body[data-role="receptionist"] .receptionist-photo-upload img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.receptionist-photo-upload-error {
+    display: block;
+    margin-top: 6px;
+    color: #a22d2d;
+    font-size: 10px;
+}
+
+body[data-role="receptionist"] .receptionist-register-form .receptionist-form-section.receptionist-personal-information {
+    margin-top: 14px;
+}
+
+body[data-role="receptionist"] .receptionist-register-form .receptionist-form-grid {
+    row-gap: 18px;
+    column-gap: 36px;
+}
+
+body[data-role="receptionist"] .receptionist-register-form .receptionist-form-section.receptionist-additional-notes {
+    margin-top: 18px;
+}
+
+body[data-role="receptionist"] .receptionist-register-form .receptionist-form-section textarea {
+    min-height: 64px;
+}
+
+body[data-role="receptionist"] .receptionist-register-form .receptionist-form-actions {
+    margin-top: 28px;
+}
+
+body[data-role="receptionist"] .receptionist-register-form .receptionist-form-actions .secondary-button,
+body[data-role="receptionist"] .receptionist-register-form .receptionist-form-actions .primary-button {
+    min-height: 30px;
+}
+
+body[data-role="receptionist"] .receptionist-register-form .receptionist-form-actions .secondary-button {
+    flex: 0 0 32%;
+}
+
+body[data-role="receptionist"] .receptionist-register-form .receptionist-form-actions .primary-button {
+    flex: 1;
+}
+
+body[data-role="receptionist"] .receptionist-registration-summary {
+    align-self: start;
+}
+
+@media (max-width: 460px) {
+    body[data-role="receptionist"] .receptionist-register-form .receptionist-register-card {
+        padding: 14px;
+    }
+
+    body[data-role="receptionist"] .receptionist-register-form .receptionist-form-grid {
+        row-gap: 12px;
+    }
+}
+
+body.therapist-dashboard-page {
+    background: #f8f6f1;
+    color: #242927;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body.therapist-dashboard-page .sidebar {
+    width: 145px;
+    flex-basis: 145px;
+    padding: 14px 7px 18px;
+    background: #003b35;
+}
+
+body.therapist-dashboard-page .brand-block {
+    padding: 0 7px 23px;
+}
+
+body.therapist-dashboard-page .brand-mark {
+    gap: 5px;
+}
+
+body.therapist-dashboard-page .brand-leaf {
+    width: 27px;
+    height: 27px;
+    font-size: 17px;
+}
+
+body.therapist-dashboard-page .brand-text .brand-name {
+    font-size: 29px;
+}
+
+body.therapist-dashboard-page .brand-text .brand-subtitle {
+    padding-left: 14px;
+    font-size: 20px;
+}
+
+body.therapist-dashboard-page .sidebar-menu {
+    gap: 0;
+    margin-top: 0;
+}
+
+body.therapist-dashboard-page .sidebar-menu .nav-section {
+    gap: 4px;
+    margin-bottom: 10px;
+    padding: 0 0 10px;
+}
+
+body.therapist-dashboard-page .sidebar-menu .nav-section::before {
+    display: block;
+    padding: 0 7px 5px;
+    color: #a4b7a3;
+    content: attr(data-label);
+    font-size: 8px;
+    text-transform: uppercase;
+}
+
+body.therapist-dashboard-page .sidebar-menu .nav-item {
+    min-height: 28px;
+    gap: 7px;
+    padding: 6px 7px;
+    font-size: 10px;
+}
+
+body.therapist-dashboard-page .sidebar-menu .nav-icon {
+    width: 15px;
+    font-size: 13px;
+}
+
+body.therapist-dashboard-page .sidebar-role {
+    margin-top: auto;
+    padding: 9px 2px 0;
+}
+
+body.therapist-dashboard-page .sidebar-role > span {
+    margin-bottom: 5px;
+    font-size: 9px;
+}
+
+body.therapist-dashboard-page .role-select {
+    min-height: 34px;
+    padding: 5px 7px;
+    font-size: 10px;
+}
+
+body.therapist-dashboard-page .role-avatar {
+    width: 19px;
+    height: 19px;
+}
+
+body.therapist-dashboard-page .sidebar-logout-form {
+    margin-top: 5px;
+}
+
+body.therapist-dashboard-page .sidebar-logout-button {
+    min-height: 26px;
+    justify-content: flex-start;
+    border: 0;
+    background: transparent;
+    font-size: 9px;
+}
+
+body.therapist-dashboard-page .sidebar-logout-button:hover,
+body.therapist-dashboard-page .sidebar-logout-button:focus-visible {
+    background: rgba(255, 255, 255, .1);
+}
+
+.therapist-sidebar-logout-form {
+    margin: 0;
+}
+
+body.therapist-dashboard-page .sidebar-menu .therapist-sidebar-logout {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    text-align: left;
+}
+
+body.therapist-dashboard-page .sidebar-menu .therapist-sidebar-logout:hover,
+body.therapist-dashboard-page .sidebar-menu .therapist-sidebar-logout:focus-visible {
+    background: rgba(255, 255, 255, .1);
+}
+
+body.therapist-dashboard-page .sidebar-role {
+    margin-top: auto;
+}
+
+.therapist-sidebar-note {
+    margin: 22px 0 0;
+    color: #e4eee6;
+    font-size: 8px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+body.therapist-dashboard-page .main-panel {
+    width: calc(100% - 145px);
+    margin-left: 145px;
+}
+
+body.therapist-dashboard-page .therapist-topbar {
+    min-height: 52px;
+    box-sizing: border-box;
+    padding: 7px 25px;
+    background: #fff;
+}
+
+body.therapist-dashboard-page .therapist-topbar > .search-box {
+    width: min(355px, 48%);
+    min-width: 180px;
+    height: 25px;
+    box-sizing: border-box;
+    padding: 0 10px;
+    border: 1px solid #e8e8e6;
+    border-radius: 6px;
+    background: #f7f7f6;
+    font-size: 12px;
+}
+
+body.therapist-dashboard-page .therapist-topbar .search-icon {
+    font-size: 16px;
+}
+
+body.therapist-dashboard-page .therapist-topbar .search-input {
+    font-size: 9px;
+}
+
+body.therapist-dashboard-page .therapist-topbar .topbar-actions {
+    gap: 12px;
+}
+
+.therapist-notification,
+.therapist-calendar-shortcut {
+    color: #e7a448;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.therapist-calendar-shortcut {
+    color: #d97777;
+}
+
+body.therapist-dashboard-page .therapist-user-chip {
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+body.therapist-dashboard-page .therapist-user-chip .user-name {
+    width: 21px;
+    height: 21px;
+    background: #8db4f4;
+    color: #fff;
+    font-size: 9px;
+}
+
+.therapist-user-details {
+    display: grid;
+    gap: 2px;
+}
+
+.therapist-user-details strong {
+    color: #282b29;
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.therapist-user-details small {
+    color: #989995;
+    font-size: 9px;
+}
+
+body.therapist-dashboard-page .therapist-dashboard-content {
+    min-height: calc(100vh - 52px);
+    box-sizing: border-box;
+    padding: 38px 18px 28px;
+    background: #f8f6f1;
+}
+
+.therapist-dashboard-heading {
+    margin-bottom: 24px;
+}
+
+.therapist-dashboard-heading h1 {
+    margin: 0;
+    color: #222725;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.therapist-dashboard-heading p {
+    margin: 5px 0 0;
+    color: #999b97;
+    font-size: 11px;
+}
+
+.therapist-profile-notice {
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border: 1px solid #ecd7a4;
+    border-radius: 7px;
+    background: #fff8e6;
+    color: #705b22;
+    font-size: 11px;
+}
+
+.therapist-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.therapist-stat-card {
+    display: grid;
+    min-height: 141px;
+    box-sizing: border-box;
+    align-content: end;
+    gap: 6px;
+    padding: 17px 18px 15px;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.therapist-stat-card strong {
+    margin-top: 38px;
+    color: #111513;
+    font-size: 24px;
+    line-height: 1;
+}
+
+.therapist-stat-card > span:last-child {
+    color: #999b97;
+    font-size: 11px;
+}
+
+.therapist-stat-icon {
+    display: grid;
+    width: 21px;
+    height: 21px;
+    place-items: center;
+    align-self: start;
+    border-radius: 5px;
+    background: #fff0c1;
+    color: #d5a82f;
+    font-size: 13px;
+}
+
+.therapist-stat-icon.customers {
+    background: #f0dbff;
+    color: #a64feb;
+}
+
+.therapist-stat-icon.pending {
+    background: #ffedb5;
+    color: #d29b35;
+}
+
+.therapist-stat-icon.revenue {
+    background: #d9f5d5;
+    color: #2e9c68;
+}
+
+.therapist-schedule-panel {
+    overflow: hidden;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.therapist-schedule-heading {
+    display: flex;
+    min-height: 62px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+}
+
+.therapist-schedule-heading h2 {
+    margin: 0;
+    color: #272b28;
+    font-size: 15px;
+}
+
+.therapist-schedule-heading > span {
+    min-width: 72px;
+    padding: 5px 10px;
+    border-radius: 16px;
+    background: #e7f2eb;
+    color: #378153;
+    font-size: 9px;
+    text-align: center;
+}
+
+.therapist-schedule-table-wrap {
+    overflow-x: auto;
+    padding: 0 25px 8px;
+}
+
+.therapist-schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #777a77;
+    font-size: 11px;
+}
+
+.therapist-schedule-table th,
+.therapist-schedule-table td {
+    padding: 18px 15px;
+    border-bottom: 1px solid #e6e6e4;
+    text-align: left;
+}
+
+.therapist-schedule-table th {
+    color: #868985;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.therapist-schedule-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.therapist-status-pill {
+    display: inline-block;
+    min-width: 54px;
+    padding: 5px 10px;
+    border-radius: 14px;
+    background: #e6f2e9;
+    color: #368047;
+    font-size: 9px;
+    text-align: center;
+}
+
+.therapist-status-pill.pending {
+    background: #fff0dc;
+    color: #d47d21;
+}
+
+.therapist-status-pill.completed {
+    background: #e6effc;
+    color: #4479bd;
+}
+
+.therapist-status-pill.cancelled {
+    background: #f9e5e5;
+    color: #b94b4b;
+}
+
+.therapist-status-pill.in-progress {
+    background: #f0e9fb;
+    color: #8251b5;
+}
+
+.therapist-schedule-empty {
+    padding: 36px 15px !important;
+    color: #969995;
+    text-align: center !important;
+}
+
+@media (max-width: 900px) {
+    body.therapist-dashboard-page .sidebar {
+        width: 145px;
+        flex-basis: 145px;
+        height: 100vh;
+        max-height: 100vh;
+        padding: 14px 7px 18px;
+    }
+
+    body.therapist-dashboard-page .main-panel {
+        width: calc(100% - 145px);
+        margin-left: 145px;
+        height: 100vh;
+    }
+}
+
+@media (max-width: 760px) {
+    body.therapist-dashboard-page {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+    }
+
+    body.therapist-dashboard-page .dashboard-shell {
+        display: block;
+        height: auto;
+    }
+
+    body.therapist-dashboard-page .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        padding: 12px 14px;
+    }
+
+    body.therapist-dashboard-page .brand-block {
+        padding: 0 4px 12px;
+    }
+
+    body.therapist-dashboard-page .sidebar-menu {
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    body.therapist-dashboard-page .sidebar-menu .nav-section {
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    body.therapist-dashboard-page .sidebar-menu .nav-section::before {
+        display: none;
+    }
+
+    body.therapist-dashboard-page .sidebar-menu .nav-item {
+        min-height: 34px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    body.therapist-dashboard-page .sidebar-menu .therapist-sidebar-logout {
+        font-size: 11px;
+    }
+
+    body.therapist-dashboard-page .sidebar-role {
+        display: block;
+        margin-top: 8px;
+        border-top: 1px solid rgba(255, 255, 255, .2);
+    }
+
+    body.therapist-dashboard-page .sidebar-role > span {
+        font-size: 10px;
+    }
+
+    body.therapist-dashboard-page .sidebar-logout-button {
+        min-height: 32px;
+        font-size: 11px;
+    }
+
+    .therapist-sidebar-note {
+        display: none;
+    }
+
+    body.therapist-dashboard-page .main-panel {
+        width: 100%;
+        height: auto;
+        margin-left: 0;
+    }
+
+    body.therapist-dashboard-page .therapist-topbar {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px 14px;
+    }
+
+    body.therapist-dashboard-page .therapist-topbar > .search-box {
+        width: 100%;
+        min-width: 0;
+        flex: 1 1 100%;
+    }
+
+    body.therapist-dashboard-page .therapist-topbar .topbar-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    body.therapist-dashboard-page .therapist-dashboard-content {
+        min-height: auto;
+        padding: 24px 14px;
+    }
+
+    .therapist-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 460px) {
+    .therapist-stat-card {
+        min-height: 125px;
+        padding: 14px;
+    }
+}
+
+body.therapist-dashboard-page .therapist-appointments-content {
+    min-height: calc(100vh - 52px);
+    box-sizing: border-box;
+    padding: 30px 24px;
+    background: #f8f6f1;
+}
+
+.therapist-appointments-content .page-heading {
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.therapist-appointments-content .page-title {
+    margin: 0;
+    color: #242927;
+    font-size: 22px;
+    font-weight: 700;
+    text-transform: none;
+}
+
+.therapist-appointments-content .page-date {
+    margin-top: 5px;
+    color: #92958f;
+    font-size: 11px;
+}
+
+.therapist-appointment-count {
+    padding: 7px 10px;
+    border-radius: 6px;
+    background: #e8eee8;
+    color: #315d4d;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.therapist-appointments-panel {
+    overflow: hidden;
+    border: 1px solid #e8e5de;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(34, 39, 36, .03);
+}
+
+.therapist-appointments-panel .toolbar-row {
+    min-height: 48px;
+    padding: 8px 14px;
+    border-bottom: 1px solid #eeeae3;
+}
+
+.therapist-appointments-panel .toolbar-pills {
+    gap: 5px;
+}
+
+.therapist-appointments-panel .toolbar-pills .pill {
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: #777a74;
+    font-size: 10px;
+}
+
+.therapist-appointments-panel .toolbar-pills .pill.active {
+    background: #e8f0e9;
+    color: #315d4d;
+    font-weight: 600;
+}
+
+.therapist-appointment-table {
+    min-width: 610px;
+    border-collapse: collapse;
+}
+
+.therapist-appointment-table thead th {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eeeae3;
+    background: #fcfbf9;
+    color: #858881;
+    font-size: 9px;
+    font-weight: 600;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.therapist-appointment-table tbody td {
+    height: 49px;
+    padding: 8px 14px;
+    border-bottom: 1px solid #f0eee9;
+    color: #4b514c;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.therapist-appointment-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.therapist-appointment-table .status-pill {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 8px;
+    font-weight: 600;
+}
+
+.therapist-appointment-view {
+    padding: 5px 10px;
+    border: 1px solid #dfe9e1;
+    border-radius: 5px;
+    background: #f6faf6;
+    color: #315d4d;
+    cursor: pointer;
+    font: inherit;
+    font-size: 9px;
+}
+
+.therapist-appointment-view:hover,
+.therapist-appointment-view:focus-visible {
+    border-color: #9eb9a3;
+    background: #eaf2eb;
+}
+
+.therapist-appointment-table .appointment-empty-row td,
+.therapist-appointment-table .appointment-no-results td {
+    padding: 34px 14px;
+    color: #92958f;
+    text-align: center;
+}
+
+.therapist-appointment-table [hidden] {
+    display: none;
+}
+
+.therapist-appointment-detail-card {
+    width: min(440px, calc(100% - 28px));
+}
+
+.therapist-appointment-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin: 8px 0 0;
+}
+
+.therapist-appointment-details div {
+    display: grid;
+    gap: 4px;
+}
+
+.therapist-appointment-details dt {
+    color: #92958f;
+    font-size: 10px;
+}
+
+.therapist-appointment-details dd {
+    margin: 0;
+    color: #313934;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+@media (max-width: 760px) {
+    body.therapist-dashboard-page .therapist-appointments-content {
+        min-height: auto;
+        padding: 22px 14px;
+    }
+
+    .therapist-appointments-content .page-heading {
+        gap: 12px;
+    }
+
+    .therapist-stat-card strong {
+        margin-top: 25px;
+        font-size: 21px;
+    }
+
+    .therapist-schedule-heading {
+        padding: 0 16px;
+    }
+
+    .therapist-schedule-table-wrap {
+        padding: 0 10px 6px;
+    }
+
+    .therapist-schedule-table th,
+    .therapist-schedule-table td {
+        padding: 13px 9px;
+    }
+}
+
+body.therapist-dashboard-page .therapist-customers-content {
+    min-height: calc(100vh - 52px);
+    box-sizing: border-box;
+    padding: 38px 24px;
+    background: #f8f6f1;
+}
+
+.therapist-customers-heading {
+    margin-bottom: 16px;
+}
+
+.therapist-customers-heading h1 {
+    margin: 0;
+    color: #242927;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.therapist-customers-heading p {
+    margin: 5px 0 0;
+    color: #999b97;
+    font-size: 11px;
+}
+
+.therapist-customers-toolbar {
+    display: flex;
+    min-height: 45px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    color: #999b97;
+    font-size: 10px;
+}
+
+.therapist-customers-toolbar .primary-button {
+    padding: 9px 14px;
+    border-radius: 6px;
+    background: #075447;
+    font-size: 10px;
+}
+
+.therapist-customer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.therapist-customer-card {
+    display: flex;
+    min-width: 0;
+    min-height: 86px;
+    box-sizing: border-box;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 20px;
+    border: 1px solid #f1eee8;
+    border-radius: 9px;
+    background: #fff;
+    transition: box-shadow .18s ease, transform .18s ease;
+}
+
+.therapist-customer-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(32, 44, 37, .08);
+}
+
+.therapist-customer-avatar {
+    display: grid;
+    flex: 0 0 41px;
+    width: 41px;
+    height: 41px;
+    place-items: center;
+    border-radius: 50%;
+    background: #d3cba9;
+    color: #075447;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.therapist-customer-card:nth-child(3n + 2) .therapist-customer-avatar {
+    background: #d1c9a7;
+}
+
+.therapist-customer-card:nth-child(3n + 3) .therapist-customer-avatar {
+    background: #d8cfad;
+}
+
+.therapist-customer-identity {
+    display: grid;
+    min-width: 0;
+    gap: 6px;
+}
+
+.therapist-customer-identity strong {
+    overflow: hidden;
+    color: #252927;
+    font-size: 13px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.therapist-customer-identity small {
+    overflow: hidden;
+    color: #92958f;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.therapist-customer-card[hidden],
+.therapist-customer-empty[hidden] {
+    display: none;
+}
+
+.therapist-customer-empty {
+    grid-column: 1 / -1;
+    padding: 30px 16px;
+    border: 1px solid #eeeae3;
+    border-radius: 8px;
+    background: #fff;
+    color: #92958f;
+    font-size: 11px;
+    text-align: center;
+}
+
+@media (max-width: 1000px) {
+    .therapist-customer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    body.therapist-dashboard-page .therapist-customers-content {
+        min-height: auto;
+        padding: 24px 14px;
+    }
+
+    .therapist-customer-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+body.therapist-dashboard-page .therapist-history-content {
+    min-height: calc(100vh - 52px);
+    box-sizing: border-box;
+    padding: 38px 24px;
+    background: #f8f6f1;
+}
+
+.therapist-history-heading {
+    margin-bottom: 27px;
+}
+
+.therapist-history-heading h1 {
+    margin: 0;
+    color: #242927;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.therapist-history-heading p {
+    margin: 5px 0 0;
+    color: #999b97;
+    font-size: 11px;
+}
+
+.therapist-history-panel {
+    overflow: hidden;
+    padding: 0 25px;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.therapist-history-table-wrap {
+    overflow-x: auto;
+}
+
+.therapist-history-table {
+    width: 100%;
+    min-width: 570px;
+    border-collapse: collapse;
+}
+
+.therapist-history-table th {
+    height: 56px;
+    border-bottom: 1px solid #e8e6e2;
+    color: #858881;
+    font-size: 10px;
+    font-weight: 500;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.therapist-history-table td {
+    height: 65px;
+    border-bottom: 1px solid #e8e6e2;
+    color: #777a76;
+    font-size: 11px;
+}
+
+.therapist-history-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.therapist-history-table td:first-child {
+    width: 20%;
+    color: #777a76;
+}
+
+.therapist-history-table td:first-child small {
+    display: block;
+    margin-top: 3px;
+    color: #a0a29d;
+    font-size: 9px;
+}
+
+.therapist-history-table th:nth-child(2),
+.therapist-history-table td:nth-child(2) {
+    width: 22%;
+}
+
+.therapist-history-table th:nth-child(3),
+.therapist-history-table td:nth-child(3) {
+    width: 38%;
+}
+
+.therapist-history-status {
+    display: inline-block;
+    min-width: 74px;
+    padding: 5px 9px;
+    border-radius: 14px;
+    background: #e6f1e9;
+    color: #39704b;
+    font-size: 9px;
+    text-align: center;
+}
+
+.therapist-history-status.pending {
+    background: #fff0dc;
+    color: #c27a1b;
+}
+
+.therapist-history-status.cancelled {
+    background: #f8e6e5;
+    color: #ad514b;
+}
+
+.therapist-history-status.in-progress {
+    background: #eee8f8;
+    color: #7653a7;
+}
+
+.therapist-history-table .therapist-history-empty,
+.therapist-history-table .therapist-history-no-results td {
+    height: 115px;
+    color: #969995;
+    text-align: center;
+}
+
+.therapist-history-table [hidden] {
+    display: none;
+}
+
+@media (max-width: 760px) {
+    body.therapist-dashboard-page .therapist-history-content {
+        min-height: auto;
+        padding: 24px 14px;
+    }
+
+    .therapist-history-heading {
+        margin-bottom: 18px;
+    }
+
+    .therapist-history-panel {
+        padding: 0 14px;
+        border-radius: 9px;
+    }
+}
+
+body.therapist-dashboard-page .therapist-calendar-content {
+    min-height: calc(100vh - 52px);
+    box-sizing: border-box;
+    padding: 38px 24px;
+    background: #f8f6f1;
+}
+
+.therapist-calendar-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.therapist-calendar-heading h1 {
+    margin: 0;
+    color: #242927;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.therapist-calendar-heading p {
+    margin: 5px 0 0;
+    color: #999b97;
+    font-size: 11px;
+}
+
+.therapist-calendar-period {
+    display: inline-flex;
+    min-height: 25px;
+    align-items: center;
+    gap: 7px;
+    padding: 0 10px;
+    border: 1px solid #e8e5de;
+    border-radius: 6px;
+    background: #fff;
+    color: #343a35;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.therapist-calendar-range {
+    margin-bottom: 12px;
+    color: #999b97;
+    font-size: 10px;
+}
+
+.therapist-week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.therapist-week-day {
+    min-width: 0;
+    min-height: 100px;
+    padding: 10px 8px;
+    border: 1px solid #e7e4de;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.therapist-week-day h2 {
+    margin: 0 0 9px;
+    color: #8d908a;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.therapist-week-day h2 span {
+    margin-left: 3px;
+}
+
+.therapist-week-booking,
+.therapist-schedule-off {
+    display: block;
+    overflow: hidden;
+    margin-top: 4px;
+    padding: 4px 5px;
+    border-radius: 4px;
+    background: #e2d9bd;
+    color: #8a7841;
+    font-size: 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.therapist-week-booking time {
+    font-size: 7px;
+}
+
+.therapist-week-booking[hidden] {
+    display: none;
+}
+
+.therapist-calendar-empty {
+    grid-column: 1 / -1;
+    padding: 24px 14px;
+    border: 1px solid #eeeae3;
+    border-radius: 8px;
+    background: #fff;
+    color: #92958f;
+    font-size: 11px;
+    text-align: center;
+}
+
+.therapist-calendar-empty[hidden] {
+    display: none;
+}
+
+@media (max-width: 1000px) {
+    .therapist-week-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    body.therapist-dashboard-page .therapist-calendar-content {
+        min-height: auto;
+        padding: 24px 14px;
+    }
+
+    .therapist-week-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 420px) {
+    .therapist-week-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+body.therapist-dashboard-page .therapist-services-content {
+    min-height: calc(100vh - 52px);
+    box-sizing: border-box;
+    padding: 38px 24px;
+    background: #f8f6f1;
+}
+
+.therapist-services-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.therapist-services-heading h1 {
+    margin: 0;
+    color: #242927;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.therapist-services-heading p {
+    margin: 5px 0 0;
+    color: #999b97;
+    font-size: 11px;
+}
+
+.therapist-service-add {
+    min-height: 32px;
+    padding: 0 17px;
+    border: 0;
+    border-radius: 6px;
+    background: #075447;
+    color: #fff;
+    cursor: not-allowed;
+    font: inherit;
+    font-size: 10px;
+    opacity: .78;
+}
+
+.therapist-service-count {
+    margin-bottom: 12px;
+    color: #999b97;
+    font-size: 10px;
+}
+
+.therapist-service-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.therapist-service-card {
+    min-width: 0;
+    min-height: 96px;
+    box-sizing: border-box;
+    padding: 14px 18px;
+    border: 1px solid #e8e5de;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.therapist-service-card.is-inactive {
+    opacity: .65;
+}
+
+.therapist-service-card[hidden],
+.therapist-service-no-results[hidden] {
+    display: none;
+}
+
+.therapist-service-card-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.therapist-service-card-heading h2 {
+    overflow: hidden;
+    margin: 0;
+    color: #222725;
+    font-size: 11px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.therapist-service-card-heading strong {
+    flex: 0 0 auto;
+    color: #b3871d;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.therapist-service-duration {
+    margin-top: 12px;
+    color: #9a9c97;
+    font-size: 9px;
+}
+
+.therapist-service-card p {
+    overflow: hidden;
+    margin: 10px 0 0;
+    color: #9a9c97;
+    font-size: 9px;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+}
+
+.therapist-service-inactive {
+    display: inline-block;
+    margin-top: 8px;
+    color: #9a5d44;
+    font-size: 9px;
+}
+
+.therapist-service-empty,
+.therapist-service-no-results {
+    grid-column: 1 / -1;
+    padding: 26px 14px;
+    color: #92958f;
+    font-size: 11px;
+    text-align: center;
+}
+
+@media (max-width: 1000px) {
+    .therapist-service-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    body.therapist-dashboard-page .therapist-services-content {
+        min-height: auto;
+        padding: 24px 14px;
+    }
+
+    .therapist-service-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+body.therapist-dashboard-page .therapist-products-content {
+    min-height: calc(100vh - 52px);
+    box-sizing: border-box;
+    padding: 38px 24px;
+    background: #f8f6f1;
+}
+
+.therapist-products-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.therapist-products-heading h1 {
+    margin: 0;
+    color: #242927;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.therapist-products-heading p {
+    margin: 5px 0 0;
+    color: #999b97;
+    font-size: 11px;
+}
+
+.therapist-products-add {
+    min-height: 32px;
+    padding: 0 17px;
+    border: 0;
+    border-radius: 6px;
+    background: #075447;
+    color: #fff;
+    cursor: not-allowed;
+    font: inherit;
+    font-size: 10px;
+    opacity: .78;
+}
+
+.therapist-products-count {
+    margin-bottom: 12px;
+    color: #999b97;
+    font-size: 10px;
+}
+
+.therapist-products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.therapist-product-card {
+    overflow: hidden;
+    min-width: 0;
+    border: 1px solid #e3e0da;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.therapist-product-card[hidden],
+.therapist-products-no-results[hidden] {
+    display: none;
+}
+
+.therapist-product-card.is-inactive {
+    opacity: .65;
+}
+
+.therapist-product-card > img {
+    display: block;
+    width: 100%;
+    height: 96px;
+    background: #fff;
+    object-fit: cover;
+    object-position: center;
+}
+
+.therapist-product-card-body {
+    display: grid;
+    gap: 3px;
+    padding: 8px 12px 10px;
+}
+
+.therapist-product-card-body h2 {
+    overflow: hidden;
+    margin: 0;
+    color: #252927;
+    font-size: 10px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.therapist-product-stock {
+    color: #999b97;
+    font-size: 9px;
+}
+
+.therapist-product-card-body > strong {
+    margin-top: 4px;
+    color: #c1a900;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.therapist-product-inactive {
+    color: #a15a4f;
+    font-size: 9px;
+}
+
+.therapist-products-empty,
+.therapist-products-no-results {
+    grid-column: 1 / -1;
+    padding: 26px 14px;
+    color: #92958f;
+    font-size: 11px;
+    text-align: center;
+}
+
+@media (max-width: 1000px) {
+    .therapist-products-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    body.therapist-dashboard-page .therapist-products-content {
+        min-height: auto;
+        padding: 24px 14px;
+    }
+
+    .therapist-products-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 440px) {
+    .therapist-products-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+body.therapist-dashboard-page .therapist-profile-content {
+    min-height: calc(100vh - 52px);
+    box-sizing: border-box;
+    padding: 38px 32px;
+    background: #f7f8f6;
+}
+
+.therapist-profile-page-heading {
+    margin: 0 auto 24px;
+    max-width: 980px;
+}
+
+.therapist-profile-page-heading h1 {
+    margin: 0 0 7px;
+    color: #23332d;
+    font-size: 26px;
+    font-weight: 650;
+}
+
+.therapist-profile-page-heading p {
+    margin: 0;
+    color: #858b86;
+    font-size: 13px;
+}
+
+.therapist-profile-card {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 27px 30px 30px;
+    border: 1px solid #e8ebe7;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(34, 52, 43, .04);
+}
+
+.therapist-profile-identity {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #edf0ec;
+}
+
+.therapist-profile-avatar {
+    display: inline-flex;
+    width: 62px;
+    height: 62px;
+    flex: 0 0 62px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #e8f0e9;
+    color: #496b51;
+    font-size: 20px;
+    font-weight: 650;
+}
+
+.therapist-profile-identity h2 {
+    margin: 0 0 6px;
+    color: #273630;
+    font-size: 18px;
+    font-weight: 650;
+}
+
+.therapist-profile-identity p {
+    margin: 0;
+    color: #858b86;
+    font-size: 12px;
+}
+
+.therapist-profile-identity p span {
+    padding: 0 5px;
+    color: #bdc3bd;
+}
+
+.therapist-profile-fields {
+    padding-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 19px 22px;
+}
+
+.therapist-profile-field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 8px;
+    color: #414d46;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.therapist-profile-value {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 42px;
+    padding: 12px;
+    border: 1px solid #dfe4df;
+    border-radius: 6px;
+    background: #f8f9f7;
+    color: #354139;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.55;
+}
+
+.therapist-profile-bio {
+    grid-column: 1 / -1;
+}
+
+.therapist-profile-bio-value {
+    min-height: 94px;
+    white-space: pre-wrap;
+}
+
+.therapist-profile-notice {
+    max-width: 980px;
+    box-sizing: border-box;
+    margin: 0 auto 16px;
+    padding: 12px 15px;
+    border-radius: 7px;
+    font-size: 13px;
+}
+
+#therapist-modal .therapist-admin-bio {
+    grid-column: 1 / -1;
+}
+
+#therapist-modal .therapist-admin-bio textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 94px;
+    padding: 11px 12px;
+    border: 1px solid #dfe4df;
+    border-radius: 6px;
+    font: inherit;
+    resize: vertical;
+}
+
+.therapist-profile-notice {
+    border: 1px solid #eadfbf;
+    background: #fffaf0;
+    color: #806b37;
+}
+
+.therapist-password-card {
+    max-width: 640px;
+}
+
+.therapist-password-form {
+    display: grid;
+    gap: 20px;
+}
+
+.therapist-password-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: #414d46;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.therapist-password-form input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #dfe4df;
+    border-radius: 6px;
+    outline: none;
+    background: #fff;
+    color: #354139;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.therapist-password-form input:focus {
+    border-color: #6d9474;
+    box-shadow: 0 0 0 3px rgba(109, 148, 116, .12);
+}
+
+.therapist-password-form small {
+    color: #858b86;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.therapist-password-form .therapist-profile-save {
+    justify-self: start;
+    margin-top: 0;
+}
+
+.therapist-password-message {
+    max-width: 640px;
+    box-sizing: border-box;
+    margin: 0 auto 16px;
+    padding: 12px 15px;
+    border: 1px solid;
+    border-radius: 7px;
+    font-size: 13px;
+}
+
+.therapist-password-error {
+    border-color: #ead3ce;
+    background: #fff6f3;
+    color: #8b4438;
+}
+
+.therapist-password-success {
+    border-color: #d3e6d5;
+    background: #f3faf3;
+    color: #3e7045;
+}
+
+@media (max-width: 760px) {
+    body.therapist-dashboard-page .therapist-profile-content {
+        min-height: auto;
+        padding: 25px 16px;
+    }
+
+    .therapist-profile-card {
+        padding: 21px 18px 22px;
+    }
+}
+
+@media (max-width: 520px) {
+    .therapist-profile-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .therapist-profile-bio {
+        grid-column: auto;
+    }
+}
+
+body[data-role="cashier"] .sidebar,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar {
+    width: 164px;
+    flex: 0 0 164px;
+    padding: 14px 8px;
+    background: #003b35;
+    color: #f4f4ed;
+}
+
+body[data-role="cashier"] .brand-block,
+body.therapist-dashboard-page[data-role="cashier"] .brand-block {
+    padding: 5px 5px 21px;
+}
+
+body[data-role="cashier"] .brand-mark,
+body.therapist-dashboard-page[data-role="cashier"] .brand-mark {
+    gap: 5px;
+}
+
+body[data-role="cashier"] .brand-leaf,
+body.therapist-dashboard-page[data-role="cashier"] .brand-leaf {
+    width: 28px;
+    height: 28px;
+    font-size: 17px;
+}
+
+body[data-role="cashier"] .brand-text .brand-name,
+body.therapist-dashboard-page[data-role="cashier"] .brand-text .brand-name {
+    font-size: 28px;
+}
+
+body[data-role="cashier"] .brand-text .brand-subtitle,
+body.therapist-dashboard-page[data-role="cashier"] .brand-text .brand-subtitle {
+    padding-left: 14px;
+    font-size: 20px;
+}
+
+body[data-role="cashier"] .sidebar-menu,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu {
+    gap: 0;
+    margin-top: 0;
+}
+
+body[data-role="cashier"] .sidebar-menu .nav-section,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu .nav-section {
+    gap: 3px;
+    margin: 0 0 8px;
+    padding: 0 0 9px;
+    border-bottom: 1px solid rgba(255, 255, 255, .24);
+}
+
+body[data-role="cashier"] .sidebar-menu .nav-section::before,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu .nav-section::before {
+    display: block;
+    margin: 0;
+    padding: 0 7px 5px;
+    color: #b6c0a3;
+    content: attr(data-label);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+body[data-role="cashier"] .sidebar-menu .nav-item,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu .nav-item {
+    min-height: 29px;
+    gap: 7px;
+    padding: 6px 7px;
+    border-radius: 7px;
+    color: #f4f4ed;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+body[data-role="cashier"] .sidebar-menu .nav-icon,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu .nav-icon {
+    width: 15px;
+    color: #d8dfc5;
+    font-size: 13px;
+}
+
+body[data-role="cashier"] .sidebar-menu .nav-item:hover,
+body[data-role="cashier"] .sidebar-menu .nav-item.active,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu .nav-item:hover,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu .nav-item.active {
+    background: #12675b;
+    color: #fff;
+}
+
+body[data-role="cashier"] .sidebar-menu .nav-item:hover .nav-icon,
+body[data-role="cashier"] .sidebar-menu .nav-item.active .nav-icon,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu .nav-item:hover .nav-icon,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu .nav-item.active .nav-icon {
+    color: #e7ddaf;
+}
+
+body[data-role="cashier"] .sidebar-role,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-role {
+    margin-top: auto;
+    padding: 10px 7px 0;
+}
+
+body[data-role="cashier"] .sidebar-role > span,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-role > span {
+    color: #9aae91;
+    font-size: 12px;
+}
+
+body[data-role="cashier"] .role-select,
+body.therapist-dashboard-page[data-role="cashier"] .role-select {
+    gap: 7px;
+    padding: 8px 9px;
+    border-color: #6e977b;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 12px;
+}
+
+body[data-role="cashier"] .role-avatar,
+body.therapist-dashboard-page[data-role="cashier"] .role-avatar {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+}
+
+body[data-role="cashier"] .sidebar-logout-form,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-logout-form {
+    margin-top: 8px;
+}
+
+body[data-role="cashier"] .sidebar-logout-button,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-logout-button {
+    min-height: 34px;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, .2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .06);
+    color: #f4f4ed;
+    font-size: 12px;
+}
+
+body[data-role="cashier"] .sidebar-logout-button:hover,
+body[data-role="cashier"] .sidebar-logout-button:focus-visible,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-logout-button:hover,
+body.therapist-dashboard-page[data-role="cashier"] .sidebar-logout-button:focus-visible {
+    border-color: #9aae91;
+    background: rgba(255, 255, 255, .14);
+}
+
+body[data-role="cashier"] .main-panel,
+body.therapist-dashboard-page[data-role="cashier"] .main-panel {
+    width: calc(100% - 164px);
+    margin-left: 164px;
+}
+
+@media (max-width: 900px) {
+    body[data-role="cashier"] .sidebar,
+    body.therapist-dashboard-page[data-role="cashier"] .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        max-height: none;
+        flex: 0 0 auto;
+        overflow: visible;
+        padding: 12px 14px;
+    }
+
+    body[data-role="cashier"] .main-panel,
+    body.therapist-dashboard-page[data-role="cashier"] .main-panel {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 760px) {
+    body[data-role="cashier"] .sidebar-menu,
+    body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    body[data-role="cashier"] .sidebar-menu .nav-section,
+    body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu .nav-section {
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    body[data-role="cashier"] .sidebar-menu .nav-section::before,
+    body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu .nav-section::before,
+    body[data-role="cashier"] .sidebar-role,
+    body.therapist-dashboard-page[data-role="cashier"] .sidebar-role {
+        display: none;
+    }
+}
+
+body[data-role="admin"] .sidebar {
+    background-color: #003b35 !important;
+    background-image: none !important;
+}
+
+body[data-role="admin"] .sidebar .sidebar-role.sidebar-role-admin {
+    display: flex !important;
+    position: relative;
+    box-sizing: border-box;
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden;
+    margin: auto 0 0;
+    padding: 8px 9px;
+    border: 1px solid #6e977b;
+    border-radius: 8px;
+    background: #003b35 !important;
+    background-image: none !important;
+}
+
+body[data-role="admin"] .sidebar .sidebar-role-admin > span {
+    display: block;
+    margin: 0 0 4px;
+    color: #b6c0a3;
+    font-size: 9px;
+    line-height: 1.2;
+}
+
+body[data-role="admin"] .sidebar .sidebar-role-admin .role-select {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 24px;
+    justify-content: center;
+    gap: 5px;
+    padding: 2px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 10px;
+    line-height: 1.2;
+}
+
+body[data-role="admin"] .sidebar .sidebar-role-admin .role-avatar,
+body[data-role="admin"] .sidebar .sidebar-role-admin .chevron {
+    display: grid;
+}
+
+body[data-role="admin"] .sidebar .sidebar-role-admin .role-avatar {
+    box-sizing: border-box;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    flex: 0 0 18px;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+body[data-role="admin"] .sidebar .sidebar-role-admin .role-avatar img {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border-radius: inherit;
+    object-fit: cover;
+}
+
+body[data-role="admin"] .sidebar .sidebar-role-admin .chevron {
+    display: none;
+}
+
+body[data-role="admin"] .sidebar .sidebar-role-admin .sidebar-logout-form {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin: 5px 0 0;
+    padding: 5px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, .18);
+}
+
+body[data-role="admin"] .sidebar .sidebar-role-admin .sidebar-logout-button {
+    appearance: none;
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 27px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 4px 2px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #f4f4ed;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+}
+
+body[data-role="admin"] .sidebar .sidebar-role-admin .sidebar-logout-button:hover,
+body[data-role="admin"] .sidebar .sidebar-role-admin .sidebar-logout-button:focus-visible {
+    border: 0;
+    background: rgba(255, 255, 255, .1);
+}
+
+@media (max-width: 760px) {
+    body[data-role="admin"] .sidebar .sidebar-role.sidebar-role-admin {
+        margin-top: 10px;
     }
 }

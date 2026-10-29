@@ -75,14 +75,7 @@ $isManager = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'manager
                 <?php endif; ?>
             </nav>
             <?php if ($isManager): ?>
-            <div class="sidebar-role">
-                <span>Current Role</span>
-                <div class="role-select">
-                    <?= profile_avatar($_SESSION['user'] ?? [], 'role-avatar', strtoupper(substr((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'M'), 0, 1))) ?>
-                    <span>Manager</span>
-                    <span class="chevron">▾</span>
-                </div>
-            </div>
+            <?= sidebar_role_footer() ?>
             <?php endif; ?>
         </aside>
         <main class="main-panel">

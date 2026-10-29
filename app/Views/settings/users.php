@@ -96,13 +96,7 @@ $lastActive = static function (?string $value): string {
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
                 </div>
             </nav>
-            <div class="sidebar-role">
-                <span>Current Role</span>
-                <div class="role-select">
-                    <?= profile_avatar($currentUser, 'role-avatar', $initials($currentUserName)) ?>
-                    <span><?= e($currentUserRole) ?></span>
-                </div>
-            </div>
+            <?= sidebar_role_footer() ?>
         </aside>
 
         <main class="main-panel">

@@ -13,6 +13,13 @@ final class ProductController
         }
 
         $productModel = new Product(Database::connection());
+        $role = strtolower((string) ($_SESSION['user']['role'] ?? ''));
+
+        if ($role === 'cashier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            http_response_code(403);
+            echo 'Cashiers cannot create or modify products.';
+            return;
+        }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create') {
             $code = trim((string) ($_POST['product_code'] ?? ''));
@@ -70,9 +77,12 @@ final class ProductController
 
         $products = $productModel->all();
 
-        $view = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'manager'
-            ? 'products.php'
-            : 'admin.php';
+        $view = match ($role) {
+            'manager' => 'products.php',
+            'cashier' => 'cashier.php',
+            'staff', 'therapist' => 'therapist.php',
+            default => 'admin.php',
+        };
         require __DIR__ . '/../Views/inventory/' . $view;
     }
 }

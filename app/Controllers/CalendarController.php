@@ -20,10 +20,36 @@ final class CalendarController
         $monthStart = new DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month));
         $gridStart = $monthStart->modify('-' . (int) $monthStart->format('w') . ' days');
         $gridEnd = $gridStart->modify('+42 days');
-        $appointments = (new Appointment(Database::connection()))->betweenDates(
-            $gridStart->format('Y-m-d'),
-            $gridEnd->format('Y-m-d')
-        );
+        $user = $_SESSION['user'] ?? [];
+        $role = strtolower((string) ($user['role'] ?? ''));
+        $isTherapist = in_array($role, ['staff', 'therapist'], true);
+        $appointmentModel = new Appointment(Database::connection());
+        if ($isTherapist) {
+            $weekStart = (new DateTimeImmutable('today'))->modify('monday this week');
+            $weekEnd = $weekStart->modify('+7 days');
+            $therapistAppointments = $appointmentModel->forTherapistUser(
+                (int) ($user['id'] ?? 0),
+                (string) ($user['full_name'] ?? $user['username'] ?? '')
+            );
+            $therapistId = $therapistAppointments['therapist_id'];
+            $appointments = $therapistId === null
+                ? []
+                : $appointmentModel->betweenDatesForTherapist(
+                    $therapistId,
+                    $weekStart->format('Y-m-d'),
+                    $weekEnd->format('Y-m-d')
+                );
+            $scheduleStart = $weekStart;
+            $scheduleDays = 7;
+        } else {
+            $therapistId = null;
+            $appointments = $appointmentModel->betweenDates(
+                $gridStart->format('Y-m-d'),
+                $gridEnd->format('Y-m-d')
+            );
+            $scheduleStart = $gridStart;
+            $scheduleDays = 42;
+        }
         $appointmentsByDate = [];
         foreach ($appointments as $appointment) {
             $appointmentsByDate[$appointment['appointment_date']][] = $appointment;

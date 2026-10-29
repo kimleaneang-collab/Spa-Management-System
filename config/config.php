@@ -114,8 +114,48 @@ function role_label(string $role): string
         'manager' => 'Manager',
         'staff' => 'Therapist',
         'receptionist' => 'Receptionist',
+        'cashier' => 'Cashier',
         default => ucfirst($role),
     };
+}
+
+function sidebar_role_footer(bool $includeLogout = true): string
+{
+    $user = $_SESSION['user'] ?? [];
+    $name = trim((string) ($user['full_name'] ?? $user['username'] ?? 'User'));
+    $nameParts = preg_split('/\s+/', $name) ?: [];
+    $initials = strtoupper(substr($nameParts[0] ?? 'U', 0, 1) . substr($nameParts[1] ?? '', 0, 1));
+    $role = role_label((string) ($user['role'] ?? ''));
+    $roleCardClass = strtolower((string) ($user['role'] ?? '')) === 'admin' ? ' sidebar-role-admin' : '';
+
+    $logout = $includeLogout
+        ? '<form method="post" action="' . e(APP_URL) . '/?route=logout" class="sidebar-logout-form">'
+            . '<input type="hidden" name="csrf_token" value="' . e((string) ($_SESSION['csrf_token'] ?? '')) . '">'
+            . '<button class="sidebar-logout-button" type="submit"><span aria-hidden="true">↪</span>Logout</button>'
+            . '</form>'
+        : '';
+
+    return '<div class="sidebar-role' . $roleCardClass . '">'
+        . '<span>Current Role</span>'
+        . '<div class="role-select">' . profile_avatar($user, 'role-avatar', $initials)
+        . '<span>' . e($role) . '</span><span class="chevron" aria-hidden="true">⌄</span></div>'
+        . $logout
+        . '</div>';
+}
+
+function therapist_account_nav(string $activeRoute = ''): string
+{
+    $profileClass = $activeRoute === 'profile' ? ' active' : '';
+    $passwordClass = $activeRoute === 'change-password' ? ' active' : '';
+
+    return '<div class="nav-section" data-label="Account">'
+        . '<a class="nav-item' . $profileClass . '" href="' . e(APP_URL) . '/?route=profile"><span class="nav-icon">♙</span><span>My Profile</span></a>'
+        . '<a class="nav-item' . $passwordClass . '" href="' . e(APP_URL) . '/?route=change-password"><span class="nav-icon">♧</span><span>Change Password</span></a>'
+        . '<form method="post" action="' . e(APP_URL) . '/?route=logout" class="therapist-sidebar-logout-form">'
+        . '<input type="hidden" name="csrf_token" value="' . e((string) ($_SESSION['csrf_token'] ?? '')) . '">'
+        . '<button class="nav-item therapist-sidebar-logout" type="submit"><span class="nav-icon" aria-hidden="true">↪</span><span>Logout</span></button>'
+        . '</form>'
+        . '</div>';
 }
 
 /*
@@ -222,14 +262,22 @@ function authorize_route(string $route): void
     }
 
     $adminOnly = ['backup'];
-    $managerRoutes = ['users', 'users-and-roles', 'settings'];
-    $staffRoutes = ['dashboard', 'appointments', 'calendar', 'services', 'therapists', 'rooms', 'customers', 'memberships', 'customer-history', 'history', 'products', 'stock', 'stock-management', 'suppliers', 'pos', 'reports', 'report', 'sales', 'inventory-report'];
-    $receptionistRoutes = ['dashboard', 'appointments', 'calendar', 'services', 'therapists', 'rooms', 'customers', 'memberships', 'customer-history', 'history', 'pos'];
+    $managerRoutes = ['users', 'users-and-roles', 'settings', 'therapists'];
+    $staffRoutes = ['dashboard', 'appointments', 'calendar', 'services', 'rooms', 'customers', 'memberships', 'customer-history', 'history', 'products', 'stock', 'stock-management', 'suppliers', 'reports', 'report', 'sales', 'inventory-report'];
+    $receptionistRoutes = ['dashboard', 'appointments', 'new-appointment', 'calendar', 'services', 'rooms', 'customers', 'register-customer', 'memberships', 'customer-history', 'history', 'pos'];
+    $cashierRoutes = ['dashboard', 'pos', 'customers', 'receipts', 'services', 'products', 'memberships', 'cashier-profile'];
 
     if (in_array($route, $adminOnly, true)) {
         require_roles(['admin']);
     } elseif (in_array($route, $managerRoutes, true)) {
         require_roles(['admin', 'manager']);
+    } elseif ($route === 'pos') {
+        require_roles(['admin', 'manager', 'staff', 'receptionist', 'cashier']);
+    } elseif (in_array($route, $cashierRoutes, true)
+        && strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'cashier') {
+        require_roles(['cashier']);
+    } elseif (in_array($route, ['profile', 'change-password'], true)) {
+        require_roles(['staff', 'therapist']);
     } elseif (in_array($route, $receptionistRoutes, true)) {
         require_roles(['admin', 'manager', 'staff', 'receptionist']);
     } elseif (in_array($route, $staffRoutes, true)) {

@@ -6,9 +6,24 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class BillingController
 {
+    public function receipts(): void
+    {
+        require_roles(['cashier']);
+
+        $user = $_SESSION['user'];
+        $receipts = (new Invoice(Database::connection()))->receiptsForCashier((int) $user['id']);
+        $currencyQuery = Database::connection()->prepare(
+            "SELECT setting_value FROM settings WHERE setting_key = 'currency' LIMIT 1"
+        );
+        $currencyQuery->execute();
+        $currency = (string) ($currencyQuery->fetchColumn() ?: 'USD');
+
+        require __DIR__ . '/../Views/billing/cashier-receipts.php';
+    }
+
     public function index(): void
     {
-        require_roles(['admin', 'manager', 'staff', 'receptionist']);
+        require_roles(['admin', 'manager', 'staff', 'receptionist', 'cashier']);
 
         if (empty($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -67,6 +82,11 @@ final class BillingController
         $currencyQuery->execute();
         $currency = (string) ($currencyQuery->fetchColumn() ?: 'USD');
         $csrfToken = (string) $_SESSION['csrf_token'];
+
+        if (strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'cashier') {
+            require __DIR__ . '/../Views/billing/cashier-pos.php';
+            return;
+        }
 
         require __DIR__ . '/../Views/billing/inoice.php';
     }

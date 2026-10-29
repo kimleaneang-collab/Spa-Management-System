@@ -6,6 +6,8 @@ if (empty($_SESSION['user'])) {
     redirect('login');
 }
 $managerDashboard = strtolower((string) ($user['role'] ?? '')) === 'manager';
+$receptionistDashboard = strtolower((string) ($user['role'] ?? '')) === 'receptionist';
+$currentRole = strtolower((string) ($user['role'] ?? 'admin'));
 $dashboardInitials = static function (string $name): string {
     $parts = preg_split('/\s+/', trim($name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
     if ($parts === []) {
@@ -23,7 +25,7 @@ $dashboardInitials = static function (string $name): string {
     <title>Dashboard | Relax Spa</title>
     <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css?v=<?= e(asset_version('public/css/style.css')) ?>">
 </head>
-<body class="dashboard-page">
+<body class="dashboard-page" data-role="<?= e($currentRole) ?>">
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">
@@ -109,14 +111,7 @@ $dashboardInitials = static function (string $name): string {
                 </div>
             </nav>
 
-            <div class="sidebar-role">
-                <span>Current Role</span>
-                <div class="role-select">
-                    <?= profile_avatar($user, 'role-avatar', $dashboardInitials((string) ($user['full_name'] ?? $user['username'] ?? 'A'))) ?>
-                    <span><?= e(role_label((string) $user['role'])) ?></span>
-                    <span class="chevron">▾</span>
-                </div>
-            </div>
+            <?= sidebar_role_footer() ?>
         </aside>
 
         <main class="main-panel">
@@ -140,7 +135,7 @@ $dashboardInitials = static function (string $name): string {
                 </div>
             </header>
 
-            <?php if ($managerDashboard): ?>
+            <?php if ($managerDashboard || $receptionistDashboard): ?>
             <div class="content-wrap manager-dashboard">
                 <div class="manager-dashboard-heading">
                     <div>
@@ -183,8 +178,185 @@ $dashboardInitials = static function (string $name): string {
                             <h2>Today's Appointments</h2>
                             <a href="<?= e(APP_URL) ?>/?route=appointments">View appointments</a>
                         </div>
-                        <?php if ($appointmentRows === []): ?>
+                        <?php if ($appointmentRows === [] && !$receptionistDashboard): ?>
                             <p class="manager-empty">No appointments are scheduled for today.</p>
+                        <?php elseif ($receptionistDashboard): ?>
+                        <div class="content-wrap receptionist-dashboard">
+                            <div class="receptionist-dashboard-heading">
+                                <div>
+                                    <h1>Good <?= e((int) date('G') < 12 ? 'Morning' : ((int) date('G') < 17 ? 'Afternoon' : 'Evening')) ?>, <?= e((string) ($user['full_name'] ?? $user['username'] ?? '')) ?>!</h1>
+                                    <p>Here’s your front desk overview for today.</p>
+                                </div>
+                                <span class="receptionist-date"><?= e(date('M j, Y')) ?></span>
+                            </div>
+
+                            <section class="receptionist-stat-grid" aria-label="Today's front desk overview">
+                                <article class="receptionist-stat-card">
+                                    <span class="receptionist-stat-icon green">▣</span>
+                                    <span class="receptionist-stat-label">Today's Appointments</span>
+                                    <strong><?= number_format($todayAppointments) ?></strong>
+                                    <small>Scheduled today</small>
+                                </article>
+                                <article class="receptionist-stat-card">
+                                    <span class="receptionist-stat-icon blue">✓</span>
+                                    <span class="receptionist-stat-label">Confirmed</span>
+                                    <strong><?= number_format($todayConfirmedAppointments) ?></strong>
+                                    <small>Ready for today</small>
+                                </article>
+                                <article class="receptionist-stat-card">
+                                    <span class="receptionist-stat-icon amber">◷</span>
+                                    <span class="receptionist-stat-label">Pending</span>
+                                    <strong><?= number_format($pendingAppointments) ?></strong>
+                                    <small>Awaiting confirmation</small>
+                                </article>
+                                <article class="receptionist-stat-card">
+                                    <span class="receptionist-stat-icon violet">◉</span>
+                                    <span class="receptionist-stat-label">New Customers</span>
+                                    <strong><?= number_format($newCustomersToday) ?></strong>
+                                    <small>Added today</small>
+                                </article>
+                                <article class="receptionist-stat-card">
+                                    <span class="receptionist-stat-icon violet">⌂</span>
+                                    <span class="receptionist-stat-label">Available Rooms</span>
+                                    <strong><?= number_format($availableRooms) ?>/<?= number_format($totalRooms) ?></strong>
+                                    <small>Ready for service</small>
+                                </article>
+                                <article class="receptionist-stat-card">
+                                    <span class="receptionist-stat-icon green">◎</span>
+                                    <span class="receptionist-stat-label">Active Therapists</span>
+                                    <strong><?= number_format($activeTherapists) ?></strong>
+                                    <small>On the team</small>
+                                </article>
+                            </section>
+
+                            <section class="receptionist-panel-grid">
+                                <article class="receptionist-panel">
+                                    <div class="receptionist-panel-heading">
+                                        <h2>Today's Appointments</h2>
+                                        <a href="<?= e(APP_URL) ?>/?route=appointments">View all</a>
+                                    </div>
+                                    <?php if ($appointmentRows === []): ?>
+                                        <p class="manager-empty">No appointments are scheduled for today.</p>
+                                    <?php else: ?>
+                                        <div class="receptionist-appointment-list">
+                                            <?php foreach (array_slice($appointmentRows, 0, 6) as $appointment): ?>
+                                                <?php
+                                                    $status = strtolower((string) $appointment['status']);
+                                                    $statusClass = match ($status) {
+                                                        'confirmed' => 'confirmed',
+                                                        'in_progress' => 'in-progress',
+                                                        'completed' => 'completed',
+                                                        'cancelled' => 'cancelled',
+                                                        default => 'pending',
+                                                    };
+                                                ?>
+                                                <div class="receptionist-appointment">
+                                                    <time><?= e(date('g:i A', strtotime((string) $appointment['start_time']))) ?></time>
+                                                    <span class="receptionist-customer-avatar"><?= e($dashboardInitials((string) $appointment['full_name'])) ?></span>
+                                                    <span class="receptionist-appointment-info">
+                                                        <strong><?= e((string) $appointment['full_name']) ?></strong>
+                                                        <small><?= e((string) $appointment['service']) ?> · <?= e((string) $appointment['therapist']) ?></small>
+                                                    </span>
+                                                    <span class="manager-appointment-status <?= e($statusClass) ?>"><?= e(ucwords(str_replace('_', ' ', $status))) ?></span>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </article>
+
+                                <article class="receptionist-panel">
+                                    <div class="receptionist-panel-heading">
+                                        <h2>Today's Schedule</h2>
+                                        <a href="<?= e(APP_URL) ?>/?route=calendar">Calendar</a>
+                                    </div>
+                                    <?php if ($appointmentRows === []): ?>
+                                        <p class="manager-empty">Your schedule is clear.</p>
+                                    <?php else: ?>
+                                        <div class="receptionist-schedule-list">
+                                            <?php foreach (array_slice($appointmentRows, 0, 5) as $appointment): ?>
+                                                <div class="receptionist-schedule-item">
+                                                    <time><?= e(date('g:i A', strtotime((string) $appointment['start_time']))) ?></time>
+                                                    <span>
+                                                        <strong><?= e((string) $appointment['service']) ?></strong>
+                                                        <small><?= e((string) $appointment['full_name']) ?> · <?= e((string) $appointment['room']) ?></small>
+                                                    </span>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </article>
+
+                                <article class="receptionist-panel">
+                                    <div class="receptionist-panel-heading">
+                                        <h2>Needs Confirmation</h2>
+                                        <span class="receptionist-alert-count"><?= number_format($pendingAppointments) ?></span>
+                                    </div>
+                                    <?php if ($receptionistAlerts === []): ?>
+                                        <p class="manager-empty">No pending appointments.</p>
+                                    <?php else: ?>
+                                        <div class="receptionist-alert-list">
+                                            <?php foreach ($receptionistAlerts as $alert): ?>
+                                                <a class="receptionist-alert" href="<?= e(APP_URL) ?>/?route=appointments">
+                                                    <span class="receptionist-alert-icon">!</span>
+                                                    <span>
+                                                        <strong><?= e((string) $alert['full_name']) ?></strong>
+                                                        <small>Pending · <?= e(date('g:i A', strtotime((string) $alert['start_time']))) ?></small>
+                                                    </span>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </article>
+                            </section>
+
+                            <section class="receptionist-bottom-grid">
+                                <article class="receptionist-panel receptionist-customers-panel">
+                                    <div class="receptionist-panel-heading">
+                                        <h2>Recent Customers</h2>
+                                        <a href="<?= e(APP_URL) ?>/?route=customers">View all</a>
+                                    </div>
+                                    <?php if ($recentCustomers === []): ?>
+                                        <p class="manager-empty">No customers have been added yet.</p>
+                                    <?php else: ?>
+                                        <div class="receptionist-customer-list">
+                                            <?php foreach ($recentCustomers as $customer): ?>
+                                                <?php $createdAt = strtotime((string) $customer['created_at']); ?>
+                                                <?php $customerTime = $createdAt === false ? '—' : (date('Y-m-d', $createdAt) === date('Y-m-d') ? date('g:i A', $createdAt) : date('M j', $createdAt)); ?>
+                                                <div class="receptionist-customer">
+                                                    <span class="receptionist-customer-avatar"><?= e($dashboardInitials((string) $customer['full_name'])) ?></span>
+                                                    <strong><?= e((string) $customer['full_name']) ?></strong>
+                                                    <time><?= e($customerTime) ?></time>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </article>
+
+                                <article class="receptionist-panel receptionist-quick-actions">
+                                    <div class="receptionist-panel-heading"><h2>Quick Actions</h2></div>
+                                    <div class="receptionist-action-grid">
+                                        <a href="<?= e(APP_URL) ?>/?route=appointments">
+                                            <span>＋</span><strong>New Appointment</strong>
+                                        </a>
+                                        <a href="<?= e(APP_URL) ?>/?route=customers">
+                                            <span>◉</span><strong>Customers</strong>
+                                        </a>
+                                        <a href="<?= e(APP_URL) ?>/?route=calendar">
+                                            <span>▦</span><strong>Check Schedule</strong>
+                                        </a>
+                                        <a href="<?= e(APP_URL) ?>/?route=rooms">
+                                            <span>⌂</span><strong>Room Status</strong>
+                                        </a>
+                                        <a href="<?= e(APP_URL) ?>/?route=pos">
+                                            <span>$</span><strong>POS &amp; Billing</strong>
+                                        </a>
+                                        <a href="<?= e(APP_URL) ?>/?route=customer-history">
+                                            <span>◷</span><strong>Customer History</strong>
+                                        </a>
+                                    </div>
+                                </article>
+                            </section>
+                        </div>
                         <?php else: ?>
                             <div class="manager-appointment-list">
                                 <?php foreach ($appointmentRows as $appointment): ?>
@@ -239,7 +411,7 @@ $dashboardInitials = static function (string $name): string {
             <?php else: ?>
             <div class="content-wrap">
                 <h1 class="page-title">DASHBOARD OVERVIEW</h1>
-                <div class="page-date">May 16, 2026</div>
+                <div class="page-date"><?= e(date('F j, Y')) ?></div>
 
                 <section class="stats-grid">
                     <article class="stat-card revenue">
@@ -285,20 +457,26 @@ $dashboardInitials = static function (string $name): string {
                             <span>Revenue trend</span>
                             <span class="panel-meta">Last 7 days</span>
                         </div>
-                        <svg class="chart-svg" viewBox="0 0 430 180" preserveAspectRatio="none" aria-label="Revenue trend chart">
+                        <svg class="chart-svg revenue-chart" viewBox="0 0 470 190" preserveAspectRatio="none" role="img" aria-label="Revenue trend for the last seven days">
                             <defs>
-                                <linearGradient id="chartArea" x1="0" x2="0" y1="0" y2="1">
-                                    <stop offset="0%" stop-color="#2d7a58" stop-opacity="0.18"/>
-                                    <stop offset="100%" stop-color="#2d7a58" stop-opacity="0.02"/>
+                                <linearGradient id="revenueChartArea" x1="0" x2="0" y1="0" y2="1">
+                                    <stop offset="0%" stop-color="#39b8bc" stop-opacity="0.28"/>
+                                    <stop offset="100%" stop-color="#39b8bc" stop-opacity="0.02"/>
                                 </linearGradient>
                             </defs>
-                            <path d="M 18 140 L 93 112 L 168 95 L 243 70 L 318 82 L 393 58 L 393 150 L 18 150 Z" fill="url(#chartArea)" opacity="0.8"></path>
-                            <path d="M 18 140 L 93 112 L 168 95 L 243 70 L 318 82 L 393 58" fill="none" stroke="#2c7755" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-                            <?php foreach ($chartPoints as $point): ?>
-                                <circle cx="<?= e((string) $point[0]) ?>" cy="<?= e((string) $point[1]) ?>" r="3.5" fill="#2c7755" />
+                            <?php foreach ($chartTicks as $tick): ?>
+                                <line class="revenue-chart-gridline" x1="52" x2="458" y1="<?= e((string) $tick['y']) ?>" y2="<?= e((string) $tick['y']) ?>" />
+                                <text class="revenue-chart-axis-label" x="44" y="<?= e((string) ($tick['y'] + 4)) ?>" text-anchor="end"><?= e($tick['label']) ?></text>
+                            <?php endforeach; ?>
+                            <path class="revenue-chart-area" d="<?= e($chartAreaPath) ?>" fill="url(#revenueChartArea)" />
+                            <path class="revenue-chart-line" d="<?= e($chartPath) ?>" pathLength="1" />
+                            <?php foreach ($chartPoints as $index => $point): ?>
+                                <circle class="revenue-chart-point" cx="<?= e((string) $point[0]) ?>" cy="<?= e((string) $point[1]) ?>" r="3.5" style="--point-index: <?= (int) $index ?>">
+                                    <title><?= e($point[2]) ?>: $<?= e(number_format((float) $point[3], 2)) ?></title>
+                                </circle>
                             <?php endforeach; ?>
                             <?php foreach ($chartPoints as $point): ?>
-                                <text x="<?= e((string) $point[0]) ?>" y="170" text-anchor="middle" font-size="10" fill="#74807a"><?= e($point[2]) ?></text>
+                                <text class="revenue-chart-date-label" x="<?= e((string) $point[0]) ?>" y="179" text-anchor="middle"><?= e($point[2]) ?></text>
                             <?php endforeach; ?>
                         </svg>
                     </article>

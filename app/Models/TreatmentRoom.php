@@ -7,12 +7,40 @@ final class TreatmentRoom
 	{
 	}
 
-	public function all(): array
+	public function all(bool $ascending = false): array
 	{
 		$stmt = $this->db->query(
-			'SELECT id, room_code, room_name, room_type, capacity, status, notes
-			 FROM treatment_rooms
-			 ORDER BY id DESC'
+			'SELECT r.id, r.room_code, r.room_name, r.room_type, r.capacity, r.status, r.notes,
+					(SELECT a.id
+					 FROM appointments a
+					 WHERE a.room_id = r.id
+					   AND a.appointment_date = CURDATE()
+					   AND a.start_time <= CURTIME()
+					   AND a.end_time > CURTIME()
+					   AND a.status IN (\'confirmed\', \'in_progress\')
+					 ORDER BY a.start_time DESC
+					 LIMIT 1) AS current_appointment_id,
+					(SELECT t.full_name
+					 FROM appointments a
+					 LEFT JOIN therapists t ON t.id = a.therapist_id
+					 WHERE a.room_id = r.id
+					   AND a.appointment_date = CURDATE()
+					   AND a.start_time <= CURTIME()
+					   AND a.end_time > CURTIME()
+					   AND a.status IN (\'confirmed\', \'in_progress\')
+					 ORDER BY a.start_time DESC
+					 LIMIT 1) AS current_therapist,
+					(SELECT TIME_FORMAT(a.end_time, \'%l:%i%p\')
+					 FROM appointments a
+					 WHERE a.room_id = r.id
+					   AND a.appointment_date = CURDATE()
+					   AND a.start_time <= CURTIME()
+					   AND a.end_time > CURTIME()
+					   AND a.status IN (\'confirmed\', \'in_progress\')
+					 ORDER BY a.start_time DESC
+					 LIMIT 1) AS occupied_until
+			 FROM treatment_rooms r
+			 ORDER BY r.id ' . ($ascending ? 'ASC' : 'DESC')
 		);
 
 		return array_map(static function (array $room): array {
@@ -23,6 +51,10 @@ final class TreatmentRoom
 				'under_maintenance' => ['label' => 'Maintenance', 'class' => 'maintenance'],
 			];
 			$status = $statusMap[$room['status']] ?? $statusMap['available'];
+			$isOccupied = !empty($room['current_appointment_id']) && !in_array($room['status'], ['cleaning', 'under_maintenance'], true);
+			if ($isOccupied) {
+				$status = $statusMap['occupied'];
+			}
 
 			return [
 				'id' => (int) $room['id'],
@@ -31,6 +63,8 @@ final class TreatmentRoom
 				'capacity' => (int) $room['capacity'],
 				'status' => $status['label'],
 				'status_class' => $status['class'],
+				'therapist' => $isOccupied ? ((string) ($room['current_therapist'] ?? '') ?: 'Guest appointment') : '',
+				'occupied_until' => $isOccupied ? (string) $room['occupied_until'] : '',
 			];
 		}, $stmt->fetchAll(PDO::FETCH_ASSOC));
 	}

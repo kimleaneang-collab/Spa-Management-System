@@ -18,6 +18,7 @@ require_once __DIR__ . '/app/controllers/ProductController.php';
 require_once __DIR__ . '/app/controllers/ReportController.php';
 require_once __DIR__ . '/app/controllers/UserController.php';
 require_once __DIR__ . '/app/controllers/SettingsController.php';
+require_once __DIR__ . '/app/controllers/ProfileController.php';
 
 // Read the requested page; unauthenticated visitors start at the login route.
 $route = trim(
@@ -46,6 +47,7 @@ switch ($route) {
         break;
 
     case 'appointments':
+    case 'new-appointment':
         (new AppointmentController())->index();
         break;
 
@@ -55,6 +57,10 @@ switch ($route) {
 
     case 'pos':
         (new BillingController())->index();
+        break;
+
+    case 'receipts':
+        (new BillingController())->receipts();
         break;
 
     case 'services':
@@ -70,6 +76,7 @@ switch ($route) {
         break;
 
     case 'customers':
+    case 'register-customer':
         (new CustomerController())->index();
         break;
 
@@ -117,6 +124,18 @@ switch ($route) {
 
     case 'settings':
         (new SettingsController())->general();
+        break;
+
+    case 'profile':
+        (new ProfileController())->therapist();
+        break;
+
+    case 'change-password':
+        (new ProfileController())->changePassword();
+        break;
+
+    case 'cashier-profile':
+        (new ProfileController())->cashier();
         break;
 
     case 'backup':

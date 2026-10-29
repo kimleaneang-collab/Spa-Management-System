@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarMenu = document.querySelector('.sidebar-menu');
     if (sidebarMenu) {
         const linksByRoute = new Map();
+        const therapistAccountSection = sidebarMenu.querySelector('.nav-section[data-label="Account"]');
 
         sidebarMenu.querySelectorAll('.nav-item').forEach((link) => {
             const route = new URL(link.href, window.location.origin).searchParams.get('route');
@@ -89,6 +90,136 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (section.children.length > 0) sidebarMenu.append(section);
+            });
+        } else if ((currentRole === 'staff' || currentRole === 'therapist') && document.body.classList.contains('therapist-dashboard-page')) {
+            const therapistGroups = [
+                { label: 'Main', routes: ['dashboard', 'appointments', 'customers', 'customer-history', 'calendar'] },
+                { label: 'Work', routes: ['services', 'products'] },
+            ];
+            const therapistLabels = {
+                appointments: 'My Appointments',
+                customers: 'My Customer',
+                'customer-history': 'Treatment History',
+                calendar: 'My Schedule',
+                services: 'Service',
+            };
+            Object.entries(therapistLabels).forEach(([route, label]) => {
+                const link = linksByRoute.get(route);
+                const text = link?.querySelector('span:last-child');
+                if (text) text.textContent = label;
+            });
+
+            sidebarMenu.replaceChildren();
+            therapistGroups.forEach((group) => {
+                const section = document.createElement('div');
+                section.className = 'nav-section';
+                section.dataset.label = group.label;
+                group.routes.forEach((route) => {
+                    const link = linksByRoute.get(route);
+                    if (link) section.append(link);
+                });
+                if (section.children.length > 0) sidebarMenu.append(section);
+            });
+            if (therapistAccountSection) {
+                sidebarMenu.append(therapistAccountSection);
+            }
+        } else if (currentRole === 'receptionist') {
+            const dashboardUrl = linksByRoute.get('dashboard')?.href;
+            const addReceptionistLink = (route, label, icon) => {
+                if (linksByRoute.has(route) || !dashboardUrl) return;
+                const link = document.createElement('a');
+                link.className = 'nav-item';
+                link.href = `${dashboardUrl.split('?')[0]}?route=${route}`;
+                link.innerHTML = `<span class="nav-icon">${icon}</span><span>${label}</span>`;
+                if (new URL(window.location.href).searchParams.get('route') === route) {
+                    link.classList.add('active');
+                }
+                linksByRoute.set(route, link);
+            };
+            addReceptionistLink('calendar', 'Calendar', '▦');
+            addReceptionistLink('new-appointment', 'New Appointment', '＋');
+            addReceptionistLink('register-customer', 'Register Customer', '♙');
+
+            const receptionistGroups = [
+                { label: 'Main', routes: ['dashboard', 'appointments', 'customers', 'calendar', 'rooms'] },
+                { label: 'Quick Actions', routes: ['new-appointment', 'register-customer'] },
+            ];
+
+            sidebarMenu.replaceChildren();
+            receptionistGroups.forEach((group) => {
+                const section = document.createElement('div');
+                section.className = 'nav-section';
+                section.dataset.label = group.label;
+                group.routes.forEach((route) => {
+                    const link = linksByRoute.get(route);
+                    if (link) section.append(link);
+                });
+                if (section.children.length > 0) sidebarMenu.append(section);
+            });
+        } else if (currentRole === 'cashier') {
+            document.body.dataset.role = 'cashier';
+            const dashboardLink = linksByRoute.get('dashboard');
+            const dashboardUrl = dashboardLink
+                ? new URL(dashboardLink.href)
+                : new URL(window.location.href);
+            const currentUrl = new URL(window.location.href);
+            const currentRoute = currentUrl.searchParams.get('route') || 'dashboard';
+            const createCashierLink = (route, label, icon, hash = '') => {
+                const link = document.createElement('a');
+                const targetUrl = new URL(dashboardUrl.pathname, dashboardUrl.origin);
+                targetUrl.searchParams.set('route', route);
+                targetUrl.hash = hash;
+                link.className = 'nav-item';
+                link.href = targetUrl.href;
+                const anchor = document.createElement('span');
+                anchor.className = 'nav-icon';
+                anchor.setAttribute('aria-hidden', 'true');
+                anchor.textContent = icon;
+                const text = document.createElement('span');
+                text.textContent = label;
+                link.append(anchor, text);
+
+                const isAnchorActive = hash !== '' && currentUrl.hash === `#${hash}`;
+                const isRouteActive = hash === '' && route === currentRoute && currentUrl.hash === '';
+                if (isAnchorActive || isRouteActive) link.classList.add('active');
+                return link;
+            };
+            const cashierGroups = [
+                {
+                    label: 'Main',
+                    links: [
+                        ['dashboard', 'Dashboard', '⌂', ''],
+                        ['pos', 'POS / New Sale', '▤', ''],
+                        ['dashboard', 'Transactions', '▧', 'recent-transactions'],
+                        ['customers', 'Customers', '♙', ''],
+                        ['receipts', 'Receipt', '▤', ''],
+                    ],
+                },
+                {
+                    label: 'Quick Access',
+                    links: [
+                        ['services', 'Service', '✦', ''],
+                        ['products', 'Products', '▣', ''],
+                        ['memberships', 'Memberships', '◌', ''],
+                    ],
+                },
+                {
+                    label: 'Settings',
+                    links: [
+                        ['cashier-profile', 'My Profile', '◎', ''],
+                    ],
+                },
+            ];
+
+            sidebarMenu.replaceChildren();
+            cashierGroups.forEach((group) => {
+                const section = document.createElement('div');
+                section.className = 'nav-section';
+                section.dataset.label = group.label;
+                group.links.forEach(([route, label, icon, hash]) => {
+                    section.append(createCashierLink(route, label, icon, hash));
+                });
+                sidebarMenu.append(section);
             });
         } else {
             const adminGroups = [
@@ -236,6 +367,316 @@ document.addEventListener('DOMContentLoaded', () => {
     const openModalButtons = document.querySelectorAll('[data-open-modal]');
     const closeModalButtons = document.querySelectorAll('[data-close-modal]');
 
+    const bookingForm = document.querySelector('[data-booking-form]');
+    if (bookingForm) {
+        const customerPickerSearch = bookingForm.querySelector('[data-customer-picker-search]');
+        const customerPickerOptions = [...bookingForm.querySelectorAll('#appointment-customer-options option')];
+        const customerIdField = bookingForm.querySelector('[data-booking-customer]');
+        const customerByName = new Map(
+            customerPickerOptions.map((option) => [option.value.trim().toLocaleLowerCase(), option.dataset.customerId || ''])
+        );
+        const matchCustomerName = (value) => {
+            const search = value.trim().toLocaleLowerCase();
+            if (!search) return '';
+            const exactId = customerByName.get(search);
+            if (exactId) return exactId;
+            const matches = customerPickerOptions.filter((option) => option.value.trim().toLocaleLowerCase().includes(search));
+            return matches.length === 1 ? (matches[0].dataset.customerId || '') : '';
+        };
+        const syncCustomerPicker = () => {
+            if (!customerPickerSearch || !customerIdField) return;
+            customerIdField.value = matchCustomerName(customerPickerSearch.value);
+            customerPickerSearch.setCustomValidity(
+                customerPickerSearch.value.trim() && !customerIdField.value
+                    ? 'Choose a customer from the suggestions.'
+                    : ''
+            );
+        };
+        customerPickerSearch?.addEventListener('input', syncCustomerPicker);
+        customerPickerSearch?.addEventListener('change', syncCustomerPicker);
+        customerPickerSearch?.addEventListener('blur', syncCustomerPicker);
+        syncCustomerPicker();
+
+        const summaryTargets = {
+            customer: customerPickerSearch,
+            service: bookingForm.querySelector('[data-booking-service]'),
+            therapist: bookingForm.querySelector('[name="therapist_id"]'),
+            room: bookingForm.querySelector('[name="room_id"]'),
+            date: bookingForm.querySelector('[name="appointment_date"]'),
+            time: bookingForm.querySelector('[name="start_time"]'),
+        };
+        const updateBookingSummary = () => {
+            Object.entries(summaryTargets).forEach(([key, field]) => {
+                const target = document.querySelector(`[data-summary-${key}]`);
+                if (!target || !field) return;
+                const selected = field instanceof HTMLSelectElement ? field.selectedOptions[0] : null;
+                const rawValue = selected ? selected.textContent.trim() : field.value;
+                if (key === 'date' && rawValue) {
+                    const parsedDate = new Date(`${rawValue}T00:00:00`);
+                    target.textContent = Number.isNaN(parsedDate.getTime())
+                        ? rawValue
+                        : parsedDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                } else if (key === 'time' && rawValue) {
+                    const [hour, minute] = rawValue.split(':').map(Number);
+                    if (Number.isFinite(hour) && Number.isFinite(minute)) {
+                        target.textContent = new Date(2000, 0, 1, hour, minute).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+                    } else {
+                        target.textContent = rawValue;
+                    }
+                } else {
+                    target.textContent = selected && selected.value
+                        ? rawValue
+                        : (key === 'customer' || key === 'service' ? `Select ${key}` : 'Not selected');
+                }
+            });
+
+            const service = summaryTargets.service;
+            const selectedService = service?.selectedOptions[0];
+            const duration = bookingForm.querySelector('[data-booking-duration]');
+            const price = document.querySelector('[data-summary-price]');
+            if (duration) {
+                duration.value = selectedService?.value
+                    ? `${selectedService.dataset.duration || '—'} minutes`
+                    : 'Select a service';
+            }
+            if (price) {
+                const servicePrice = Number(selectedService?.dataset.price);
+                price.textContent = selectedService?.value && Number.isFinite(servicePrice)
+                    ? new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(servicePrice)
+                    : '—';
+            }
+        };
+
+        Object.values(summaryTargets).forEach((field) => field?.addEventListener('change', updateBookingSummary));
+        updateBookingSummary();
+    }
+
+    const customerSearch = document.querySelector('[data-customer-search]');
+    const membershipFilter = document.querySelector('[data-membership-filter]');
+    const customerCards = [...document.querySelectorAll('.receptionist-customer-card')];
+    const customerNoResults = document.querySelector('[data-customer-no-results]');
+    const filterCustomers = () => {
+        const query = customerSearch?.value.trim().toLocaleLowerCase() || '';
+        const membership = membershipFilter?.value || '';
+        customerCards.forEach((card) => {
+            const matchesQuery = card.textContent.toLocaleLowerCase().includes(query);
+            const matchesMembership = !membership || card.dataset.membership === membership;
+            card.hidden = !matchesQuery || !matchesMembership;
+        });
+        if (customerNoResults) {
+            customerNoResults.hidden = customerCards.length === 0 || customerCards.some((card) => !card.hidden);
+        }
+    };
+    customerSearch?.addEventListener('input', filterCustomers);
+    membershipFilter?.addEventListener('change', filterCustomers);
+
+    const cashierCustomerSearch = document.querySelector('[data-cashier-customer-search]');
+    const cashierCustomerRows = [...document.querySelectorAll('[data-cashier-customer-row]')];
+    const cashierCustomerNoResults = document.querySelector('[data-cashier-customer-no-results]');
+    cashierCustomerSearch?.addEventListener('input', () => {
+        const query = cashierCustomerSearch.value.trim().toLocaleLowerCase();
+        let visibleCount = 0;
+        cashierCustomerRows.forEach((row) => {
+            row.hidden = !row.textContent.toLocaleLowerCase().includes(query);
+            if (!row.hidden) visibleCount += 1;
+        });
+        if (cashierCustomerNoResults) cashierCustomerNoResults.hidden = visibleCount > 0;
+    });
+
+    document.querySelectorAll('[data-cashier-customer-view]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const modal = document.getElementById('cashier-customer-details-modal');
+            if (!modal) return;
+            ['name', 'phone', 'membership', 'visits', 'spent', 'currency'].forEach((field) => {
+                const target = modal.querySelector(`[data-cashier-detail="${field}"]`);
+                if (target) target.textContent = button.dataset[field] || '';
+            });
+            modal.classList.remove('hidden');
+            modal.setAttribute('aria-hidden', 'false');
+        });
+    });
+
+    const cashierReceiptSearch = document.querySelector('[data-cashier-receipt-search]');
+    const cashierReceiptRows = [...document.querySelectorAll('[data-cashier-receipt-row]')];
+    const cashierReceiptNoResults = document.querySelector('[data-cashier-receipt-no-results]');
+    cashierReceiptSearch?.addEventListener('input', () => {
+        const query = cashierReceiptSearch.value.trim().toLocaleLowerCase();
+        let visibleCount = 0;
+        cashierReceiptRows.forEach((row) => {
+            row.hidden = !row.textContent.toLocaleLowerCase().includes(query);
+            if (!row.hidden) visibleCount += 1;
+        });
+        if (cashierReceiptNoResults) cashierReceiptNoResults.hidden = visibleCount > 0;
+    });
+
+    document.querySelectorAll('[data-open-modal="cashier-receipt-modal"]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const modal = document.getElementById('cashier-receipt-modal');
+            if (!modal) return;
+            ['receiptNo', 'customer', 'date', 'items', 'method', 'amount', 'currency'].forEach((field) => {
+                const target = modal.querySelector(`[data-receipt-detail="${field}"]`);
+                if (target) target.textContent = button.dataset[field] || '';
+            });
+        });
+    });
+
+    const printCashierReceipt = document.querySelector('[data-print-cashier-receipt]');
+    printCashierReceipt?.addEventListener('click', () => {
+        document.body.classList.add('cashier-printing-receipt');
+        window.print();
+    });
+    window.addEventListener('afterprint', () => {
+        document.body.classList.remove('cashier-printing-receipt');
+    });
+
+    const therapistCustomerSearch = document.querySelector('[data-therapist-customer-search]');
+    const therapistCustomerCards = [...document.querySelectorAll('[data-therapist-customer-card]')];
+    const therapistCustomerEmpty = document.querySelector('[data-therapist-customer-empty]');
+    therapistCustomerSearch?.addEventListener('input', () => {
+        const query = therapistCustomerSearch.value.trim().toLocaleLowerCase();
+        let visibleCount = 0;
+        therapistCustomerCards.forEach((card) => {
+            card.hidden = !card.textContent.toLocaleLowerCase().includes(query);
+            if (!card.hidden) visibleCount += 1;
+        });
+        if (therapistCustomerEmpty) {
+            therapistCustomerEmpty.hidden = therapistCustomerCards.length === 0 || visibleCount > 0;
+        }
+    });
+
+    const therapistHistorySearch = document.querySelector('[data-therapist-history-search]');
+    const therapistHistoryRows = [...document.querySelectorAll('[data-therapist-history-row]')];
+    const therapistHistoryNoResults = document.querySelector('.therapist-history-no-results');
+    therapistHistorySearch?.addEventListener('input', () => {
+        const query = therapistHistorySearch.value.trim().toLocaleLowerCase();
+        let visibleCount = 0;
+        therapistHistoryRows.forEach((row) => {
+            row.hidden = !row.textContent.toLocaleLowerCase().includes(query);
+            if (!row.hidden) visibleCount += 1;
+        });
+        if (therapistHistoryNoResults) {
+            therapistHistoryNoResults.hidden = visibleCount > 0;
+        }
+    });
+
+    const therapistScheduleSearch = document.querySelector('[data-therapist-schedule-search]');
+    const therapistScheduleBookings = [...document.querySelectorAll('[data-schedule-booking]')];
+    const therapistScheduleEmpty = document.querySelector('[data-therapist-calendar-empty]');
+    therapistScheduleSearch?.addEventListener('input', () => {
+        const query = therapistScheduleSearch.value.trim().toLocaleLowerCase();
+        let visibleCount = 0;
+        therapistScheduleBookings.forEach((booking) => {
+            booking.hidden = !((booking.dataset.scheduleSearch || booking.textContent).toLocaleLowerCase().includes(query));
+            if (!booking.hidden) visibleCount += 1;
+        });
+        if (therapistScheduleEmpty) {
+            therapistScheduleEmpty.hidden = query === '' || visibleCount > 0;
+        }
+    });
+
+    const therapistServiceSearch = document.querySelector('[data-therapist-service-search]');
+    const therapistServiceCards = [...document.querySelectorAll('[data-service-card]')];
+    const therapistServiceEmpty = document.querySelector('[data-therapist-service-empty]');
+    therapistServiceSearch?.addEventListener('input', () => {
+        const query = therapistServiceSearch.value.trim().toLocaleLowerCase();
+        let visibleCount = 0;
+        therapistServiceCards.forEach((card) => {
+            card.hidden = !((card.dataset.search || card.textContent).toLocaleLowerCase().includes(query));
+            if (!card.hidden) visibleCount += 1;
+        });
+        if (therapistServiceEmpty) {
+            therapistServiceEmpty.hidden = therapistServiceCards.length === 0 || visibleCount > 0;
+        }
+    });
+
+    const therapistProductSearch = document.querySelector('[data-therapist-product-search]');
+    const therapistProductCards = [...document.querySelectorAll('[data-therapist-product-card]')];
+    const therapistProductsEmpty = document.querySelector('[data-therapist-products-empty]');
+    therapistProductSearch?.addEventListener('input', () => {
+        const query = therapistProductSearch.value.trim().toLocaleLowerCase();
+        let visibleCount = 0;
+        therapistProductCards.forEach((card) => {
+            card.hidden = !((card.dataset.search || card.textContent).toLocaleLowerCase().includes(query));
+            if (!card.hidden) visibleCount += 1;
+        });
+        if (therapistProductsEmpty) {
+            therapistProductsEmpty.hidden = therapistProductCards.length === 0 || visibleCount > 0;
+        }
+    });
+
+    const appointmentFilters = [...document.querySelectorAll('[data-appointment-filter]')];
+    const appointmentRows = [...document.querySelectorAll('tbody tr[data-appointment-status]')];
+    const appointmentSearch = document.querySelector('[data-appointment-search]');
+    const appointmentDateFilter = document.querySelector('[data-appointment-date-filter]');
+    const appointmentStatusFilter = document.querySelector('[data-appointment-status-filter]');
+    const appointmentNoResults = document.querySelector('.appointment-no-results');
+    const therapistAppointmentsPage = document.body.classList.contains('therapist-dashboard-page');
+    let activeAppointmentFilter = therapistAppointmentsPage ? 'today' : 'all';
+    const todayDate = () => {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    };
+    const filterAppointments = () => {
+        const query = appointmentSearch?.value.trim().toLocaleLowerCase() || '';
+        const selectedDate = appointmentDateFilter?.value || '';
+        const selectedStatus = appointmentStatusFilter?.value || 'all';
+        let visibleCount = 0;
+        appointmentRows.forEach((row) => {
+            const matchesSearch = !query || (row.dataset.appointmentSearch || row.textContent).toLocaleLowerCase().includes(query);
+            const appointmentDate = row.dataset.appointmentDate || '';
+            const today = todayDate();
+            const matchesDate = therapistAppointmentsPage
+                ? activeAppointmentFilter === 'today'
+                    ? appointmentDate === today
+                    : activeAppointmentFilter === 'upcoming'
+                        ? appointmentDate > today && row.dataset.appointmentStatus !== 'cancelled'
+                        : activeAppointmentFilter === 'past'
+                            ? appointmentDate < today && row.dataset.appointmentStatus !== 'cancelled'
+                            : true
+                : activeAppointmentFilter === 'today'
+                    ? appointmentDate === today
+                    : !selectedDate || appointmentDate === selectedDate;
+            const tabStatus = activeAppointmentFilter === 'all' || activeAppointmentFilter === 'today'
+                ? 'all'
+                : therapistAppointmentsPage && activeAppointmentFilter !== 'cancelled'
+                    ? 'all'
+                    : activeAppointmentFilter;
+            const matchesStatus = (tabStatus === 'all' || row.dataset.appointmentStatus === tabStatus)
+                && (selectedStatus === 'all' || row.dataset.appointmentStatus === selectedStatus)
+                && (!therapistAppointmentsPage || activeAppointmentFilter === 'cancelled' || row.dataset.appointmentStatus !== 'cancelled');
+            row.hidden = !matchesSearch || !matchesDate || !matchesStatus;
+            if (!row.hidden) visibleCount += 1;
+        });
+        if (appointmentNoResults) appointmentNoResults.hidden = visibleCount > 0;
+    };
+    appointmentFilters.forEach((filter) => {
+        filter.addEventListener('click', () => {
+            activeAppointmentFilter = filter.dataset.appointmentFilter || 'all';
+            appointmentFilters.forEach((button) => button.classList.toggle('active', button === filter));
+            if (appointmentStatusFilter) {
+                appointmentStatusFilter.value = activeAppointmentFilter === 'today' ? 'all' : activeAppointmentFilter;
+            }
+            filterAppointments();
+        });
+    });
+    appointmentSearch?.addEventListener('input', filterAppointments);
+    appointmentDateFilter?.addEventListener('change', filterAppointments);
+    appointmentStatusFilter?.addEventListener('change', () => {
+        activeAppointmentFilter = 'all';
+        appointmentFilters.forEach((button) => button.classList.toggle('active', button.dataset.appointmentFilter === 'all'));
+        filterAppointments();
+    });
+    if (appointmentRows.length > 0) filterAppointments();
+
+    document.querySelectorAll('[data-appointment-view]').forEach((button) => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('[data-appointment-detail]').forEach((detail) => {
+                const key = detail.dataset.appointmentDetail;
+                detail.textContent = key ? button.dataset[key] || '' : '';
+            });
+        });
+    });
+
     const profilePhotoInput = document.getElementById('user-profile-photo-input');
     const profilePhotoImage = document.getElementById('user-profile-photo-image');
     const profilePhotoInitials = document.getElementById('user-profile-photo-initials');
@@ -251,6 +692,38 @@ document.addEventListener('DOMContentLoaded', () => {
         profilePhotoImage.hidden = false;
         profilePhotoInitials.hidden = true;
         profilePhotoFilename.textContent = file.name;
+    });
+
+    const customerPhotoInput = document.querySelector('[data-customer-photo]');
+    const customerPhotoPreview = document.querySelector('[data-customer-photo-preview]');
+    const customerPhotoPrompt = document.querySelector('[data-customer-photo-prompt]');
+    const customerPhotoError = document.querySelector('[data-customer-photo-error]');
+    let customerPhotoObjectUrl = '';
+    customerPhotoInput?.addEventListener('change', () => {
+        const file = customerPhotoInput.files?.[0];
+        if (!file || !customerPhotoPreview || !customerPhotoPrompt || !customerPhotoError) return;
+
+        customerPhotoError.hidden = true;
+        customerPhotoError.textContent = '';
+        if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+            customerPhotoError.textContent = file.size > 5 * 1024 * 1024
+                ? 'Choose a photo no larger than 5 MB.'
+                : 'Choose a PNG or JPG photo.';
+            customerPhotoError.hidden = false;
+            customerPhotoInput.value = '';
+            if (customerPhotoObjectUrl) URL.revokeObjectURL(customerPhotoObjectUrl);
+            customerPhotoObjectUrl = '';
+            customerPhotoPreview.removeAttribute('src');
+            customerPhotoPreview.hidden = true;
+            customerPhotoPrompt.hidden = false;
+            return;
+        }
+
+        if (customerPhotoObjectUrl) URL.revokeObjectURL(customerPhotoObjectUrl);
+        customerPhotoObjectUrl = URL.createObjectURL(file);
+        customerPhotoPreview.src = customerPhotoObjectUrl;
+        customerPhotoPreview.hidden = false;
+        customerPhotoPrompt.hidden = true;
     });
 
     openModalButtons.forEach((button) => {
@@ -305,6 +778,62 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     serviceSearch?.addEventListener('input', filterServices);
     serviceCategory?.addEventListener('change', filterServices);
+
+    const cashierServiceSearch = document.querySelector('[data-cashier-service-search]');
+    const cashierServiceCards = [...document.querySelectorAll('[data-cashier-service-card]')];
+    const cashierServiceCategories = [...document.querySelectorAll('[data-cashier-service-category]')];
+    const cashierServiceNoResults = document.querySelector('[data-cashier-service-no-results]');
+    let activeCashierServiceCategory = 'all';
+    const filterCashierServices = () => {
+        const query = cashierServiceSearch?.value.trim().toLocaleLowerCase() || '';
+        let visibleCount = 0;
+        cashierServiceCards.forEach((card) => {
+            const matchesQuery = (card.dataset.search || '').includes(query);
+            const matchesCategory = activeCashierServiceCategory === 'all'
+                || card.dataset.category === activeCashierServiceCategory;
+            card.hidden = !matchesQuery || !matchesCategory;
+            if (!card.hidden) visibleCount += 1;
+        });
+        if (cashierServiceNoResults) cashierServiceNoResults.hidden = visibleCount > 0;
+    };
+    cashierServiceSearch?.addEventListener('input', filterCashierServices);
+    cashierServiceCategories.forEach((button) => {
+        button.addEventListener('click', () => {
+            activeCashierServiceCategory = button.dataset.cashierServiceCategory || 'all';
+            cashierServiceCategories.forEach((categoryButton) => {
+                const active = categoryButton === button;
+                categoryButton.classList.toggle('active', active);
+                categoryButton.setAttribute('aria-pressed', String(active));
+            });
+            filterCashierServices();
+        });
+    });
+
+    const cashierProductSearch = document.querySelector('[data-cashier-product-search]');
+    const cashierProductRows = [...document.querySelectorAll('[data-cashier-product-row]')];
+    const cashierProductNoResults = document.querySelector('[data-cashier-product-no-results]');
+    cashierProductSearch?.addEventListener('input', () => {
+        const query = cashierProductSearch.value.trim().toLocaleLowerCase();
+        let visibleCount = 0;
+        cashierProductRows.forEach((row) => {
+            row.hidden = !row.textContent.toLocaleLowerCase().includes(query);
+            if (!row.hidden) visibleCount += 1;
+        });
+        if (cashierProductNoResults) cashierProductNoResults.hidden = visibleCount > 0;
+    });
+
+    const cashierMembershipSearch = document.querySelector('[data-cashier-membership-search]');
+    const cashierMembershipRows = [...document.querySelectorAll('[data-cashier-membership-row]')];
+    const cashierMembershipNoResults = document.querySelector('[data-cashier-membership-no-results]');
+    cashierMembershipSearch?.addEventListener('input', () => {
+        const query = cashierMembershipSearch.value.trim().toLocaleLowerCase();
+        let visibleCount = 0;
+        cashierMembershipRows.forEach((row) => {
+            row.hidden = !row.textContent.toLocaleLowerCase().includes(query);
+            if (!row.hidden) visibleCount += 1;
+        });
+        if (cashierMembershipNoResults) cashierMembershipNoResults.hidden = visibleCount > 0;
+    });
 
     const inventorySearch = document.getElementById('inventory-search');
     const inventoryStatus = document.getElementById('inventory-status');

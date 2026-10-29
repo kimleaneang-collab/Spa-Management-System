@@ -32,17 +32,68 @@ final class User
         return $user !== false ? $user : null;
     }
 
+    public function changeOwnPassword(int $id, string $currentPassword, string $newPassword): bool
+    {
+        $stmt = $this->db->prepare('SELECT password_hash FROM users WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $passwordHash = $stmt->fetchColumn();
+
+        if ($passwordHash === false || !password_verify($currentPassword, (string) $passwordHash)) {
+            return false;
+        }
+
+        $update = $this->db->prepare('UPDATE users SET password_hash = :password_hash WHERE id = :id');
+        $update->execute([
+            ':id' => $id,
+            ':password_hash' => password_hash($newPassword, PASSWORD_DEFAULT),
+        ]);
+
+        return true;
+    }
+
+    public function updateOwnProfile(int $id, string $name, string $email, string $phone): bool
+    {
+        if ($email !== '') {
+            $emailCheck = $this->db->prepare(
+                'SELECT id FROM users WHERE email = :email AND id <> :id LIMIT 1'
+            );
+            $emailCheck->execute([
+                ':email' => $email,
+                ':id' => $id,
+            ]);
+            if ($emailCheck->fetchColumn() !== false) {
+                return false;
+            }
+        }
+
+        $statement = $this->db->prepare(
+            'UPDATE users
+             SET full_name = :full_name, email = :email, phone = :phone
+             WHERE id = :id'
+        );
+        $statement->execute([
+            ':id' => $id,
+            ':full_name' => $name,
+            ':email' => $email !== '' ? $email : null,
+            ':phone' => $phone !== '' ? $phone : null,
+        ]);
+
+        return $statement->rowCount() > 0 || $this->find($id) !== null;
+    }
+
     public function roles(): array
     {
         $this->db->exec(
             "INSERT IGNORE INTO roles (name, description)
-             VALUES ('manager', 'Spa operations management access')"
+             VALUES
+                ('manager', 'Spa operations management access'),
+                ('cashier', 'Point-of-sale and billing access')"
         );
 
         $stmt = $this->db->query(
             "SELECT name FROM roles
-             WHERE name IN ('admin', 'manager', 'staff', 'receptionist')
-             ORDER BY FIELD(name, 'admin', 'manager', 'staff', 'receptionist')"
+             WHERE name IN ('admin', 'manager', 'staff', 'receptionist', 'cashier')
+             ORDER BY FIELD(name, 'admin', 'manager', 'staff', 'receptionist', 'cashier')"
         );
 
         return $stmt->fetchAll(PDO::FETCH_COLUMN);

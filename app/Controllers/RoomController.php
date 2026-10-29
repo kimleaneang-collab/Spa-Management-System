@@ -12,6 +12,7 @@ final class RoomController
             redirect('login');
         }
 
+        $isReceptionist = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'receptionist';
         $roomModel = new TreatmentRoom(Database::connection());
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create') {
@@ -33,7 +34,7 @@ final class RoomController
 
         $rooms = [];
         try {
-            $rooms = $roomModel->all();
+            $rooms = $roomModel->all($isReceptionist);
         } catch (Throwable $e) {
         }
 

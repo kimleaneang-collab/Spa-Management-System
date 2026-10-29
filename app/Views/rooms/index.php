@@ -4,6 +4,7 @@ declare(strict_types=1);
 if (empty($_SESSION['user'])) {
     redirect('login');
 }
+$isReceptionist = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'receptionist';
 
 ?>
 <!doctype html>
@@ -14,7 +15,7 @@ if (empty($_SESSION['user'])) {
     <title>Rooms | Relax Spa</title>
     <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css?v=<?= e(asset_version('public/css/style.css')) ?>">
 </head>
-<body class="dashboard-page">
+<body class="dashboard-page <?= $isReceptionist ? 'receptionist-role' : '' ?>" data-role="<?= e(strtolower((string) ($_SESSION['user']['role'] ?? ''))) ?>">
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">
@@ -53,6 +54,7 @@ if (empty($_SESSION['user'])) {
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
                 </div>
             </nav>
+            <?= sidebar_role_footer() ?>
         </aside>
 
         <main class="main-panel">
@@ -65,13 +67,46 @@ if (empty($_SESSION['user'])) {
                 </div>
             </header>
 
-            <div class="content-wrap">
+            <div class="content-wrap <?= $isReceptionist ? 'receptionist-rooms-page' : '' ?>">
+                <?php if ($isReceptionist): ?>
+                    <?php
+                        $availableRoomCount = count(array_filter($rooms, static fn (array $room): bool => $room['status'] === 'Available'));
+                    ?>
+                    <div class="page-heading receptionist-rooms-heading">
+                        <div>
+                            <h1 class="page-title">ROOMS</h1>
+                            <div class="page-date"><?= number_format($availableRoomCount) ?> of <?= number_format(count($rooms)) ?> treatment rooms available right now.</div>
+                        </div>
+                        <div class="receptionist-rooms-date"><span aria-hidden="true">▣</span><?= e(date('M j, Y')) ?></div>
+                    </div>
+                    <section class="receptionist-room-grid" aria-label="Treatment room availability">
+                        <?php if ($rooms === []): ?>
+                            <p class="receptionist-room-empty">No treatment rooms are available.</p>
+                        <?php endif; ?>
+                        <?php foreach ($rooms as $room): ?>
+                            <article class="receptionist-room-card receptionist-room-<?= e($room['status_class']) ?>">
+                                <div class="receptionist-room-card-top">
+                                    <span class="receptionist-room-icon" aria-hidden="true">⌂</span>
+                                    <span class="receptionist-room-status status-<?= e($room['status_class']) ?>"><?= e($room['status']) ?></span>
+                                </div>
+                                <div class="receptionist-room-card-body">
+                                    <h2><?= e($room['number']) ?></h2>
+                                    <p><?= e($room['type']) ?><?= (int) $room['capacity'] > 1 ? ' · ' . e((string) $room['capacity']) . ' beds' : '' ?></p>
+                                    <div class="receptionist-room-assignment">
+                                        <span><?= e($room['therapist'] !== '' ? $room['therapist'] : ($room['status'] === 'Available' ? 'Ready for guests' : $room['status'])) ?></span>
+                                        <span><?= e($room['occupied_until'] !== '' ? 'Until ' . $room['occupied_until'] : ($room['status'] === 'Available' ? 'Available now' : '')) ?></span>
+                                    </div>
+                                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    </section>
+                <?php else: ?>
                 <div class="page-heading">
                     <div>
                         <h1 class="page-title">ROOMS</h1>
                         <div class="page-date">Availability and service status</div>
                     </div>
-                    <button class="primary-button" type="button" data-open-modal="room-modal">+ Add room</button>
+                    <?php if (!$isReceptionist): ?><button class="primary-button" type="button" data-open-modal="room-modal">+ Add room</button><?php endif; ?>
                 </div>
 
                 <section class="module-panel">
@@ -80,22 +115,24 @@ if (empty($_SESSION['user'])) {
                             <p>No rooms available.</p>
                         <?php endif; ?>
                         <?php foreach ($rooms as $room): ?>
-                            <article class="room-card">
+                            <article class="room-card <?= $isReceptionist ? 'receptionist-room-card' : '' ?>">
                                 <div class="room-icon">◫</div>
                                 <div class="room-line">
                                     <h3><?= e($room['number']) ?></h3>
                                     <span class="status-pill status-<?= e($room['status_class']) ?>"><?= e($room['status']) ?></span>
                                 </div>
                                 <p><?= e($room['type']) ?></p>
-                                <small>Capacity: <?= e((string) $room['capacity']) ?></small>
+                                <small><?= $isReceptionist ? 'Guest capacity: ' : 'Capacity: ' ?><?= e((string) $room['capacity']) ?></small>
                             </article>
                         <?php endforeach; ?>
                     </div>
                 </section>
+                <?php endif; ?>
             </div>
         </main>
     </div>
 
+    <?php if (!$isReceptionist): ?>
     <div class="modal-backdrop hidden" id="room-modal" aria-hidden="true">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="room-title">
             <div class="modal-header">
@@ -103,6 +140,7 @@ if (empty($_SESSION['user'])) {
                     <p class="eyebrow">Treatment room</p>
                     <h2 id="room-title">Add room</h2>
                 </div>
+                <?php endif; ?>
                 <button class="modal-close" type="button" aria-label="Close" data-close-modal="room-modal">×</button>
             </div>
             <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=rooms">

@@ -11,13 +11,35 @@ final class Invoice
     {
         return [
             'services' => $this->db->query(
-                "SELECT id, name, price AS unit_price, 'service' AS item_type
-                 FROM services
-                 WHERE status = 'active'
-                 ORDER BY name"
+                "SELECT s.id, s.name, s.price AS unit_price, s.duration_minutes,
+                        COALESCE(NULLIF(s.image_path, ''), CASE
+                            WHEN LOWER(c.name) LIKE '%massage%' THEN 'public/uploads/fullbody-massage.png'
+                            WHEN LOWER(c.name) LIKE '%facial%' THEN 'public/uploads/facial-treatment.png'
+                            WHEN LOWER(c.name) LIKE '%body%' THEN 'public/uploads/body-scrub.png'
+                            WHEN LOWER(c.name) LIKE '%hair%' THEN 'public/uploads/Essentail-oil.png'
+                            WHEN LOWER(c.name) LIKE '%nail%' THEN 'public/uploads/foot-message.png'
+                            ELSE 'public/uploads/aromatherapy.png'
+                        END) AS image_path,
+                        c.name AS category, 'service' AS item_type
+                 FROM services s
+                 INNER JOIN service_categories c ON c.id = s.category_id
+                 WHERE s.status = 'active'
+                 ORDER BY s.name"
             )->fetchAll(PDO::FETCH_ASSOC),
             'products' => $this->db->query(
-                "SELECT id, name, selling_price AS unit_price, stock_quantity, unit, 'product' AS item_type
+                "SELECT id, name, selling_price AS unit_price, stock_quantity, unit,
+                        category,
+                        COALESCE(NULLIF(image_path, ''), CASE LOWER(name)
+                            WHEN 'massage oil' THEN 'public/uploads/massage oil.png'
+                            WHEN 'essential oil' THEN 'public/uploads/Essentail-oil.png'
+                            WHEN 'facial cream' THEN 'public/uploads/Facial Cream.png'
+                            WHEN 'body lotion' THEN 'public/uploads/bodylotion.png'
+                            WHEN 'shampoo' THEN 'public/uploads/shampoo.png'
+                            WHEN 'towels' THEN 'public/uploads/Tower.png'
+                            WHEN 'candles' THEN 'public/uploads/Candles Candles.png'
+                            WHEN 'spa equipment' THEN 'public/uploads/Spa Equipment.jpg'
+                            ELSE 'public/uploads/login-bg.jpg'
+                        END) AS image_path, 'product' AS item_type
                  FROM products
                  WHERE status = 'active' AND stock_quantity > 0
                  ORDER BY name"
@@ -42,6 +64,35 @@ final class Invoice
         return $taxPercent !== false && is_numeric($taxPercent)
             ? max(0, min(100, (float) $taxPercent))
             : 0.0;
+    }
+
+    public function receiptsForCashier(int $userId): array
+    {
+        $statement = $this->db->prepare(
+            "SELECT i.id, i.invoice_no, c.full_name AS customer_name,
+                    cashier_payments.receipt_date, cashier_payments.amount,
+                    cashier_payments.payment_method, receipt_items.items
+             FROM (
+                 SELECT invoice_id, MAX(paid_at) AS receipt_date, SUM(amount) AS amount,
+                        MAX(payment_method) AS payment_method
+                 FROM payments
+                 WHERE received_by = :user_id
+                 GROUP BY invoice_id
+             ) cashier_payments
+             INNER JOIN invoices i ON i.id = cashier_payments.invoice_id
+             INNER JOIN customers c ON c.id = i.customer_id
+             LEFT JOIN (
+                 SELECT invoice_id,
+                        GROUP_CONCAT(DISTINCT description ORDER BY description SEPARATOR ', ') AS items
+                 FROM invoice_items
+                 GROUP BY invoice_id
+             ) receipt_items ON receipt_items.invoice_id = i.id
+             ORDER BY cashier_payments.receipt_date DESC, i.id DESC
+             LIMIT 100"
+        );
+        $statement->execute([':user_id' => $userId]);
+
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function checkout(

@@ -51,6 +51,7 @@ if (empty($_SESSION['user'])) {
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=reports"><span class="nav-icon">▥</span><span>Reports &amp; Analytics</span></a>
                 </div>
             </nav>
+            <?= sidebar_role_footer() ?>
         </aside>
         <main class="main-panel">
             <header class="topbar">
@@ -69,6 +70,22 @@ if (empty($_SESSION['user'])) {
                     </div>
                 </div>
                 <section class="settings-layout">
+                    <article class="module-panel settings-panel">
+                        <div class="settings-heading">
+                            <?= profile_avatar(
+                                $_SESSION['user'] ?? [],
+                                'manager-profile-avatar',
+                                strtoupper(substr((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'M'), 0, 1))
+                            ) ?>
+                            <div><h2>Manager Profile</h2><p>Your account information</p></div>
+                        </div>
+                        <div class="settings-fields manager-profile-fields">
+                            <div><span class="manager-profile-label">Full Name</span><span class="manager-profile-value"><?= e((string) ($_SESSION['user']['full_name'] ?? 'Manager')) ?></span></div>
+                            <div><span class="manager-profile-label">Username</span><span class="manager-profile-value"><?= e((string) ($_SESSION['user']['username'] ?? '')) ?></span></div>
+                            <div><span class="manager-profile-label">Email</span><span class="manager-profile-value"><?= e((string) ($_SESSION['user']['email'] ?? 'Not provided')) ?></span></div>
+                            <div><span class="manager-profile-label">Role</span><span class="manager-profile-value"><?= e(role_label((string) ($_SESSION['user']['role'] ?? 'manager'))) ?></span></div>
+                        </div>
+                    </article>
                     <article class="module-panel settings-panel">
                         <div class="settings-heading"><span class="settings-symbol">⌂</span><div><h2>Spa Profile</h2><p>Manage your spa information</p></div></div>
                         <div class="settings-fields"><label>Spa Name<input value="Relax spa"></label><label>Phone Number<input value="+855 12 345 667"></label><label>Email<input value="relaxspa@gmail.com"></label><label>Currency<select><option>USD ($)</option></select></label><label class="wide-field">Address<input value="No, 123, Street 06, Siem Reap, Cambodia"></label></div>

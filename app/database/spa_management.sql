@@ -174,15 +174,20 @@ CREATE TABLE service_products (
 -- 6. THERAPISTS
 CREATE TABLE therapists (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NULL UNIQUE,
     therapist_code VARCHAR(30) NOT NULL UNIQUE,
     full_name VARCHAR(150) NOT NULL,
     gender ENUM('male','female','other') NULL,
     phone VARCHAR(30) NOT NULL,
     specialization VARCHAR(150) NULL,
+    bio TEXT NULL,
     experience_years DECIMAL(4,1) NOT NULL DEFAULT 0,
     employment_status ENUM('active','inactive','on_leave') NOT NULL DEFAULT 'active',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_therapist_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE SET NULL,
     INDEX idx_therapist_name (full_name),
     INDEX idx_therapist_status (employment_status)
 ) ENGINE=InnoDB;
@@ -530,7 +535,8 @@ INSERT INTO roles (name, description) VALUES
 ('admin', 'Full system access'),
 ('manager', 'Spa operations management access'),
 ('staff', 'Operational spa management access'),
-('receptionist', 'Customer and appointment access');
+('receptionist', 'Customer and appointment access'),
+('cashier', 'Point-of-sale and billing access');
 
 INSERT INTO membership_levels
     (name, discount_percent, loyalty_points_multiplier, annual_fee)

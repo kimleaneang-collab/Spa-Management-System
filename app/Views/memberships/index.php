@@ -13,7 +13,7 @@ if (empty($_SESSION['user'])) {
     <title>Memberships | Relax Spa</title>
     <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css?v=<?= e(asset_version('public/css/style.css')) ?>">
 </head>
-<body class="dashboard-page">
+<body class="dashboard-page" data-role="<?= e(strtolower((string) ($_SESSION['user']['role'] ?? ''))) ?>">
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">
@@ -51,6 +51,7 @@ if (empty($_SESSION['user'])) {
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
                 </div>
             </nav>
+            <?= sidebar_role_footer() ?>
         </aside>
         <main class="main-panel">
             <header class="topbar">

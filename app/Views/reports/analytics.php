@@ -56,14 +56,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
                 </div>
             </nav>
-            <div class="sidebar-role">
-                <span>Current Role</span>
-                <div class="role-select">
-                    <?= profile_avatar($_SESSION['user'] ?? [], 'role-avatar', $userInitials) ?>
-                    <span><?= e(role_label((string) ($_SESSION['user']['role'] ?? 'staff'))) ?></span>
-                    <span class="chevron">▾</span>
-                </div>
-            </div>
+            <?= sidebar_role_footer() ?>
         </aside>
 
         <main class="main-panel">

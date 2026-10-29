@@ -53,6 +53,7 @@ if (empty($_SESSION['user'])) {
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
                 </div>
             </nav>
+            <?= sidebar_role_footer() ?>
         </aside>
 
         <main class="main-panel">
@@ -113,7 +114,7 @@ if (empty($_SESSION['user'])) {
         </main>
     </div>
 
-    <div class="modal-backdrop <?= $editingTherapist !== null ? '' : 'hidden' ?>" id="therapist-modal" aria-hidden="<?= $editingTherapist !== null ? 'false' : 'true' ?>">
+    <div class="modal-backdrop <?= ($editingTherapist !== null || !empty($_GET['new']) || $therapistFormError !== '') ? '' : 'hidden' ?>" id="therapist-modal" aria-hidden="<?= ($editingTherapist !== null || !empty($_GET['new']) || $therapistFormError !== '') ? 'false' : 'true' ?>">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="therapist-title">
             <div class="modal-header">
                 <div>
@@ -123,6 +124,9 @@ if (empty($_SESSION['user'])) {
                 <button class="modal-close" type="button" aria-label="Close" data-close-modal="therapist-modal">×</button>
             </div>
             <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=therapists">
+                <?php if ($therapistFormError !== ''): ?>
+                    <div class="therapist-profile-notice" role="alert"><?= e($therapistFormError) ?></div>
+                <?php endif; ?>
                 <input type="hidden" name="action" value="<?= $editingTherapist !== null ? 'update' : 'create' ?>">
                 <input type="hidden" name="id" value="<?= e((string) ($editingTherapist['id'] ?? '')) ?>">
                 <div class="form-grid two-col">
@@ -135,8 +139,23 @@ if (empty($_SESSION['user'])) {
                         <input type="tel" name="therapist_phone" value="<?= e($editingTherapist['phone'] ?? '') ?>" pattern="[0-9+()\-\s]{7,30}" maxlength="30" required>
                     </label>
                     <label>
+                        <span>Login account</span>
+                        <select name="therapist_user_id">
+                            <option value="">Not linked</option>
+                            <?php foreach ($therapistAccounts as $account): ?>
+                                <option value="<?= e((string) $account['id']) ?>" <?= (int) ($editingTherapist['user_id'] ?? 0) === (int) $account['id'] ? 'selected' : '' ?>>
+                                    <?= e($account['full_name'] . ' (' . $account['username'] . ')') ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <label>
                         <span>Specialization</span>
                         <input type="text" name="therapist_specialization" value="<?= e($editingTherapist['specialization'] ?? '') ?>" placeholder="Massage Therapy">
+                    </label>
+                    <label class="therapist-admin-bio">
+                        <span>Bio</span>
+                        <textarea name="therapist_bio" maxlength="2000" rows="3"><?= e($editingTherapist['bio'] ?? '') ?></textarea>
                     </label>
                     <label>
                         <span>Gender</span>

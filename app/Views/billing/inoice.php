@@ -39,10 +39,7 @@ $money = static fn (float $amount): string => e($currency) . ' ' . number_format
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
                 </div>
             </nav>
-            <div class="sidebar-role">
-                <span>Current Role</span>
-                <div class="role-select"><?= profile_avatar($user, 'role-avatar', $userInitials) ?><span><?= e(role_label((string) ($user['role'] ?? 'staff'))) ?></span></div>
-            </div>
+            <?= sidebar_role_footer() ?>
         </aside>
         <main class="main-panel">
             <header class="topbar">

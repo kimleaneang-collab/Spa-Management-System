@@ -44,11 +44,100 @@ final class Therapist
 
 	public function find(int $id): ?array
 	{
-		$stmt = $this->db->prepare('SELECT id, full_name, phone, specialization, gender, employment_status FROM therapists WHERE id = :id');
+		$stmt = $this->db->prepare('SELECT id, user_id, full_name, phone, specialization, bio, gender, employment_status FROM therapists WHERE id = :id');
 		$stmt->execute([':id' => $id]);
 		$therapist = $stmt->fetch(PDO::FETCH_ASSOC);
 
 		return $therapist !== false ? $therapist : null;
+	}
+
+	public function accountsForAssignment(int $therapistId = 0): array
+	{
+		$stmt = $this->db->prepare(
+			"SELECT u.id, u.full_name, u.username
+			 FROM users u
+			 INNER JOIN roles r ON r.id = u.role_id
+			 LEFT JOIN therapists assigned
+				ON assigned.user_id = u.id
+			   AND assigned.id <> :therapist_id
+			 LEFT JOIN therapists current_assignment
+				ON current_assignment.user_id = u.id
+			   AND current_assignment.id = :current_therapist_id
+			 WHERE r.name IN ('staff', 'therapist')
+			   AND (u.status = 'active' OR current_assignment.id IS NOT NULL)
+			   AND assigned.id IS NULL
+			 ORDER BY u.full_name, u.id"
+		);
+		$stmt->execute([
+			':therapist_id' => $therapistId,
+			':current_therapist_id' => $therapistId,
+		]);
+
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+
+	public function accountCanBeAssigned(int $userId, int $therapistId = 0): bool
+	{
+		$stmt = $this->db->prepare(
+			"SELECT COUNT(*)
+			 FROM users u
+			 INNER JOIN roles r ON r.id = u.role_id
+			 WHERE u.id = :user_id
+			   AND r.name IN ('staff', 'therapist')
+			   AND (
+					u.status = 'active'
+					OR EXISTS (
+						SELECT 1
+						FROM therapists current_assignment
+						WHERE current_assignment.user_id = u.id
+						  AND current_assignment.id = :current_therapist_id
+					)
+			   )
+			   AND NOT EXISTS (
+					SELECT 1
+					FROM therapists assigned
+					WHERE assigned.user_id = u.id
+					  AND assigned.id <> :therapist_id
+			   )"
+		);
+		$stmt->execute([
+			':user_id' => $userId,
+			':current_therapist_id' => $therapistId,
+			':therapist_id' => $therapistId,
+		]);
+
+		return (int) $stmt->fetchColumn() > 0;
+	}
+
+	public function profileForUser(int $userId, string $userName): ?array
+	{
+		$stmt = $this->db->prepare(
+			"SELECT t.id, t.full_name, t.phone, t.specialization, t.bio, t.experience_years,
+					COALESCE(NULLIF(e.email, ''), u.email) AS email,
+					COALESCE(NULLIF(e.phone, ''), NULLIF(t.phone, ''), u.phone) AS profile_phone,
+					COALESCE(e.hire_date, DATE(t.created_at)) AS joined_date
+			 FROM therapists t
+			 LEFT JOIN employees e
+				ON e.user_id = :user_id
+			   AND e.role_name = 'therapist'
+			   AND LOWER(TRIM(e.full_name)) = LOWER(TRIM(t.full_name))
+			 LEFT JOIN users u ON u.id = :account_id
+			 WHERE e.id IS NOT NULL
+				OR t.user_id = :linked_user_id
+				OR LOWER(TRIM(t.full_name)) = LOWER(TRIM(:user_name))
+			 ORDER BY (t.user_id = :priority_user_id) DESC, (e.id IS NOT NULL) DESC, t.id ASC
+			 LIMIT 1"
+		);
+		$stmt->execute([
+			':user_id' => $userId,
+			':account_id' => $userId,
+			':linked_user_id' => $userId,
+			':priority_user_id' => $userId,
+			':user_name' => $userName,
+		]);
+		$profile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+		return $profile !== false ? $profile : null;
 	}
 
 	public function create(
@@ -56,36 +145,75 @@ final class Therapist
 		string $phone,
 		string $specialization,
 		string $gender,
-		string $status
+		string $status,
+		string $bio,
+		?int $userId
 	): void {
 		$stmt = $this->db->prepare(
 			'INSERT INTO therapists
-				(therapist_code, full_name, gender, phone, specialization, employment_status)
-			 VALUES (:code, :name, :gender, :phone, :specialization, :status)'
+				(user_id, therapist_code, full_name, gender, phone, specialization, bio, employment_status)
+			 VALUES (:user_id, :code, :name, :gender, :phone, :specialization, :bio, :status)'
 		);
 		$stmt->execute([
+			':user_id' => $userId,
 			':code' => 'THER-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6)),
 			':name' => $name,
 			':gender' => $gender !== '' ? $gender : null,
 			':phone' => $phone,
 			':specialization' => $specialization !== '' ? $specialization : null,
+			':bio' => $bio !== '' ? $bio : null,
 			':status' => $status,
 		]);
 	}
 
-	public function update(int $id, string $name, string $phone, string $specialization, string $gender, string $status): void
+	public function update(int $id, string $name, string $phone, string $specialization, string $gender, string $status, string $bio, ?int $userId): void
 	{
+		$current = $this->db->prepare('SELECT full_name FROM therapists WHERE id = :id');
+		$current->execute([':id' => $id]);
+		$previousName = $current->fetchColumn();
+
 		$stmt = $this->db->prepare(
-			'UPDATE therapists SET full_name = :name, phone = :phone, specialization = :specialization, gender = :gender, employment_status = :status WHERE id = :id'
+			'UPDATE therapists SET user_id = :user_id, full_name = :name, phone = :phone, specialization = :specialization, bio = :bio, gender = :gender, employment_status = :status WHERE id = :id'
 		);
 		$stmt->execute([
 			':id' => $id,
+			':user_id' => $userId,
 			':name' => $name,
 			':phone' => $phone,
 			':specialization' => $specialization !== '' ? $specialization : null,
+			':bio' => $bio !== '' ? $bio : null,
 			':gender' => $gender !== '' ? $gender : null,
 			':status' => $status,
 		]);
+
+		if ($previousName !== false) {
+			$employees = $this->db->prepare(
+				"UPDATE employees
+				 SET full_name = :name, phone = :phone
+				 WHERE role_name = 'therapist'
+				   AND LOWER(TRIM(full_name)) = LOWER(TRIM(:previous_name))"
+			);
+			$employees->execute([
+				':name' => $name,
+				':phone' => $phone,
+				':previous_name' => (string) $previousName,
+			]);
+
+			$accounts = $this->db->prepare(
+				"UPDATE users u
+				 INNER JOIN roles r ON r.id = u.role_id
+				 LEFT JOIN employees e ON e.user_id = u.id AND e.role_name = 'therapist'
+				 SET u.full_name = :name, u.phone = :phone
+				 WHERE r.name IN ('staff', 'therapist')
+				   AND e.id IS NULL
+				   AND LOWER(TRIM(u.full_name)) = LOWER(TRIM(:previous_name))"
+			);
+			$accounts->execute([
+				':name' => $name,
+				':phone' => $phone,
+				':previous_name' => (string) $previousName,
+			]);
+		}
 	}
 
 	public function delete(int $id): void

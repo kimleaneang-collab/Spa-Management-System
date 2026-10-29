@@ -51,6 +51,7 @@ if (empty($_SESSION['user'])) {
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
                 </div>
             </nav>
+            <?= sidebar_role_footer() ?>
         </aside>
         <main class="main-panel">
             <header class="topbar">

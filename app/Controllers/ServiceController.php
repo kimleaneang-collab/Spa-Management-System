@@ -14,7 +14,23 @@ final class ServiceController
 
         $serviceModel = new Service(Database::connection());
 
+        $role = strtolower((string) ($_SESSION['user']['role'] ?? ''));
+        $isTherapist = in_array($role, ['staff', 'therapist'], true);
+        $isReadOnly = $isTherapist || $role === 'cashier';
+
+        if ($role === 'cashier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            http_response_code(403);
+            echo 'Cashiers cannot create or modify services.';
+            return;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create') {
+            if ($isTherapist) {
+                http_response_code(403);
+                echo 'Therapists cannot create or modify services.';
+                return;
+            }
+
             $categoryId = (int) ($_POST['category_id'] ?? 0);
             $code = trim((string) ($_POST['service_code'] ?? ''));
             $name = trim((string) ($_POST['service_name'] ?? ''));
@@ -61,9 +77,9 @@ final class ServiceController
         } catch (Throwable $e) {
         }
 
-        $view = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'manager'
-            ? 'index.php'
-            : 'admin.php';
+        $view = $role === 'cashier'
+            ? 'cashier.php'
+            : ($role === 'manager' ? 'index.php' : ($isReadOnly ? 'therapist.php' : 'admin.php'));
         require __DIR__ . '/../Views/services/' . $view;
     }
 }
