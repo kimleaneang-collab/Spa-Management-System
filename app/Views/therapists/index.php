@@ -5,6 +5,13 @@ if (empty($_SESSION['user'])) {
     redirect('login');
 }
 
+$therapistName = (string) ($editingTherapist['full_name'] ?? 'New therapist');
+$therapistNameParts = preg_split('/\s+/', trim($therapistName), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+$therapistInitials = $therapistNameParts === []
+    ? '?'
+    : strtoupper(substr($therapistNameParts[0], 0, 1) . substr($therapistNameParts[count($therapistNameParts) - 1], 0, 1));
+$accountPhotoUrl = profile_image_url((string) ($editingTherapist['account_profile_image'] ?? ''));
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -99,6 +106,7 @@ if (empty($_SESSION['user'])) {
                                         <td>
                                             <a class="secondary-button" href="<?= e(APP_URL) ?>/?route=therapists&amp;edit=<?= e((string) ($therapist['id'] ?? 0)) ?>">Edit</a>
                                             <form method="post" action="<?= e(APP_URL) ?>/?route=therapists" style="display:inline" onsubmit="return confirm('Delete this therapist?');">
+                                                <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?= e((string) ($therapist['id'] ?? 0)) ?>">
                                                 <button class="secondary-button" type="submit">Delete</button>
@@ -123,10 +131,11 @@ if (empty($_SESSION['user'])) {
                 </div>
                 <button class="modal-close" type="button" aria-label="Close" data-close-modal="therapist-modal">×</button>
             </div>
-            <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=therapists">
+            <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=therapists" enctype="multipart/form-data">
                 <?php if ($therapistFormError !== ''): ?>
                     <div class="therapist-profile-notice" role="alert"><?= e($therapistFormError) ?></div>
                 <?php endif; ?>
+                <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                 <input type="hidden" name="action" value="<?= $editingTherapist !== null ? 'update' : 'create' ?>">
                 <input type="hidden" name="id" value="<?= e((string) ($editingTherapist['id'] ?? '')) ?>">
                 <div class="form-grid two-col">
@@ -139,20 +148,54 @@ if (empty($_SESSION['user'])) {
                         <input type="tel" name="therapist_phone" value="<?= e($editingTherapist['phone'] ?? '') ?>" pattern="[0-9+()\-\s]{7,30}" maxlength="30" required>
                     </label>
                     <label>
+                        <span>Email</span>
+                        <input type="email" name="therapist_email" value="<?= e($editingTherapist['email'] ?? $editingTherapist['account_email'] ?? '') ?>" maxlength="150" autocomplete="email">
+                    </label>
+                    <label>
                         <span>Login account</span>
-                        <select name="therapist_user_id">
+                        <select name="therapist_user_id" id="therapist-login-account">
                             <option value="">Not linked</option>
                             <?php foreach ($therapistAccounts as $account): ?>
-                                <option value="<?= e((string) $account['id']) ?>" <?= (int) ($editingTherapist['user_id'] ?? 0) === (int) $account['id'] ? 'selected' : '' ?>>
+                                <option value="<?= e((string) $account['id']) ?>" data-profile-image="<?= e(profile_image_url((string) ($account['profile_image'] ?? ''))) ?>" <?= (int) ($editingTherapist['user_id'] ?? 0) === (int) $account['id'] ? 'selected' : '' ?>>
                                     <?= e($account['full_name'] . ' (' . $account['username'] . ')') ?>
                                 </option>
                             <?php endforeach; ?>
+                            <option value="new">Create new therapist login</option>
                         </select>
                     </label>
+                    <div class="therapist-login-credentials" id="therapist-login-credentials" hidden>
+                        <label>
+                            <span>Therapist username</span>
+                            <input type="text" name="therapist_username" minlength="3" maxlength="100" pattern="[A-Za-z0-9@_.-]{3,100}" title="Use 3–100 characters: letters, numbers, @, dots, underscores, or hyphens." autocomplete="username">
+                        </label>
+                        <label>
+                            <span>Login password</span>
+                            <input type="password" name="therapist_password" minlength="16" maxlength="255" pattern="(?=.*[A-Za-z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{16,255}" title="Use at least 16 characters, including a letter, a number, and a symbol." autocomplete="new-password">
+                        </label>
+                        <p>Share this username and password with the therapist. Use at least 16 characters with a letter, number, and symbol. Passwords are stored as hashes.</p>
+                    </div>
                     <label>
                         <span>Specialization</span>
                         <input type="text" name="therapist_specialization" value="<?= e($editingTherapist['specialization'] ?? '') ?>" placeholder="Massage Therapy">
                     </label>
+                    <div class="user-profile-photo-field">
+                        <div class="user-profile-photo-preview">
+                            <img id="therapist-profile-photo-image" alt="Selected therapist profile photo preview" <?= $accountPhotoUrl !== '' ? 'src="' . e($accountPhotoUrl) . '"' : 'hidden' ?>>
+                            <span id="therapist-profile-photo-initials" <?= $accountPhotoUrl !== '' ? 'hidden' : '' ?>><?= e($therapistInitials) ?></span>
+                        </div>
+                        <div class="user-profile-photo-controls">
+                            <strong>Therapist profile photo</strong>
+                            <label class="user-profile-photo-button" for="therapist-profile-photo-input">Choose photo</label>
+                            <input
+                                class="user-profile-photo-input"
+                                id="therapist-profile-photo-input"
+                                type="file"
+                                name="profile_image"
+                                accept="image/jpeg,image/png,image/gif,image/webp"
+                            >
+                            <small id="therapist-profile-photo-filename">JPG, PNG, GIF, or WEBP. Maximum 5 MB. Choose or create a login account to save the photo.</small>
+                        </div>
+                    </div>
                     <label class="therapist-admin-bio">
                         <span>Bio</span>
                         <textarea name="therapist_bio" maxlength="2000" rows="3"><?= e($editingTherapist['bio'] ?? '') ?></textarea>

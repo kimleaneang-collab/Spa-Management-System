@@ -138,10 +138,37 @@ final class User
             ':username' => $username,
             ':password_hash' => password_hash($password, PASSWORD_DEFAULT),
             ':full_name' => $name,
-            ':email' => $email,
-            ':phone' => $phone,
+            ':email' => $email !== '' ? $email : null,
+            ':phone' => $phone !== '' ? $phone : null,
             ':profile_image' => $profileImage !== '' ? $profileImage : null,
             ':status' => 'active',
+        ]);
+    }
+
+    public function updateProfileImage(int $id, string $profileImage): string
+    {
+        $lookup = $this->db->prepare('SELECT profile_image FROM users WHERE id = :id FOR UPDATE');
+        $lookup->execute([':id' => $id]);
+        $currentImage = $lookup->fetchColumn();
+        if ($currentImage === false) {
+            throw new RuntimeException('The selected therapist login account could not be found.');
+        }
+
+        $update = $this->db->prepare('UPDATE users SET profile_image = :profile_image WHERE id = :id');
+        $update->execute([
+            ':id' => $id,
+            ':profile_image' => $profileImage !== '' ? $profileImage : null,
+        ]);
+
+        return (string) ($currentImage ?? '');
+    }
+
+    public function updateEmail(int $id, string $email): void
+    {
+        $stmt = $this->db->prepare('UPDATE users SET email = :email WHERE id = :id');
+        $stmt->execute([
+            ':id' => $id,
+            ':email' => $email !== '' ? $email : null,
         ]);
     }
 

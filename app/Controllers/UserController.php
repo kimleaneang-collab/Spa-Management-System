@@ -43,7 +43,7 @@ final class UserController
                     $formError = 'Invite another active Administrator before deleting your own account.';
                 } else {
                     $userModel->delete($id);
-                    $this->removeProfileImage((string) ($targetUser['profile_image'] ?? ''));
+                    remove_profile_image((string) ($targetUser['profile_image'] ?? ''));
                     if ($id === $currentUserId) {
                         $this->endSession();
                     }
@@ -115,7 +115,7 @@ final class UserController
                         $formError = implode(' ', $validationErrors);
                     }
                 } else {
-                    [$newProfileImage, $uploadError] = $this->storeProfileImage($_FILES['profile_image'] ?? null);
+                    [$newProfileImage, $uploadError] = store_profile_image($_FILES['profile_image'] ?? null);
                     if ($uploadError !== '') {
                         $formError = $uploadError;
                     } else {
@@ -128,7 +128,7 @@ final class UserController
                             }
                         } catch (Throwable $exception) {
                             if ($newProfileImage !== '') {
-                                $this->removeProfileImage($newProfileImage);
+                                remove_profile_image($newProfileImage);
                             }
                             if ($exception instanceof PDOException && $exception->getCode() === '23000') {
                                 $formError = 'That username or email is already in use.';
@@ -139,7 +139,7 @@ final class UserController
 
                         if ($formError === '') {
                             if ($action === 'update' && $newProfileImage !== '') {
-                                $this->removeProfileImage($oldProfileImage);
+                                remove_profile_image($oldProfileImage);
                             }
                             if ($action === 'update' && (int) $id === $currentUserId && $newProfileImage !== '') {
                                 $_SESSION['user']['profile_image'] = $newProfileImage;
@@ -170,85 +170,6 @@ final class UserController
 
         $users = $userModel->all();
         require __DIR__ . '/../Views/settings/users.php';
-    }
-
-    private function storeProfileImage(?array $upload): array
-    {
-        if ($upload === null) {
-            return ['', ''];
-        }
-
-        $uploadError = $upload['error'] ?? UPLOAD_ERR_NO_FILE;
-        if (!is_scalar($uploadError)) {
-            return ['', 'The selected profile photo is invalid. Please try again.'];
-        }
-        if ((int) $uploadError === UPLOAD_ERR_NO_FILE) {
-            return ['', ''];
-        }
-        if ((int) $uploadError !== UPLOAD_ERR_OK) {
-            return ['', 'The profile photo could not be uploaded. Please select it again.'];
-        }
-
-        $uploadSize = $upload['size'] ?? null;
-        if (!is_scalar($uploadSize) || !is_numeric($uploadSize)) {
-            return ['', 'The selected profile photo is invalid. Please try again.'];
-        }
-        if ((int) $uploadSize > 5 * 1024 * 1024) {
-            return ['', 'The profile photo must be no larger than 5 MB.'];
-        }
-
-        $temporaryPath = $upload['tmp_name'] ?? '';
-        if (!is_string($temporaryPath)) {
-            return ['', 'The selected profile photo could not be verified. Please try again.'];
-        }
-        if ($temporaryPath === '' || !is_uploaded_file($temporaryPath)) {
-            return ['', 'The selected profile photo could not be verified. Please try again.'];
-        }
-
-        $mimeType = (new finfo(FILEINFO_MIME_TYPE))->file($temporaryPath);
-        $extensions = [
-            'image/jpeg' => 'jpg',
-            'image/png' => 'png',
-            'image/gif' => 'gif',
-            'image/webp' => 'webp',
-        ];
-        if (!is_string($mimeType) || !isset($extensions[$mimeType])) {
-            return ['', 'Choose a JPG, PNG, GIF, or WEBP profile photo.'];
-        }
-        if (getimagesize($temporaryPath) === false) {
-            return ['', 'The selected profile photo is not a valid image.'];
-        }
-
-        $directory = __DIR__ . '/../../public/uploads/user_profiles';
-        if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
-            throw new RuntimeException('Unable to create the profile photo upload directory.');
-        }
-
-        $filename = bin2hex(random_bytes(16)) . '.' . $extensions[$mimeType];
-        $destination = $directory . DIRECTORY_SEPARATOR . $filename;
-        if (!move_uploaded_file($temporaryPath, $destination)) {
-            return ['', 'The profile photo could not be saved. Please try again.'];
-        }
-
-        return ['public/uploads/user_profiles/' . $filename, ''];
-    }
-
-    private function removeProfileImage(string $imagePath): void
-    {
-        $prefix = 'public/uploads/user_profiles/';
-        if (!str_starts_with($imagePath, $prefix)) {
-            return;
-        }
-
-        $filename = substr($imagePath, strlen($prefix));
-        if ($filename === '' || basename($filename) !== $filename) {
-            return;
-        }
-
-        $absolutePath = __DIR__ . '/../../public/uploads/user_profiles/' . $filename;
-        if (is_file($absolutePath) && !unlink($absolutePath)) {
-            error_log('Unable to remove replaced user profile image: ' . $absolutePath);
-        }
     }
 
     private function verifyCsrf(): void

@@ -87,24 +87,104 @@ function e(?string $value): string
     );
 }
 
-function profile_avatar(array $user, string $class, string $fallback): string
+function profile_image_url(string $imagePath): string
 {
-    $imagePath = (string) ($user['profile_image'] ?? '');
-    $imageUrl = '';
     $imagePrefix = 'public/uploads/user_profiles/';
 
     if (str_starts_with($imagePath, $imagePrefix)) {
         $filename = substr($imagePath, strlen($imagePrefix));
         if ($filename !== '' && basename($filename) === $filename) {
-            $imageUrl = APP_URL . '/' . $imagePrefix . rawurlencode($filename);
+            return APP_URL . '/' . $imagePrefix . rawurlencode($filename);
         }
     }
 
+    return '';
+}
+
+function profile_avatar(array $user, string $class, string $fallback): string
+{
+    $imageUrl = profile_image_url((string) ($user['profile_image'] ?? ''));
     $content = $imageUrl !== ''
         ? '<img src="' . e($imageUrl) . '" alt="" aria-hidden="true">'
         : e($fallback);
 
     return '<span class="' . e($class) . '">' . $content . '</span>';
+}
+
+function store_profile_image(?array $upload): array
+{
+    if ($upload === null) {
+        return ['', ''];
+    }
+
+    $uploadError = $upload['error'] ?? UPLOAD_ERR_NO_FILE;
+    if (!is_scalar($uploadError)) {
+        return ['', 'The selected profile photo is invalid. Please try again.'];
+    }
+    if ((int) $uploadError === UPLOAD_ERR_NO_FILE) {
+        return ['', ''];
+    }
+    if ((int) $uploadError !== UPLOAD_ERR_OK) {
+        return ['', 'The profile photo could not be uploaded. Please select it again.'];
+    }
+
+    $uploadSize = $upload['size'] ?? null;
+    if (!is_scalar($uploadSize) || !is_numeric($uploadSize)) {
+        return ['', 'The selected profile photo is invalid. Please try again.'];
+    }
+    if ((int) $uploadSize > 5 * 1024 * 1024) {
+        return ['', 'The profile photo must be no larger than 5 MB.'];
+    }
+
+    $temporaryPath = $upload['tmp_name'] ?? '';
+    if (!is_string($temporaryPath) || $temporaryPath === '' || !is_uploaded_file($temporaryPath)) {
+        return ['', 'The selected profile photo could not be verified. Please try again.'];
+    }
+
+    $mimeType = (new finfo(FILEINFO_MIME_TYPE))->file($temporaryPath);
+    $extensions = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/gif' => 'gif',
+        'image/webp' => 'webp',
+    ];
+    if (!is_string($mimeType) || !isset($extensions[$mimeType])) {
+        return ['', 'Choose a JPG, PNG, GIF, or WEBP profile photo.'];
+    }
+    if (getimagesize($temporaryPath) === false) {
+        return ['', 'The selected profile photo is not a valid image.'];
+    }
+
+    $directory = APP_ROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'user_profiles';
+    if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
+        throw new RuntimeException('Unable to create the profile photo upload directory.');
+    }
+
+    $filename = bin2hex(random_bytes(16)) . '.' . $extensions[$mimeType];
+    $destination = $directory . DIRECTORY_SEPARATOR . $filename;
+    if (!move_uploaded_file($temporaryPath, $destination)) {
+        return ['', 'The profile photo could not be saved. Please try again.'];
+    }
+
+    return ['public/uploads/user_profiles/' . $filename, ''];
+}
+
+function remove_profile_image(string $imagePath): void
+{
+    $prefix = 'public/uploads/user_profiles/';
+    if (!str_starts_with($imagePath, $prefix)) {
+        return;
+    }
+
+    $filename = substr($imagePath, strlen($prefix));
+    if ($filename === '' || basename($filename) !== $filename) {
+        return;
+    }
+
+    $absolutePath = APP_ROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'user_profiles' . DIRECTORY_SEPARATOR . $filename;
+    if (is_file($absolutePath) && !unlink($absolutePath)) {
+        error_log('Unable to remove profile image: ' . $absolutePath);
+    }
 }
 
 function role_label(string $role): string

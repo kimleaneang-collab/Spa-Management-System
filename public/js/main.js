@@ -677,22 +677,73 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const profilePhotoInput = document.getElementById('user-profile-photo-input');
-    const profilePhotoImage = document.getElementById('user-profile-photo-image');
-    const profilePhotoInitials = document.getElementById('user-profile-photo-initials');
-    const profilePhotoFilename = document.getElementById('user-profile-photo-filename');
-    let profilePhotoObjectUrl = '';
-    profilePhotoInput?.addEventListener('change', () => {
-        const file = profilePhotoInput.files?.[0];
-        if (!file || !profilePhotoImage || !profilePhotoInitials || !profilePhotoFilename) return;
+    const configureProfilePhotoPicker = (inputId, imageId, initialsId, filenameId) => {
+        const input = document.getElementById(inputId);
+        const image = document.getElementById(imageId);
+        const initials = document.getElementById(initialsId);
+        const filename = document.getElementById(filenameId);
+        let objectUrl = '';
 
-        if (profilePhotoObjectUrl) URL.revokeObjectURL(profilePhotoObjectUrl);
-        profilePhotoObjectUrl = URL.createObjectURL(file);
-        profilePhotoImage.src = profilePhotoObjectUrl;
-        profilePhotoImage.hidden = false;
-        profilePhotoInitials.hidden = true;
-        profilePhotoFilename.textContent = file.name;
+        input?.addEventListener('change', () => {
+            const file = input.files?.[0];
+            if (!file || !image || !initials || !filename) return;
+
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+            objectUrl = URL.createObjectURL(file);
+            image.src = objectUrl;
+            image.hidden = false;
+            initials.hidden = true;
+            filename.textContent = file.name;
+        });
+    };
+
+    configureProfilePhotoPicker(
+        'user-profile-photo-input',
+        'user-profile-photo-image',
+        'user-profile-photo-initials',
+        'user-profile-photo-filename',
+    );
+    configureProfilePhotoPicker(
+        'therapist-profile-photo-input',
+        'therapist-profile-photo-image',
+        'therapist-profile-photo-initials',
+        'therapist-profile-photo-filename',
+    );
+
+    const therapistLoginAccount = document.getElementById('therapist-login-account');
+    const therapistLoginCredentials = document.getElementById('therapist-login-credentials');
+    const therapistProfilePhotoInput = document.getElementById('therapist-profile-photo-input');
+    const therapistProfilePhotoImage = document.getElementById('therapist-profile-photo-image');
+    const therapistProfilePhotoInitials = document.getElementById('therapist-profile-photo-initials');
+    const therapistProfilePhotoFilename = document.getElementById('therapist-profile-photo-filename');
+    const therapistProfilePhotoGuidance = 'JPG, PNG, GIF, or WEBP. Maximum 5 MB. Choose or create a login account to save the photo.';
+    const updateTherapistAccountPhoto = () => {
+        if (!therapistProfilePhotoImage || !therapistProfilePhotoInitials || therapistProfilePhotoInput?.files?.length) return;
+        const selectedOption = therapistLoginAccount?.selectedOptions?.[0];
+        const imageUrl = selectedOption?.dataset.profileImage || '';
+        if (imageUrl) {
+            therapistProfilePhotoImage.src = imageUrl;
+        } else {
+            therapistProfilePhotoImage.removeAttribute('src');
+        }
+        therapistProfilePhotoImage.hidden = imageUrl === '';
+        therapistProfilePhotoInitials.hidden = imageUrl !== '';
+        if (therapistProfilePhotoFilename) {
+            therapistProfilePhotoFilename.textContent = imageUrl
+                ? 'Current account photo. Choose a new photo to replace it.'
+                : therapistProfilePhotoGuidance;
+        }
+    };
+    therapistLoginAccount?.addEventListener('change', () => {
+        if (!therapistLoginCredentials) return;
+        const creatingLogin = therapistLoginAccount.value === 'new';
+        therapistLoginCredentials.hidden = !creatingLogin;
+        therapistLoginCredentials.querySelectorAll('input').forEach((input) => {
+            input.required = creatingLogin;
+        });
+        updateTherapistAccountPhoto();
     });
+    updateTherapistAccountPhoto();
 
     const customerPhotoInput = document.querySelector('[data-customer-photo]');
     const customerPhotoPreview = document.querySelector('[data-customer-photo-preview]');

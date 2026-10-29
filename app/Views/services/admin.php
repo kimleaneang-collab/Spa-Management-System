@@ -17,9 +17,9 @@ $defaultServiceImage = APP_URL . '/public/uploads/login-bg.jpg';
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Treatments | Relax Spa</title>
-    <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css">
+    <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css?v=<?= e(asset_version('public/css/style.css')) ?>">
 </head>
-<body class="dashboard-page">
+<body class="dashboard-page" data-role="<?= e(strtolower((string) ($_SESSION['user']['role'] ?? 'admin'))) ?>">
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">

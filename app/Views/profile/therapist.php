@@ -80,7 +80,7 @@ $joinedDate = $joinedTimestamp !== false ? date('M Y', $joinedTimestamp) : 'Join
 
                 <section class="therapist-profile-card" aria-label="Personal and professional details">
                     <div class="therapist-profile-identity">
-                        <span class="therapist-profile-avatar"><?= e($initials) ?></span>
+                        <?= profile_avatar($_SESSION['user'] ?? [], 'therapist-profile-avatar', $initials) ?>
                         <div><h2><?= e($name) ?></h2><p><?= e($therapistTitle) ?> <span>·</span> Joined <?= e($joinedDate) ?></p></div>
                     </div>
                     <div class="therapist-profile-fields">

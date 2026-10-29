@@ -16,13 +16,16 @@ final class Dashboard
                 ON e.user_id = :user_id
                AND e.role_name = 'therapist'
                AND LOWER(TRIM(e.full_name)) = LOWER(TRIM(t.full_name))
-             WHERE e.id IS NOT NULL
+             WHERE t.user_id = :linked_user_id
+                OR e.id IS NOT NULL
                 OR LOWER(TRIM(t.full_name)) = LOWER(TRIM(:full_name))
-             ORDER BY (e.id IS NOT NULL) DESC, t.id ASC
+             ORDER BY (t.user_id = :priority_user_id) DESC, (e.id IS NOT NULL) DESC, t.id ASC
              LIMIT 1"
         );
         $therapistLookup->execute([
             ':user_id' => $userId,
+            ':linked_user_id' => $userId,
+            ':priority_user_id' => $userId,
             ':full_name' => $userName,
         ]);
         $therapistId = $therapistLookup->fetchColumn();

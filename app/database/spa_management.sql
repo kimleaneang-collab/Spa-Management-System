@@ -177,6 +177,7 @@ CREATE TABLE therapists (
     user_id BIGINT UNSIGNED NULL UNIQUE,
     therapist_code VARCHAR(30) NOT NULL UNIQUE,
     full_name VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NULL,
     gender ENUM('male','female','other') NULL,
     phone VARCHAR(30) NOT NULL,
     specialization VARCHAR(150) NULL,
