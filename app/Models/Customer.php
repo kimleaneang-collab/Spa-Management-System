@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 final class Customer
 {
+	// Store the database connection used by this model.
 	public function __construct(private PDO $db)
 	{
 	}
 
+	// Return customer records with visit, spending, and membership details.
 	public function all(?int $limit = 100): array
 	{
 		$query = 'SELECT c.id, c.full_name,
@@ -18,7 +20,11 @@ final class Customer
 				     WHERE i.customer_id = c.id AND i.status IN (\'paid\', \'partial\')) AS total_spent,
 				    COALESCE(ml.name, \'None\') AS membership
 			 FROM customers c
-			 LEFT JOIN memberships m ON m.customer_id = c.id AND m.status = \'active\'
+			 LEFT JOIN memberships m
+				 ON m.customer_id = c.id
+					AND m.status = \'active\'
+					AND m.start_date <= CURDATE()
+					AND m.expiry_date >= CURDATE()
 			 LEFT JOIN membership_levels ml ON ml.id = m.level_id
 			 ORDER BY c.id DESC';
 		if ($limit !== null) {
@@ -34,6 +40,7 @@ final class Customer
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
+	// Find the therapist for this user and return that therapist's customers.
 	public function forTherapist(int $userId, string $userName): array
 	{
 		$therapistId = $this->therapistIdForUser($userId, $userName);
@@ -60,6 +67,7 @@ final class Customer
 		];
 	}
 
+	// Return the appointment history for the therapist linked to this user.
 	public function treatmentHistoryForTherapist(int $userId, string $userName): array
 	{
 		$therapistId = $this->therapistIdForUser($userId, $userName);
@@ -85,6 +93,7 @@ final class Customer
 		];
 	}
 
+	// Match a user to a therapist by linked account, employee record, or name.
 	private function therapistIdForUser(int $userId, string $userName): int|false
 	{
 		$therapistLookup = $this->db->prepare(
@@ -112,6 +121,7 @@ final class Customer
 		return $therapistId === false ? false : (int) $therapistId;
 	}
 
+	// Find one customer by ID, or return null if the customer does not exist.
 	public function find(int $id): ?array
 	{
 		$stmt = $this->db->prepare('SELECT id, full_name, phone, email, gender, date_of_birth, address, notes FROM customers WHERE id = :id');
@@ -121,6 +131,7 @@ final class Customer
 		return $customer !== false ? $customer : null;
 	}
 
+	// Count all appointments scheduled for today.
 	public function appointmentsToday(): int
 	{
 		$stmt = $this->db->query('SELECT COUNT(*) FROM appointments WHERE appointment_date = CURDATE()');
@@ -128,6 +139,7 @@ final class Customer
 		return (int) $stmt->fetchColumn();
 	}
 
+	// Count today's appointments that are currently in progress.
 	public function checkedInToday(): int
 	{
 		$stmt = $this->db->query(
@@ -138,6 +150,7 @@ final class Customer
 		return (int) $stmt->fetchColumn();
 	}
 
+	// Return the total number of customers.
 	public function count(): int
 	{
 		$stmt = $this->db->query('SELECT COUNT(*) FROM customers');
@@ -145,6 +158,7 @@ final class Customer
 		return (int) $stmt->fetchColumn();
 	}
 
+	// Add a customer and use null for optional details that were left blank.
 	public function create(
 		string $name,
 		string $phone,
@@ -170,6 +184,7 @@ final class Customer
 		]);
 	}
 
+	// Update the supplied customer details and leave omitted optional fields unchanged.
 	public function update(int $id, string $name, string $phone, string $email, ?string $gender = null, ?string $dateOfBirth = null, ?string $notes = null): void
 	{
 		$fields = 'full_name = :full_name, phone = :phone, email = :email';
@@ -194,6 +209,7 @@ final class Customer
 		$stmt->execute($parameters);
 	}
 
+	// Remove a customer by ID.
 	public function delete(int $id): void
 	{
 		$stmt = $this->db->prepare('DELETE FROM customers WHERE id = :id');

@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class CustomerController
 {
+    // Show customers and handle allowed customer changes.
     public function index(): void
     {
         if (empty($_SESSION['user'])) {
@@ -139,6 +140,7 @@ final class CustomerController
         require __DIR__ . '/../Views/customers/index.php';
     }
 
+    // Show treatment history for the signed-in therapist.
     public function history(): void
     {
         if (empty($_SESSION['user'])) {

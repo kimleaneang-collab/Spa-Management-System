@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 $userName = (string) ($user['full_name'] ?? $user['username'] ?? 'Receptionist');
+// Create initials from the first and last words of a user's name.
 $initials = static function (string $name): string {
     $parts = preg_split('/\s+/', trim($name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
     return $parts === [] ? '?' : strtoupper(substr($parts[0], 0, 1) . substr($parts[count($parts) - 1], 0, 1));

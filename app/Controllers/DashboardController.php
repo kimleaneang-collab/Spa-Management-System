@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class DashboardController
 {
+    // Load the dashboard that matches the signed-in user's role.
     public function index(): void
     {
         if (empty($_SESSION['user'])) {

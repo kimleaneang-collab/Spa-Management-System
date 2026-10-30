@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 final class Dashboard
 {
+    // Store the database connection used by this model.
     public function __construct(private PDO $db)
     {
     }
 
+    // Return the linked therapist's booking, customer, revenue, and schedule details.
     public function therapistOverview(int $userId, string $userName): array
     {
         $therapistLookup = $this->db->prepare(
@@ -86,6 +88,7 @@ final class Dashboard
         ];
     }
 
+    // Return today's sales, payment counts, and recent transactions for a cashier.
     public function cashierOverview(int $userId): array
     {
         $statsQuery = $this->db->prepare(
@@ -136,6 +139,7 @@ final class Dashboard
         ];
     }
 
+    // Gather the totals, charts, alerts, and appointment rows shown on the main dashboard.
     public function overview(): array
     {
         $totalRevenue = (float) $this->db->query(
@@ -222,13 +226,12 @@ final class Dashboard
         }
 
         $revenueData = $this->db->query(
-            "SELECT DATE_FORMAT(invoice_date, '%Y-%m-%d') AS day,
-                    COALESCE(SUM(total_amount), 0) AS revenue
-             FROM invoices
-             WHERE invoice_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-               AND invoice_date < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
-               AND status IN ('paid', 'partial')
-             GROUP BY DATE(invoice_date)
+            "SELECT DATE_FORMAT(paid_at, '%Y-%m-%d') AS day,
+                    COALESCE(SUM(amount), 0) AS revenue
+             FROM payments
+             WHERE paid_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+               AND paid_at < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+             GROUP BY DATE(paid_at)
              ORDER BY day ASC"
         )->fetchAll(PDO::FETCH_ASSOC);
 
@@ -245,18 +248,24 @@ final class Dashboard
         }
 
         $highestRevenue = max($chartValues);
+        $chartHasRevenue = $highestRevenue > 0;
         $rawStep = max($highestRevenue, 1) / 3;
         $stepMagnitude = 10 ** floor(log10($rawStep));
         $normalizedStep = $rawStep / $stepMagnitude;
         $stepFactor = $normalizedStep <= 1 ? 1 : ($normalizedStep <= 2 ? 2 : ($normalizedStep <= 5 ? 5 : 10));
-        $chartStep = max(10000, $stepFactor * $stepMagnitude);
+        $chartStep = $stepFactor * $stepMagnitude;
         $chartMaximum = max($chartStep * 3, ceil($highestRevenue / $chartStep) * $chartStep);
         $chartTicks = [];
         for ($tick = 0; $tick <= 3; $tick++) {
             $value = $tick * $chartStep;
-            $label = $value >= 1000 && $value % 1000 === 0
-                ? '$' . number_format($value / 1000) . 'K'
-                : '$' . number_format($value, 0);
+            if ($value >= 1000) {
+                $scaledValue = $value / 1000;
+                $precision = abs($scaledValue - round($scaledValue)) < 0.00001 ? 0 : 1;
+                $label = '$' . number_format($scaledValue, $precision) . 'K';
+            } else {
+                $precision = $chartStep < 1 ? 2 : ($chartStep < 10 ? 1 : 0);
+                $label = '$' . number_format($value, $precision);
+            }
             $chartTicks[] = [
                 'y' => 150 - ($tick * (130 / 3)),
                 'label' => $label,
@@ -308,7 +317,9 @@ final class Dashboard
             "SELECT c.full_name, m.expiry_date
              FROM memberships m
              INNER JOIN customers c ON c.id = m.customer_id
-             WHERE m.status = 'active' AND m.expiry_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+             WHERE m.status = 'active'
+               AND m.start_date <= CURDATE()
+               AND m.expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
              ORDER BY m.expiry_date ASC
              LIMIT 2"
         )->fetchAll(PDO::FETCH_ASSOC);
@@ -354,6 +365,7 @@ final class Dashboard
             'chartPath' => $chartPath,
             'chartAreaPath' => $chartAreaPath,
             'chartTicks' => $chartTicks,
+            'chartHasRevenue' => $chartHasRevenue,
             'notifications' => $notifications,
             'appointmentRows' => $appointmentRows,
             'revenueTrend' => max(0, min(100, round(($totalRevenue > 0 ? ($totalRevenue / 200000) * 100 : 0), 0))),

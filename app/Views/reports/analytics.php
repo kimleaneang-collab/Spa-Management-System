@@ -5,6 +5,7 @@ if (empty($_SESSION['user'])) {
     redirect('login');
 }
 
+// Show the change from last week with an arrow or a no-data message.
 $formatChange = static function (?float $change): string {
     if ($change === null) {
         return 'No prior-period data';
@@ -13,7 +14,9 @@ $formatChange = static function (?float $change): string {
     $arrow = $change > 0 ? '↑' : ($change < 0 ? '↓' : '•');
     return $arrow . ' ' . number_format(abs($change), 1) . '% vs last week';
 };
+// Choose the CSS class based on whether the change is negative.
 $changeClass = static fn (?float $change): string => $change !== null && $change < 0 ? 'negative' : 'positive';
+// Format an amount with the selected currency.
 $formatMoney = static fn (float $amount): string => e($currency) . ' ' . number_format($amount, 2);
 $userName = (string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'User');
 $userInitials = strtoupper(substr($userName, 0, 2));

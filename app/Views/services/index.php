@@ -7,6 +7,7 @@ if (empty($_SESSION['user'])) {
 
 $activeServices = array_values(array_filter(
     $services,
+    // Keep only services that are currently active.
     static fn (array $service): bool => $service['status'] === 'Active'
 ));
 $activeCategories = array_unique(array_column($activeServices, 'category'));

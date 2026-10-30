@@ -1,3 +1,4 @@
+    // Run the related action when the user interacts with this control.
 document.addEventListener('DOMContentLoaded', () => {
     const config = window.posConfig || { currency: 'USD', taxPercent: 0 };
     const cart = new Map();
@@ -9,22 +10,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!cartContainer || !itemsInput || !discountInput) return;
 
+    // Handle this small task for the current item.
     const formatMoney = (amount) => `${config.currencySymbol || `${config.currency} `}${Number(amount).toFixed(2)}`;
+    // Handle this small task for the current item.
     const cartKey = (item) => `${item.type}:${item.id}`;
     const categoryFilters = [...document.querySelectorAll('[data-pos-category-filter]')];
     const searchInput = document.querySelector('[data-pos-search]');
     const noResults = document.querySelector('[data-pos-no-results]');
     let activeCategory = 'all';
 
+    // Handle this small task for the current item.
     document.querySelectorAll('[data-pos-image]').forEach((image) => {
+    // Run the related action when the user interacts with this control.
         image.addEventListener('error', () => {
             image.closest('.cashier-pos-item-image')?.classList.add('image-failed');
         }, { once: true });
     });
 
+    // Hide items that do not match the current search or category.
     const filterCatalog = () => {
         const searchTerm = (searchInput?.value || '').trim().toLowerCase();
         let visibleCount = 0;
+    // Handle this small task for the current item.
         document.querySelectorAll('.cashier-pos-item-card').forEach((item) => {
             const matchesCategory = activeCategory === 'all' || item.dataset.posCategory === activeCategory;
             const matchesSearch = !searchTerm || (item.dataset.posSearchValue || '').includes(searchTerm);
@@ -35,9 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (noResults) noResults.hidden = visibleCount > 0;
     };
 
+    // Refresh the cart list, totals, and saved sale data.
     const renderCart = () => {
+    // Handle this small task for the current item.
         cartContainer.querySelectorAll('.pos-cart-row').forEach((row) => row.remove());
         let subtotal = 0;
+    // Handle this small task for the current item.
         const items = [...cart.values()].map((item) => {
             subtotal += item.price * item.quantity;
             return { type: item.type, id: item.id, quantity: item.quantity };
@@ -45,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         itemsInput.value = JSON.stringify(items);
         if (emptyMessage) emptyMessage.hidden = items.length > 0;
 
+    // Handle this small task for the current item.
         cart.forEach((item, key) => {
             const row = document.createElement('div');
             row.className = 'pos-cart-row';
@@ -62,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             decrease.type = 'button';
             decrease.textContent = '−';
             decrease.setAttribute('aria-label', `Remove one ${item.name}`);
+    // Run the related action when the user interacts with this control.
             decrease.addEventListener('click', () => {
                 item.quantity -= 1;
                 if (item.quantity <= 0) cart.delete(key);
@@ -73,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             increase.type = 'button';
             increase.textContent = '+';
             increase.setAttribute('aria-label', `Add one ${item.name}`);
+    // Run the related action when the user interacts with this control.
             increase.addEventListener('click', () => {
                 if (item.type === 'product' && item.quantity + 1 > item.stock) return;
                 item.quantity += 1;
@@ -95,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('pos-tax').textContent = formatMoney(tax);
         document.getElementById('pos-total').textContent = formatMoney(total);
         document.getElementById('cashier-pos-charge-total')?.replaceChildren(document.createTextNode(formatMoney(total)));
+    // Handle this small task for the current item.
         const itemCount = [...cart.values()].reduce((count, item) => count + item.quantity, 0);
         const cartCount = document.querySelector('[data-pos-cart-count]');
         if (cartCount) cartCount.textContent = `(${itemCount})`;
@@ -103,7 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Handle this small task for the current item.
     document.querySelectorAll('.pos-item-card').forEach((button) => {
+    // Run the related action when the user interacts with this control.
         button.addEventListener('click', () => {
             let item;
             try {
@@ -127,14 +143,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     discountInput.addEventListener('input', renderCart);
+    // Run the related action when the user interacts with this control.
     document.getElementById('pos-clear')?.addEventListener('click', () => {
         cart.clear();
         renderCart();
     });
 
+    // Handle this small task for the current item.
     categoryFilters.forEach((button) => {
+    // Run the related action when the user interacts with this control.
         button.addEventListener('click', () => {
             activeCategory = button.dataset.posCategoryFilter || 'all';
+    // Handle this small task for the current item.
             categoryFilters.forEach((filter) => {
                 const isActive = filter === button;
                 filter.classList.toggle('active', isActive);
@@ -146,9 +166,12 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput?.addEventListener('input', filterCatalog);
 
     const paymentInput = document.getElementById('pos-payment-method');
+    // Handle this small task for the current item.
     document.querySelectorAll('[data-payment-method]').forEach((button) => {
+    // Run the related action when the user interacts with this control.
         button.addEventListener('click', () => {
             if (paymentInput) paymentInput.value = button.dataset.paymentMethod || 'cash';
+    // Handle this small task for the current item.
             document.querySelectorAll('[data-payment-method]').forEach((methodButton) => {
                 const isActive = methodButton === button;
                 methodButton.classList.toggle('active', isActive);

@@ -6,6 +6,7 @@ $isReceptionist = strtolower((string) ($user['role'] ?? '')) === 'receptionist';
 $isTherapist = in_array(strtolower((string) ($user['role'] ?? '')), ['staff', 'therapist'], true);
 $userName = (string) ($user['full_name'] ?? $user['username'] ?? 'User');
 $userInitials = strtoupper(substr($userName, 0, 1));
+// Build the calendar route query for the selected year and month.
 $calendarQuery = static fn (DateTimeImmutable $date): string => http_build_query([
     'route' => 'calendar',
     'year' => $date->format('Y'),

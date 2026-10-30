@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class UserController
 {
+    // Manage user accounts and show the user list.
     public function index(): void
     {
         require_roles(['admin', 'manager']);
@@ -19,6 +20,7 @@ final class UserController
         $isAdministrator = $currentRole === 'admin';
         $roles = $userModel->roles();
         if (!$isAdministrator) {
+            // Keep the admin role out of the list shown to managers.
             $roles = array_values(array_filter($roles, static fn (string $role): bool => $role !== 'admin'));
         }
         $editingUser = null;
@@ -184,6 +186,7 @@ final class UserController
         require __DIR__ . '/../Views/settings/users.php';
     }
 
+    // Check that the submitted token matches the session token.
     private function verifyCsrf(): void
     {
         $token = (string) ($_POST['csrf_token'] ?? '');
@@ -196,6 +199,7 @@ final class UserController
         }
     }
 
+    // Clear the session and return the user to the login page.
     private function endSession(): void
     {
         $_SESSION = [];

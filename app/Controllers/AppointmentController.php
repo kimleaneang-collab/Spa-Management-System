@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class AppointmentController
 {
+    // Show appointments and handle allowed appointment changes.
     public function index(): void
     {
         if (empty($_SESSION['user'])) {

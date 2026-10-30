@@ -64,6 +64,7 @@ $isReceptionist = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 're
             <div class="content-wrap <?= $isReceptionist ? 'receptionist-rooms-page' : '' ?>">
                 <?php if ($isReceptionist): ?>
                     <?php
+                        // Count rooms whose status is currently available.
                         $availableRoomCount = count(array_filter($rooms, static fn (array $room): bool => $room['status'] === 'Available'));
                     ?>
                     <div class="page-heading receptionist-rooms-heading">

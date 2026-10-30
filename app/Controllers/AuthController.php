@@ -11,6 +11,7 @@ final class AuthController
 
     private User $users;
 
+    // Set up the user model used for sign-in.
     public function __construct()
     {
         $this->users = new User(
@@ -18,6 +19,7 @@ final class AuthController
         );
     }
 
+    // Check sign-in requests and start a session for a valid user.
     public function login(): void
     {
         /*
@@ -254,6 +256,7 @@ final class AuthController
         redirect('dashboard');
     }
 
+    // End the signed-in user's session after checking the request token.
     public function logout(): void
     {
         // SECURITY: Only allow logout through a POST request to reduce CSRF abuse.
@@ -286,6 +289,7 @@ final class AuthController
         redirect('login');
     }
 
+    // Check that the submitted token matches the session token.
     private function verifyCsrf(): void
     {
         $token = (string) (

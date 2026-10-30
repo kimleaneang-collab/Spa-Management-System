@@ -132,7 +132,7 @@ switch ($route) {
         break;
 
     case 'profile':
-        (new ProfileController())->therapist();
+        (new ProfileController())->index();
         break;
 
     case 'change-password':

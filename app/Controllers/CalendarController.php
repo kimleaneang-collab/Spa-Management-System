@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class CalendarController
 {
+    // Load appointments for the selected month or therapist schedule.
     public function index(): void
     {
         require_authentication();

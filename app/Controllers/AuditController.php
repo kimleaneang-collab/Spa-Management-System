@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class AuditController
 {
+    // Show the latest audit events to administrators.
     public function index(): void
     {
         require_roles(['admin']);

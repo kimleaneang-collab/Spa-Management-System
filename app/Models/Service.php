@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 final class Service
 {
+	// Store the database connection used by this model.
 	public function __construct(private PDO $db)
 	{
 	}
 
+	// Return the names and IDs of active service categories.
 	public function categories(): array
 	{
 		$stmt = $this->db->query("SELECT id, name FROM service_categories WHERE status = 'active' ORDER BY name");
@@ -14,6 +16,7 @@ final class Service
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
+	// Return service records with formatted values and a fallback image when needed.
 	public function all(): array
 	{
 		$stmt = $this->db->query(
@@ -32,6 +35,7 @@ final class Service
 			'nail' => 'foot-message.png',
 		];
 
+		// Format each service and choose an image from its category if none is saved.
 		return array_map(static function (array $service) use ($fallbackImages): array {
 			$category = strtolower((string) $service['category']);
 			$imagePath = trim((string) ($service['image_path'] ?? ''));
@@ -61,6 +65,7 @@ final class Service
 		}, $stmt->fetchAll(PDO::FETCH_ASSOC));
 	}
 
+	// Add a service and store optional description and image values as null when blank.
 	public function create(int $categoryId, string $code, string $name, int $duration, float $price, string $description, string $imagePath): void
 	{
 		$stmt = $this->db->prepare(

@@ -5,10 +5,12 @@ final class DatabaseBackup
 {
     private const FILE_PATTERN = '/^spa-management-\d{8}-\d{6}-[a-f0-9]{12}\.sql$/';
 
+    // Store the database connection used to create backups.
     public function __construct(private PDO $db)
     {
     }
 
+    // Write the database schema and rows to a private backup file.
     public function create(): string
     {
         $directory = $this->backupDirectory();
@@ -62,12 +64,17 @@ final class DatabaseBackup
                 }
 
                 $quotedColumns = implode(', ', array_map(
+                    // Quote each column name before adding it to the backup SQL.
                     fn (string $column): string => $this->quoteIdentifier($column),
                     array_map('strval', $columns)
                 ));
                 $rows = $this->db->query('SELECT * FROM ' . $quotedTable);
                 while (($row = $rows->fetch(PDO::FETCH_NUM)) !== false) {
-                    $values = array_map(fn (mixed $value): string => $this->quoteValue($value), $row);
+                    $values = array_map(
+                        // Convert each database value into safe SQL text.
+                        fn (mixed $value): string => $this->quoteValue($value),
+                        $row
+                    );
                     $this->write(
                         $stream,
                         'INSERT INTO ' . $quotedTable . ' (' . $quotedColumns . ') VALUES (' . implode(', ', $values) . ");\n"
@@ -96,6 +103,7 @@ final class DatabaseBackup
         }
     }
 
+    // List the newest valid backup files and their sizes and dates.
     public function available(): array
     {
         $directory = $this->backupDirectory();
@@ -112,11 +120,15 @@ final class DatabaseBackup
             }
         }
 
-        usort($backups, static fn (array $left, array $right): int => $right['created_at'] <=> $left['created_at']);
+        usort($backups,
+            // Sort backup details from newest to oldest.
+            static fn (array $left, array $right): int => $right['created_at'] <=> $left['created_at']
+        );
 
         return array_slice($backups, 0, 20);
     }
 
+    // Return the safe path to a named backup, or null if it is unavailable.
     public function pathFor(string $filename): ?string
     {
         if (preg_match(self::FILE_PATTERN, $filename) !== 1) {
@@ -128,6 +140,7 @@ final class DatabaseBackup
         return is_file($path) && !is_link($path) ? $path : null;
     }
 
+    // Create and verify a writable backup directory outside the public web folder.
     private function backupDirectory(): string
     {
         $configuredDirectory = trim((string) (getenv('APP_BACKUP_DIR') ?: ''));
@@ -156,11 +169,13 @@ final class DatabaseBackup
         return $realDirectory;
     }
 
+    // Escape a database name or column name for use in SQL.
     private function quoteIdentifier(string $identifier): string
     {
         return '`' . str_replace('`', '``', $identifier) . '`';
     }
 
+    // Convert a value into safely quoted SQL text, preserving null values.
     private function quoteValue(mixed $value): string
     {
         if ($value === null) {
@@ -175,6 +190,7 @@ final class DatabaseBackup
         return $quoted;
     }
 
+    // Write all supplied text to the backup stream or raise an error.
     private function write($stream, string $contents): void
     {
         $offset = 0;

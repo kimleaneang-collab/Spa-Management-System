@@ -14,6 +14,7 @@ $userInitials = $nameParts === []
     : strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[count($nameParts) - 1], 0, 1));
 $activeServices = array_values(array_filter(
     $services,
+    // Keep only services that are currently active.
     static fn (array $service): bool => $service['status'] === 'Active'
 ));
 $activeCategories = array_unique(array_column($activeServices, 'category'));

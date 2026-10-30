@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class ProductController
 {
+    // Handle product creation and show the product list.
     public function index(): void
     {
         if (empty($_SESSION['user'])) {

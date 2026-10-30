@@ -7,12 +7,15 @@ if (empty($_SESSION['user'])) {
 
 $currentUser = $_SESSION['user'];
 $isManager = strtolower((string) ($currentUser['role'] ?? '')) === 'manager';
+$isAdministrator = strtolower((string) ($currentUser['role'] ?? '')) === 'admin';
 $currentUserName = (string) ($currentUser['full_name'] ?? $currentUser['username'] ?? 'User');
 $currentUserRole = role_label((string) ($currentUser['role'] ?? 'staff'));
+// Return a submitted form value or its default as text.
 $formValue = static function (string $key, mixed $default = '') use ($formValues): string {
     return (string) ($formValues[$key] ?? $default);
 };
 $editingSelf = $editingUser !== null && (int) $editingUser['id'] === (int) ($currentUser['id'] ?? 0);
+// Create initials from the first and last words of a user's name.
 $initials = static function (string $name): string {
     $parts = preg_split('/\s+/', trim($name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
     if ($parts === []) {
@@ -21,6 +24,7 @@ $initials = static function (string $name): string {
 
     return strtoupper(substr($parts[0], 0, 1) . substr($parts[count($parts) - 1], 0, 1));
 };
+// Turn a last-active time into a short label such as minutes or a date.
 $lastActive = static function (?string $value): string {
     if ($value === null || $value === '') {
         return 'Never';
@@ -86,7 +90,7 @@ $lastActive = static function (?string $value): string {
                     <?php if ($isManager): ?>
                         <a class="nav-item" href="<?= e(APP_URL) ?>/?route=pos"><span class="nav-icon">▤</span><span>POS &amp; Billing</span></a>
                     <?php endif; ?>
-                    <a class="nav-item active" href="<?= e(APP_URL) ?>/?route=users-and-roles"><span class="nav-icon">⚙</span><span>Users &amp; Roles</span></a>
+                    <a class="nav-item active" href="<?= e(APP_URL) ?>/?route=users-and-roles"><span class="nav-icon">⚙</span><span><?= $isAdministrator ? 'Staff Management' : 'Users &amp; Roles' ?></span></a>
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
                 </div>
             </nav>
@@ -115,8 +119,8 @@ $lastActive = static function (?string $value): string {
             <div class="content-wrap users-content">
                 <div class="page-heading">
                     <div>
-                        <h1 class="page-title">USERS &amp; ROLES</h1>
-                        <div class="page-date">Manage staff accounts and access levels.</div>
+                        <h1 class="page-title"><?= $isAdministrator ? 'STAFF MANAGEMENT' : 'USERS &amp; ROLES' ?></h1>
+                        <div class="page-date"><?= $isAdministrator ? 'Create a separate login for each staff member, including Cashiers and Receptionists. Assign each person their own role and account.' : 'Manage staff accounts and access levels.' ?></div>
                     </div>
                     <button class="primary-button" type="button" data-open-modal="user-modal">＋ Invite User</button>
                 </div>

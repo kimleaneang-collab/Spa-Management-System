@@ -8,6 +8,7 @@ if (empty($_SESSION['user'])) {
 $managerDashboard = strtolower((string) ($user['role'] ?? '')) === 'manager';
 $receptionistDashboard = strtolower((string) ($user['role'] ?? '')) === 'receptionist';
 $currentRole = strtolower((string) ($user['role'] ?? 'admin'));
+// Create initials from the first and last words of a user's name.
 $dashboardInitials = static function (string $name): string {
     $parts = preg_split('/\s+/', trim($name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
     if ($parts === []) {
@@ -462,13 +463,17 @@ $dashboardInitials = static function (string $name): string {
                                 <line class="revenue-chart-gridline" x1="52" x2="458" y1="<?= e((string) $tick['y']) ?>" y2="<?= e((string) $tick['y']) ?>" />
                                 <text class="revenue-chart-axis-label" x="44" y="<?= e((string) ($tick['y'] + 4)) ?>" text-anchor="end"><?= e($tick['label']) ?></text>
                             <?php endforeach; ?>
-                            <path class="revenue-chart-area" d="<?= e($chartAreaPath) ?>" fill="url(#revenueChartArea)" />
-                            <path class="revenue-chart-line" d="<?= e($chartPath) ?>" pathLength="1" />
-                            <?php foreach ($chartPoints as $index => $point): ?>
-                                <circle class="revenue-chart-point" cx="<?= e((string) $point[0]) ?>" cy="<?= e((string) $point[1]) ?>" r="3.5" style="--point-index: <?= (int) $index ?>">
-                                    <title><?= e($point[2]) ?>: $<?= e(number_format((float) $point[3], 2)) ?></title>
-                                </circle>
-                            <?php endforeach; ?>
+                            <?php if ($chartHasRevenue): ?>
+                                <path class="revenue-chart-area" d="<?= e($chartAreaPath) ?>" fill="url(#revenueChartArea)" />
+                                <path class="revenue-chart-line" d="<?= e($chartPath) ?>" pathLength="1" />
+                                <?php foreach ($chartPoints as $index => $point): ?>
+                                    <circle class="revenue-chart-point" cx="<?= e((string) $point[0]) ?>" cy="<?= e((string) $point[1]) ?>" r="3.5" style="--point-index: <?= (int) $index ?>">
+                                        <title><?= e($point[2]) ?>: $<?= e(number_format((float) $point[3], 2)) ?></title>
+                                    </circle>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <text class="revenue-chart-empty" x="255" y="94" text-anchor="middle">No revenue recorded in the last 7 days</text>
+                            <?php endif; ?>
                             <?php foreach ($chartPoints as $point): ?>
                                 <text class="revenue-chart-date-label" x="<?= e((string) $point[0]) ?>" y="179" text-anchor="middle"><?= e($point[2]) ?></text>
                             <?php endforeach; ?>

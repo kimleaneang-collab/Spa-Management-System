@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 final class TreatmentRoom
 {
+	// Store the database connection used by this model.
 	public function __construct(private PDO $db)
 	{
 	}
 
+	// Return rooms with their current occupancy and display-ready status.
 	public function all(bool $ascending = false): array
 	{
 		$stmt = $this->db->query(
@@ -43,6 +45,7 @@ final class TreatmentRoom
 			 ORDER BY r.id ' . ($ascending ? 'ASC' : 'DESC')
 		);
 
+		// Format each room's status and current appointment details.
 		return array_map(static function (array $room): array {
 			$statusMap = [
 				'available' => ['label' => 'Available', 'class' => 'available'],
@@ -69,6 +72,7 @@ final class TreatmentRoom
 		}, $stmt->fetchAll(PDO::FETCH_ASSOC));
 	}
 
+	// Add a treatment room and save its optional type and notes.
 	public function create(
 		string $code,
 		string $name,

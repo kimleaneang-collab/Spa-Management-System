@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class RoomController
 {
+    // Create rooms when allowed and show the room list.
     public function index(): void
     {
         if (empty($_SESSION['user'])) {

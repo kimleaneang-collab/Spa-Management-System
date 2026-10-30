@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 final class Therapist
 {
+	// Store the database connection used by this model.
 	public function __construct(private PDO $db)
 	{
 	}
 
+	// Return therapist records with booking counts and display-ready status values.
 	public function all(): array
 	{
 		$stmt = $this->db->query(
@@ -22,6 +24,7 @@ final class Therapist
 			 ORDER BY t.id DESC"
 		);
 
+		// Convert each therapist row into the fields used by the display.
 		return array_map(static function (array $therapist): array {
 			$statusMap = [
 				'active' => ['label' => 'Available', 'class' => 'available'],
@@ -42,6 +45,7 @@ final class Therapist
 		}, $stmt->fetchAll(PDO::FETCH_ASSOC));
 	}
 
+	// Find one therapist and include details from the linked user account.
 	public function find(int $id): ?array
 	{
 		$stmt = $this->db->prepare(
@@ -57,6 +61,7 @@ final class Therapist
 		return $therapist !== false ? $therapist : null;
 	}
 
+	// List eligible user accounts that can be linked to this therapist.
 	public function accountsForAssignment(int $therapistId = 0): array
 	{
 		$stmt = $this->db->prepare(
@@ -82,6 +87,7 @@ final class Therapist
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
+	// Check whether a user account can be linked to this therapist.
 	public function accountCanBeAssigned(int $userId, int $therapistId = 0): bool
 	{
 		$stmt = $this->db->prepare(
@@ -115,6 +121,7 @@ final class Therapist
 		return (int) $stmt->fetchColumn() > 0;
 	}
 
+	// Find a therapist profile using the user's account link or name.
 	public function profileForUser(int $userId, string $userName): ?array
 	{
 		$stmt = $this->db->prepare(
@@ -146,6 +153,7 @@ final class Therapist
 		return $profile !== false ? $profile : null;
 	}
 
+	// Add a therapist and connect an account when one is provided.
 	public function create(
 		string $name,
 		string $email,
@@ -174,6 +182,7 @@ final class Therapist
 		]);
 	}
 
+	// Update a therapist and synchronize matching employee and account names.
 	public function update(int $id, string $name, string $email, string $phone, string $specialization, string $gender, string $status, string $bio, ?int $userId): void
 	{
 		$current = $this->db->prepare('SELECT full_name FROM therapists WHERE id = :id');
@@ -225,6 +234,7 @@ final class Therapist
 		}
 	}
 
+	// Remove a therapist by ID.
 	public function delete(int $id): void
 	{
 		$stmt = $this->db->prepare('DELETE FROM therapists WHERE id = :id');

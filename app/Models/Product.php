@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 final class Product
 {
+	// Store the database connection used by this model.
 	public function __construct(private PDO $db)
 	{
 	}
 
+	// Return product records with formatted prices, stock status, and image paths.
 	public function all(): array
 	{
 		$stmt = $this->db->query(
@@ -16,6 +18,7 @@ final class Product
 			 ORDER BY id DESC'
 		);
 
+		// Format each product's stock, status, and display values.
 		return array_map(static function (array $product): array {
 			$stock = (float) $product['stock_quantity'];
 			$reorder = (float) $product['reorder_level'];
@@ -65,6 +68,7 @@ final class Product
 		}, $stmt->fetchAll(PDO::FETCH_ASSOC));
 	}
 
+	// Add a product and save its price, stock, and image details.
 	public function create(
 		string $code,
 		string $name,

@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 final class Appointment
 {
+	// Store the database connection used by this model.
 	public function __construct(private PDO $db)
 	{
 	}
 
+	// Return all appointments with their customer, therapist, service, and room details.
 	public function all(): array
 	{
 		$stmt = $this->db->query(
@@ -26,6 +28,7 @@ final class Appointment
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
+	// Find the therapist linked to this user and return that therapist's appointments.
 	public function forTherapistUser(int $userId, string $userName): array
 	{
 		$therapistLookup = $this->db->prepare(
@@ -75,6 +78,7 @@ final class Appointment
 		];
 	}
 
+	// Return appointments scheduled within the given date range.
 	public function betweenDates(string $startDate, string $endDate): array
 	{
 		$stmt = $this->db->prepare(
@@ -97,6 +101,7 @@ final class Appointment
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
+	// Return one therapist's appointments within the given date range.
 	public function betweenDatesForTherapist(int $therapistId, string $startDate, string $endDate): array
 	{
 		$stmt = $this->db->prepare(
@@ -121,6 +126,7 @@ final class Appointment
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 
+	// Find one appointment by ID, or return null if it does not exist.
 	public function find(int $id): ?array
 	{
 		$stmt = $this->db->prepare('SELECT id, customer_id, service_id, therapist_id, room_id, appointment_date, start_time, end_time, status, notes FROM appointments WHERE id = :id');
@@ -130,6 +136,7 @@ final class Appointment
 		return $appointment !== false ? $appointment : null;
 	}
 
+	// Return active customers, therapists, services, and usable rooms for appointment forms.
 	public function options(): array
 	{
 		return [
@@ -140,6 +147,7 @@ final class Appointment
 		];
 	}
 
+	// Add a new appointment and generate its appointment number.
 	public function create(int $customerId, int $serviceId, ?int $therapistId, ?int $roomId, string $date, string $start, string $end, string $status, string $notes, ?int $createdBy): void
 	{
 		$stmt = $this->db->prepare(
@@ -154,6 +162,7 @@ final class Appointment
 		]);
 	}
 
+	// Save the updated details for an existing appointment.
 	public function update(int $id, int $customerId, int $serviceId, ?int $therapistId, ?int $roomId, string $date, string $start, string $end, string $status, string $notes): void
 	{
 		$stmt = $this->db->prepare(
@@ -167,6 +176,7 @@ final class Appointment
 		]);
 	}
 
+	// Remove an appointment by ID.
 	public function delete(int $id): void
 	{
 		$stmt = $this->db->prepare('DELETE FROM appointments WHERE id = :id');

@@ -7,6 +7,7 @@ final class Database
 {
     private static ?PDO $connection = null;
 
+    // Reuse the database connection or create one from the environment settings.
     public static function connection(): PDO
     {
         if (self::$connection instanceof PDO) {

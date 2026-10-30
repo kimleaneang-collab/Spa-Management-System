@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 final class Report
 {
+    // Store the database connection used by this model.
     public function __construct(private PDO $db)
     {
     }
 
+    // Calculate recent revenue, appointment, customer, and service statistics.
     public function analytics(DateTimeImmutable $today): array
     {
         $periodStart = $today->modify('-6 days')->format('Y-m-d');
@@ -131,11 +133,13 @@ final class Report
         ]);
         $services = $serviceStatement->fetchAll(PDO::FETCH_ASSOC);
         $serviceRevenueTotal = array_sum(array_map(
+            // Read each service's revenue as a number for the total.
             static fn (array $row): float => (float) $row['revenue'],
             $services
         ));
         $topRows = array_slice($services, 0, 4);
         $otherRevenue = array_sum(array_map(
+            // Read each remaining service's revenue to group it as Other.
             static fn (array $row): float => (float) $row['revenue'],
             array_slice($services, 4)
         ));
@@ -143,6 +147,7 @@ final class Report
             $topRows[] = ['service_name' => 'Other', 'revenue' => $otherRevenue];
         }
         $topServices = array_map(
+            // Add a revenue share to each service row for the report display.
             static function (array $row) use ($serviceRevenueTotal): array {
                 $revenue = (float) $row['revenue'];
 
@@ -183,6 +188,7 @@ final class Report
         ];
     }
 
+    // Compare two values and return the percentage change, or null if undefined.
     private function percentageChange(float|int $current, float|int $previous): ?float
     {
         if ($previous == 0) {
@@ -192,6 +198,7 @@ final class Report
         return (($current - $previous) / $previous) * 100;
     }
 
+    // Calculate the share of customers with more than one appointment in a date range.
     private function rebookingRate(string $startDate, string $endDate): int
     {
         $statement = $this->db->prepare(

@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 final class Invoice
 {
+    // Store the database connection used by this model.
     public function __construct(private PDO $db)
     {
     }
 
+    // Return active services, stocked products, and active customers for checkout.
     public function catalog(): array
     {
         return [
@@ -53,6 +55,7 @@ final class Invoice
         ];
     }
 
+    // Read the tax setting and return a percentage between zero and one hundred.
     public function taxPercent(): float
     {
         $statement = $this->db->prepare(
@@ -66,6 +69,7 @@ final class Invoice
             : 0.0;
     }
 
+    // Return recent receipt details for payments received by this cashier.
     public function receiptsForCashier(int $userId): array
     {
         $statement = $this->db->prepare(
@@ -95,6 +99,7 @@ final class Invoice
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Validate the cart, save the invoice and payment, and reduce product stock.
     public function checkout(
         int $customerId,
         array $items,
@@ -304,6 +309,7 @@ final class Invoice
         }
     }
 
+    // Find the invoice already created for a checkout token, if one exists.
     private function invoiceForCheckoutToken(string $checkoutToken): ?string
     {
         $statement = $this->db->prepare(

@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class TherapistController
 {
+    // Manage therapist records and show the therapist list.
     public function index(): void
     {
         if (empty($_SESSION['user'])) {
@@ -173,6 +174,7 @@ final class TherapistController
         require __DIR__ . '/../Views/therapists/index.php';
     }
 
+    // Check that the submitted token matches the session token.
     private function verifyCsrf(): void
     {
         $token = (string) ($_POST['csrf_token'] ?? '');
@@ -185,6 +187,7 @@ final class TherapistController
         }
     }
 
+    // Save a form error and return to the therapist form.
     private function redirectWithError(string $message, int $id): never
     {
         $_SESSION['therapist_form_error'] = $message;

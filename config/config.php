@@ -11,6 +11,7 @@ define('APP_NAME', 'Relax Spa Management System');
 define('APP_URL', '/Relax-Spa');
 define('APP_ROOT', dirname(__DIR__));
 
+// Build a cache key from the file's modification time and content.
 function asset_version(string $assetPath): string
 {
     $assetPath = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $assetPath), DIRECTORY_SEPARATOR);
@@ -122,6 +123,7 @@ if (!empty($_SESSION['user']['id'])) {
 |--------------------------------------------------------------------------
 */
 
+// Escape a value so it can be safely shown in HTML.
 function e(?string $value): string
 {
     return htmlspecialchars(
@@ -131,11 +133,13 @@ function e(?string $value): string
     );
 }
 
+// Create the hidden form field that carries the current CSRF token.
 function csrf_field(): string
 {
     return '<input type="hidden" name="csrf_token" value="' . e((string) ($_SESSION['csrf_token'] ?? '')) . '">';
 }
 
+// Check the submitted CSRF token and stop the request if it is invalid.
 function require_valid_csrf_token(): void
 {
     $token = (string) ($_POST['csrf_token'] ?? '');
@@ -148,6 +152,7 @@ function require_valid_csrf_token(): void
     }
 }
 
+// Save an audit record with the user, action, and optional record changes.
 function write_audit_log(
     PDO $db,
     string $action,
@@ -173,6 +178,7 @@ function write_audit_log(
     ]);
 }
 
+// Return a public URL only when the stored profile image path is safe.
 function profile_image_url(string $imagePath): string
 {
     $imagePrefix = 'public/uploads/user_profiles/';
@@ -187,6 +193,7 @@ function profile_image_url(string $imagePath): string
     return '';
 }
 
+// Build avatar HTML from a user's saved image or fallback text.
 function profile_avatar(array $user, string $class, string $fallback): string
 {
     $imageUrl = profile_image_url((string) ($user['profile_image'] ?? ''));
@@ -197,6 +204,7 @@ function profile_avatar(array $user, string $class, string $fallback): string
     return '<span class="' . e($class) . '">' . $content . '</span>';
 }
 
+// Check and save an uploaded profile photo, returning its path and any error.
 function store_profile_image(?array $upload): array
 {
     if ($upload === null) {
@@ -255,6 +263,7 @@ function store_profile_image(?array $upload): array
     return ['public/uploads/user_profiles/' . $filename, ''];
 }
 
+// Remove a saved profile photo after checking that its path is safe.
 function remove_profile_image(string $imagePath): void
 {
     $prefix = 'public/uploads/user_profiles/';
@@ -273,6 +282,7 @@ function remove_profile_image(string $imagePath): void
     }
 }
 
+// Check and save an uploaded image, optionally placing it in a subfolder.
 function store_image_upload(?array $upload, string $subdirectory = ''): array
 {
     if ($upload === null) {
@@ -351,6 +361,7 @@ function store_image_upload(?array $upload, string $subdirectory = ''): array
     return [$relativePath . $filename, ''];
 }
 
+// Remove a saved upload only when it is inside the uploads folder.
 function remove_uploaded_image(string $imagePath): void
 {
     $prefix = 'public/uploads/';
@@ -385,6 +396,7 @@ function remove_uploaded_image(string $imagePath): void
     }
 }
 
+// Turn an internal role name into the label shown to users.
 function role_label(string $role): string
 {
     return match (strtolower(trim($role))) {
@@ -397,6 +409,7 @@ function role_label(string $role): string
     };
 }
 
+// Build the sidebar card showing the current role, avatar, and optional logout.
 function sidebar_role_footer(bool $includeLogout = true): string
 {
     $user = $_SESSION['user'] ?? [];
@@ -421,6 +434,7 @@ function sidebar_role_footer(bool $includeLogout = true): string
         . '</div>';
 }
 
+// Build therapist account links and mark the current page as active.
 function therapist_account_nav(string $activeRoute = ''): string
 {
     $profileClass = $activeRoute === 'profile' ? ' active' : '';
@@ -448,6 +462,7 @@ function therapist_account_nav(string $activeRoute = ''): string
 |
 */
 
+// Send the browser to the named application route and stop the request.
 function redirect(string $route): never
 {
     $route = trim($route, '/');
@@ -462,6 +477,7 @@ function redirect(string $route): never
     exit;
 }
 
+// Check that text has an allowed length and contains no angle brackets.
 function valid_text(string $value, int $min = 1, int $max = 255): bool
 {
     $length = function_exists('mb_strlen') ? mb_strlen($value) : strlen($value);
@@ -469,21 +485,25 @@ function valid_text(string $value, int $min = 1, int $max = 255): bool
     return $length >= $min && $length <= $max && preg_match('/[<>]/', $value) !== 1;
 }
 
+// Check that a username uses allowed characters and has a valid length.
 function valid_username(string $value): bool
 {
     return preg_match('/^[A-Za-z0-9@_.-]{3,100}$/', $value) === 1;
 }
 
+// Accept an optional blank email or check that a provided email is valid.
 function valid_email(string $value, bool $required = false): bool
 {
     return ($value === '' && !$required) || filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
 }
 
+// Accept an optional blank phone or check its allowed characters and length.
 function valid_phone(string $value, bool $required = false): bool
 {
     return ($value === '' && !$required) || preg_match('/^[0-9+()\-\s]{7,30}$/', $value) === 1;
 }
 
+// Check password length and require letters, numbers, and a symbol.
 function valid_password(string $value, bool $required = true): bool
 {
     return ($value === '' && !$required)
@@ -493,6 +513,7 @@ function valid_password(string $value, bool $required = true): bool
             && preg_match('/[^A-Za-z0-9\s]/', $value) === 1);
 }
 
+// Check that a date is blank only when allowed or matches YYYY-MM-DD.
 function valid_date_value(string $value, bool $required = false): bool
 {
     if ($value === '') {
@@ -504,6 +525,7 @@ function valid_date_value(string $value, bool $required = false): bool
     return $date !== false && $date->format('Y-m-d') === $value;
 }
 
+// Check that a value is numeric and zero or greater.
 function valid_non_negative_number(string $value): bool
 {
     return is_numeric($value) && (float) $value >= 0;
@@ -523,6 +545,7 @@ function require_roles(array $allowedRoles): void
     require_authentication();
 
     $role = strtolower(trim((string) ($_SESSION['user']['role'] ?? '')));
+    // Normalize each allowed role before comparing it with the current role.
     $allowedRoles = array_map(static fn (string $value): string => strtolower(trim($value)), $allowedRoles);
 
     if (!in_array($role, $allowedRoles, true)) {
@@ -554,7 +577,11 @@ function authorize_route(string $route): void
     } elseif (in_array($route, $cashierRoutes, true)
         && strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'cashier') {
         require_roles(['cashier']);
-    } elseif (in_array($route, ['profile', 'change-password'], true)) {
+    } elseif ($route === 'profile') {
+        require_roles(['admin', 'manager', 'staff', 'therapist', 'receptionist', 'cashier']);
+    } elseif ($route === 'cashier-profile') {
+        require_roles(['cashier']);
+    } elseif ($route === 'change-password') {
         require_roles(['staff', 'therapist']);
     } elseif (in_array($route, $receptionistRoutes, true)) {
         require_roles(['admin', 'manager', 'staff', 'receptionist']);
@@ -565,6 +592,7 @@ function authorize_route(string $route): void
     }
 }
 
+// Check that a login password is present and within the allowed length.
 function valid_login_password(string $value): bool
 {
     return $value !== '' && strlen($value) <= 255;

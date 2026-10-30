@@ -12,6 +12,7 @@ $currencySymbol = match (strtoupper($currency)) {
     'KHR' => '៛',
     default => $currency . ' ',
 };
+// Format an amount with the cashier's currency symbol.
 $money = static fn (float $amount): string => e($currencySymbol) . number_format($amount, 2);
 $categories = [];
 foreach ($catalog['services'] as $service) {
@@ -179,6 +180,7 @@ foreach ($catalog['services'] as $service) {
 
                     <form class="cashier-pos-cart" method="post" action="<?= e(APP_URL) ?>/?route=pos" id="pos-checkout">
                         <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                        <input type="hidden" name="checkout_token" value="<?= e($checkoutToken) ?>">
                         <input type="hidden" name="items_json" id="pos-items-json" value="[]">
                         <input type="hidden" name="payment_method" id="pos-payment-method" value="qr_payment">
                         <input type="hidden" name="discount_amount" id="pos-discount" value="0">

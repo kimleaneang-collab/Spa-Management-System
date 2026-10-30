@@ -5,11 +5,13 @@ final class User
 {
     private PDO $db;
 
+    // Store the database connection used by this model.
     public function __construct(PDO $db)
     {
         $this->db = $db;
     }
 
+    // Return all users with their role names and account details.
     public function all(): array
     {
         $stmt = $this->db->prepare(
@@ -23,6 +25,7 @@ final class User
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Find one user by ID, or return null if the user does not exist.
     public function find(int $id): ?array
     {
         $stmt = $this->db->prepare('SELECT u.id, u.full_name, u.username, u.email, u.phone, u.profile_image, u.status, u.role_id, r.name AS role_name FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.id = :id');
@@ -32,6 +35,7 @@ final class User
         return $user !== false ? $user : null;
     }
 
+    // Check the current password and save a hash of the new password when it matches.
     public function changeOwnPassword(int $id, string $currentPassword, string $newPassword): bool
     {
         $stmt = $this->db->prepare('SELECT password_hash FROM users WHERE id = :id');
@@ -51,6 +55,7 @@ final class User
         return true;
     }
 
+    // Save the user's name, email, and phone after checking that the email is unused.
     public function updateOwnProfile(int $id, string $name, string $email, string $phone): bool
     {
         if ($email !== '') {
@@ -81,12 +86,14 @@ final class User
         return $statement->rowCount() > 0 || $this->find($id) !== null;
     }
 
+    // Add standard roles if needed and return the roles available for user accounts.
     public function roles(): array
     {
         $this->db->exec(
             "INSERT IGNORE INTO roles (name, description)
              VALUES
                 ('manager', 'Spa operations management access'),
+                ('receptionist', 'Customer and appointment access'),
                 ('cashier', 'Point-of-sale and billing access')"
         );
 
@@ -99,7 +106,7 @@ final class User
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    // SECURITY: Hash user passwords with the modern default algorithm before storing them.
+    // Create a user account, assign its role, and store the password as a hash.
     public function create(
         string $name,
         string $username,
@@ -145,6 +152,7 @@ final class User
         ]);
     }
 
+    // Save a profile image and return the previous image path.
     public function updateProfileImage(int $id, string $profileImage): string
     {
         $lookup = $this->db->prepare('SELECT profile_image FROM users WHERE id = :id FOR UPDATE');
@@ -163,6 +171,7 @@ final class User
         return (string) ($currentImage ?? '');
     }
 
+    // Set a user's email address, using null when the value is blank.
     public function updateEmail(int $id, string $email): void
     {
         $stmt = $this->db->prepare('UPDATE users SET email = :email WHERE id = :id');
@@ -172,7 +181,7 @@ final class User
         ]);
     }
 
-    // SECURITY: Update the password hash only when a new password is supplied, never plain text.
+    // Update user details and save a password hash only when a new password is provided.
     public function update(int $id, string $name, string $username, string $email, string $phone, string $roleName, string $status, string $password = '', string $profileImage = ''): void
     {
         $roleId = $this->roleId($roleName);
@@ -198,12 +207,14 @@ final class User
         $stmt->execute($parameters);
     }
 
+    // Remove a user by ID.
     public function delete(int $id): void
     {
         $stmt = $this->db->prepare('DELETE FROM users WHERE id = :id');
         $stmt->execute([':id' => $id]);
     }
 
+    // Check whether another active administrator account exists.
     public function hasOtherActiveAdmin(int $userId): bool
     {
         $stmt = $this->db->prepare(
@@ -219,6 +230,7 @@ final class User
         return (int) $stmt->fetchColumn() > 0;
     }
 
+    // Find a role by name or create it if it is not already in the database.
     private function roleId(string $roleName): int
     {
         $roleName = strtolower(trim($roleName));

@@ -4,6 +4,7 @@ declare(strict_types=1);
 $user = $_SESSION['user'] ?? [];
 $userName = (string) ($user['full_name'] ?? $user['username'] ?? 'User');
 $userInitials = strtoupper(substr($userName, 0, 1));
+// Format an amount with the selected currency.
 $money = static fn (float $amount): string => e($currency) . ' ' . number_format($amount, 2);
 ?>
 <!doctype html>

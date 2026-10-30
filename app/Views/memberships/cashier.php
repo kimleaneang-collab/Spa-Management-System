@@ -7,6 +7,7 @@ $nameParts = preg_split('/\s+/', trim($userName), -1, PREG_SPLIT_NO_EMPTY) ?: []
 $userInitials = $nameParts === []
     ? '?'
     : strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[count($nameParts) - 1], 0, 1));
+// Choose the CSS class that matches the membership tier.
 $tierTone = static function (string $tier): string {
     return match (strtolower($tier)) {
         'bronze' => 'bronze',
@@ -16,6 +17,7 @@ $tierTone = static function (string $tier): string {
         default => 'default',
     };
 };
+// Show a membership date in a short, readable format when it is valid.
 $formatMembershipDate = static function (string $date): string {
     $timestamp = strtotime($date);
 

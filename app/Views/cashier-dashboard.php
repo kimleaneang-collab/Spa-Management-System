@@ -12,7 +12,9 @@ $currencySymbol = match (strtoupper($currency)) {
     'KHR' => '៛',
     default => $currency . ' ',
 };
+// Format an amount with the cashier's currency symbol.
 $money = static fn (float $amount): string => e($currencySymbol) . number_format($amount, 2);
+// Map each payment status to the CSS class used for its display.
 $statusClass = static fn (string $status): string => match (strtolower($status)) {
     'paid' => 'paid',
     'partial' => 'partial',

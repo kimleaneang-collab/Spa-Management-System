@@ -299,12 +299,23 @@ input {
     left: 0;
     height: 100vh;
     box-sizing: border-box;
+    overflow-x: hidden;
     overflow-y: auto;
+    overscroll-behavior-y: contain;
     background: linear-gradient(180deg, #0d3d3a 0%, #103d3b 100%);
     color: rgba(255,255,255,.88);
     padding: 18px 18px 18px 16px;
     display: flex;
     flex-direction: column;
+}
+
+.sidebar > .brand-block,
+.sidebar > .sidebar-role {
+    flex: 0 0 auto;
+}
+
+.sidebar > .sidebar-menu {
+    flex: 1 0 auto;
 }
 
 .dashboard-shell {
@@ -758,6 +769,11 @@ input {
 .revenue-chart-date-label {
     fill: #74807a;
     font-size: 10px;
+}
+
+.revenue-chart-empty {
+    fill: #74807a;
+    font-size: 12px;
 }
 
 .revenue-chart-area {
@@ -3794,20 +3810,6 @@ body.cashier-pos-page .cashier-pos-item-card .cashier-pos-item-image img {
 }
 
 @media (max-width: 900px) {
-    body.cashier-pos-page .sidebar {
-        position: static;
-        width: 100%;
-        flex-basis: auto;
-        height: auto;
-        max-height: none;
-        overflow: visible;
-    }
-
-    body.cashier-pos-page .main-panel {
-        width: 100%;
-        margin-left: 0;
-    }
-
     .cashier-pos-layout {
         grid-template-columns: 1fr;
     }
@@ -3853,34 +3855,6 @@ body.cashier-pos-page .cashier-pos-item-card .cashier-pos-item-image img {
 }
 
 @media (max-width: 900px) {
-    .dashboard-page {
-        height: auto;
-        overflow: visible;
-    }
-
-    .dashboard-shell {
-        flex-direction: column;
-        height: auto;
-        min-height: 100vh;
-    }
-
-    .sidebar {
-        width: 100%;
-        flex: 0 0 auto;
-        position: relative;
-        height: 100vh;
-        max-height: 100vh;
-        overflow-y: auto;
-        padding-bottom: 12px;
-    }
-
-    .main-panel {
-        min-height: auto;
-        overflow-y: visible;
-        margin-left: 0;
-        height: auto;
-    }
-
     .search-box {
         min-width: 200px;
     }
@@ -5322,15 +5296,6 @@ body.manager-role .nav-section::before {
 }
 
 @media (max-width: 900px) {
-    .sidebar {
-        width: 100%;
-        padding: 14px;
-    }
-
-    .main-panel {
-        margin-left: 0;
-    }
-
     .search-box {
         min-width: 200px;
     }
@@ -5367,25 +5332,8 @@ body.manager-role .nav-section::before {
 }
 
 @media (max-width: 760px) {
-    .dashboard-page {
-        height: auto;
-        min-height: 100vh;
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
-
     .dashboard-shell {
         display: block;
-        min-height: 100vh;
-    }
-
-    .sidebar {
-        position: static;
-        width: 100%;
-        height: auto;
-        max-height: none;
-        overflow: visible;
-        padding: 12px 14px;
     }
 
     .brand-block {
@@ -5402,33 +5350,6 @@ body.manager-role .nav-section::before {
 
     .brand-text .brand-subtitle {
         font-size: 19px;
-    }
-
-    .sidebar-menu {
-        display: flex;
-        gap: 8px;
-        overflow-x: auto;
-        padding-bottom: 4px;
-    }
-
-    .nav-section {
-        display: flex;
-        flex: 0 0 auto;
-        gap: 4px;
-        margin: 0;
-        padding: 0;
-        border: 0;
-    }
-
-    .nav-section::before,
-    .sidebar-role {
-        display: none;
-    }
-
-    .nav-item {
-        white-space: nowrap;
-        min-height: 34px;
-        font-size: 12px;
     }
 
     .main-panel {
@@ -9971,41 +9892,9 @@ body.therapist-dashboard-page .therapist-dashboard-content {
     text-align: center !important;
 }
 
-@media (max-width: 900px) {
-    body.therapist-dashboard-page .sidebar {
-        width: 145px;
-        flex-basis: 145px;
-        height: 100vh;
-        max-height: 100vh;
-        padding: 14px 7px 18px;
-    }
-
-    body.therapist-dashboard-page .main-panel {
-        width: calc(100% - 145px);
-        margin-left: 145px;
-        height: 100vh;
-    }
-}
-
 @media (max-width: 760px) {
-    body.therapist-dashboard-page {
-        height: auto;
-        min-height: 100vh;
-        overflow-y: auto;
-    }
-
     body.therapist-dashboard-page .dashboard-shell {
         display: block;
-        height: auto;
-    }
-
-    body.therapist-dashboard-page .sidebar {
-        position: static;
-        width: 100%;
-        height: auto;
-        max-height: none;
-        overflow: visible;
-        padding: 12px 14px;
     }
 
     body.therapist-dashboard-page .brand-block {
@@ -10060,7 +9949,6 @@ body.therapist-dashboard-page .therapist-dashboard-content {
 
     body.therapist-dashboard-page .main-panel {
         width: 100%;
-        height: auto;
         margin-left: 0;
     }
 
@@ -11431,25 +11319,6 @@ body.therapist-dashboard-page[data-role="cashier"] .main-panel {
     margin-left: 164px;
 }
 
-@media (max-width: 900px) {
-    body[data-role="cashier"] .sidebar,
-    body.therapist-dashboard-page[data-role="cashier"] .sidebar {
-        position: static;
-        width: 100%;
-        height: auto;
-        max-height: none;
-        flex: 0 0 auto;
-        overflow: visible;
-        padding: 12px 14px;
-    }
-
-    body[data-role="cashier"] .main-panel,
-    body.therapist-dashboard-page[data-role="cashier"] .main-panel {
-        width: 100%;
-        margin-left: 0;
-    }
-}
-
 @media (max-width: 760px) {
     body[data-role="cashier"] .sidebar-menu,
     body.therapist-dashboard-page[data-role="cashier"] .sidebar-menu {
@@ -11621,13 +11490,20 @@ body[data-role="admin"] .sidebar .sidebar-role-admin .sidebar-logout-button:focu
     body.dashboard-page {
         width: 100%;
         max-width: 100vw;
-        overflow-x: clip;
+        height: 100vh;
+        height: 100dvh;
+        min-height: 0;
+        overflow: hidden;
     }
 
     body.dashboard-page .dashboard-shell {
         display: block;
         width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        min-height: 0;
         min-width: 0;
+        overflow: hidden;
     }
 
     body.dashboard-page .sidebar {
@@ -11635,7 +11511,9 @@ body[data-role="admin"] .sidebar .sidebar-role-admin .sidebar-logout-button:focu
         z-index: 52;
         inset: 0 auto 0 0;
         width: min(300px, 86vw) !important;
+        height: 100vh !important;
         height: 100dvh !important;
+        max-height: 100vh !important;
         max-height: 100dvh !important;
         flex: 0 0 auto !important;
         overflow-x: hidden !important;
@@ -11658,6 +11536,7 @@ body[data-role="admin"] .sidebar .sidebar-role-admin .sidebar-logout-button:focu
     body.dashboard-page .sidebar-menu {
         display: flex;
         flex-direction: column;
+        flex: 1 0 auto;
         gap: 10px;
         overflow: visible;
         padding-bottom: 0;
@@ -11678,10 +11557,16 @@ body[data-role="admin"] .sidebar .sidebar-role-admin .sidebar-logout-button:focu
         margin-top: auto;
     }
 
-    body.dashboard-page .main-panel {
+    body.dashboard-page .dashboard-shell > .main-panel {
         width: 100% !important;
         min-width: 0;
+        min-height: 0;
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100dvh;
+        overflow-y: auto;
         margin-left: 0 !important;
+        overscroll-behavior-y: contain;
     }
 
     .sidebar-drawer-toggle {
@@ -11799,22 +11684,6 @@ body[data-role="admin"] .sidebar .sidebar-role-admin .sidebar-logout-button:focu
 }
 
 @media (max-width: 767px) {
-    body.dashboard-page {
-        height: auto;
-        min-height: 100vh;
-        min-height: 100dvh;
-        overflow-x: clip;
-        overflow-y: auto;
-    }
-
-    body.dashboard-page .main-panel {
-        height: auto;
-        min-height: 100vh;
-        min-height: 100dvh;
-        overflow-x: clip;
-        overflow-y: visible;
-    }
-
     body.dashboard-page .topbar {
         position: relative;
         min-height: 60px;
@@ -12066,11 +11935,6 @@ body[data-role="admin"] .sidebar .sidebar-role-admin .sidebar-logout-button:focu
 }
 
 /* Restrained motion for existing layouts and controls. */
-@keyframes spa-sidebar-enter {
-    from { opacity: 0; transform: translateX(-12px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
 @keyframes spa-content-enter {
     from { opacity: 0; transform: translateX(12px); }
     to { opacity: 1; transform: translateX(0); }
@@ -12124,16 +11988,8 @@ body[data-role="admin"] .sidebar .sidebar-role-admin .sidebar-logout-button:focu
     to { opacity: 0; transform: translate(-50%, -50%) scale(1); }
 }
 
-.sidebar.sidebar-enter {
-    animation: spa-sidebar-enter 280ms ease-out both;
-}
-
 .nav-item {
-    transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
-}
-
-.nav-item:hover {
-    transform: translateX(2px);
+    transition: background-color 180ms ease, color 180ms ease;
 }
 
 .main-panel {
@@ -12752,4 +12608,234 @@ body[data-theme="dark"].inventory-page .inventory-table td {
 
 body[data-theme="dark"].inventory-page .inventory-stock-meter {
     background-color: var(--line);
+}
+
+.account-profile-content {
+    min-height: calc(100vh - 60px);
+    padding: 28px clamp(16px, 4vw, 48px);
+    background: #f3efe5;
+}
+
+.account-profile-content > .page-heading {
+    margin-bottom: 20px;
+}
+
+.account-profile-content .page-title {
+    color: #172f2b;
+    font-size: clamp(26px, 3vw, 36px);
+}
+
+.account-profile-card {
+    width: min(100%, 820px);
+    padding: 24px;
+    border: 1px solid #ded9cf;
+    border-radius: 12px;
+    background: #fffdfb;
+}
+
+.account-password-card {
+    margin-top: 16px;
+}
+
+.account-password-card h2 {
+    margin: 0;
+    color: #172f2b;
+    font-size: 20px;
+}
+
+.account-profile-password-description {
+    margin: 6px 0 0;
+    color: #68716a;
+    font-size: 13px;
+}
+
+.account-profile-identity {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e8e3da;
+}
+
+.account-profile-avatar {
+    display: grid;
+    width: 64px;
+    height: 64px;
+    flex: 0 0 64px;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 50%;
+    background: #dce8df;
+    color: #183f39;
+    font-size: 20px;
+    font-weight: 700;
+    object-fit: cover;
+}
+
+.account-profile-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+}
+
+.account-profile-identity h2 {
+    margin: 0;
+    color: #172f2b;
+    font-size: 20px;
+}
+
+.account-profile-identity p {
+    margin: 4px 0 0;
+    color: #68716a;
+    font-size: 13px;
+}
+
+.account-profile-form {
+    padding-top: 20px;
+}
+
+.account-profile-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.account-profile-fields label {
+    display: grid;
+    gap: 7px;
+    color: #34443d;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.account-profile-fields input {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 9px 11px;
+    border: 1px solid #d8d3ca;
+    border-radius: 7px;
+    background: #fff;
+    color: #26332d;
+    font: inherit;
+    font-weight: 400;
+}
+
+.account-profile-fields input[readonly] {
+    background: #f2f1ed;
+    color: #717770;
+}
+
+.account-profile-hint {
+    margin: 16px 0;
+    color: #68716a;
+    font-size: 12px;
+}
+
+.account-profile-message {
+    width: min(100%, 820px);
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.account-profile-message.error {
+    border: 1px solid #e7b9b3;
+    background: #fff1ef;
+    color: #8d3026;
+}
+
+.account-profile-message.success {
+    border: 1px solid #b9d8c0;
+    background: #edf8ef;
+    color: #28643a;
+}
+
+body[data-theme="dark"].account-profile-page .account-profile-content {
+    background: #141c18 !important;
+}
+
+body[data-theme="dark"].account-profile-page .account-profile-card {
+    border-color: var(--line);
+    background: var(--card);
+    color: var(--text);
+}
+
+body[data-theme="dark"].account-profile-page .account-profile-identity h2,
+body[data-theme="dark"].account-profile-page .account-password-card h2,
+body[data-theme="dark"].account-profile-page .account-profile-fields label {
+    color: var(--text);
+}
+
+body[data-theme="dark"].account-profile-page .account-profile-identity p,
+body[data-theme="dark"].account-profile-page .account-profile-password-description,
+body[data-theme="dark"].account-profile-page .account-profile-hint {
+    color: var(--text-soft);
+}
+
+body[data-theme="dark"].account-profile-page .account-profile-identity {
+    border-color: var(--line);
+}
+
+body[data-theme="dark"].account-profile-page .account-profile-fields input[readonly] {
+    background: #29362f;
+    color: var(--text-soft);
+}
+
+@media (max-width: 600px) {
+    .account-profile-content {
+        padding: 20px 12px;
+    }
+
+    .account-profile-card {
+        padding: 18px 14px;
+    }
+
+    .account-profile-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+#user-modal .modal-card {
+    display: flex;
+    max-height: calc(100vh - 48px);
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#user-modal .modal-header {
+    flex: 0 0 auto;
+    margin-bottom: 14px;
+}
+
+#user-modal .appointment-form {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
+#user-modal .form-grid.two-col {
+    min-height: 0;
+    flex: 1 1 auto;
+    align-content: start;
+    overflow-y: auto;
+    padding: 2px 6px 6px 2px;
+    overscroll-behavior: contain;
+}
+
+#user-modal .modal-actions {
+    flex: 0 0 auto;
+    margin-top: 0;
+    padding-top: 12px;
+    border-top: 1px solid #eeeae2;
+    background: #fff;
+}
+
+@media (max-width: 767px) {
+    #user-modal .modal-card {
+        max-height: calc(100vh - 24px);
+        max-height: calc(100dvh - 24px);
+    }
 }

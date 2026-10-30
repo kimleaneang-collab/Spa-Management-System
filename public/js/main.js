@@ -1,3 +1,4 @@
+    // Run the related action when the user interacts with this control.
 document.addEventListener('DOMContentLoaded', () => {
     const themeKey = 'relax-spa-theme';
     const topbars = [...document.querySelectorAll('header.topbar')];
@@ -5,11 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
         .trim()
         .toLowerCase();
     const settingsRoutes = {
-        admin: ['settings', 'Open system settings'],
-        manager: ['settings', 'Open system settings'],
-        cashier: ['cashier-profile', 'Open my profile'],
-        therapist: ['profile', 'Open my profile'],
-        staff: ['profile', 'Open my profile'],
+        admin: ['profile', 'My Profile'],
+        manager: ['profile', 'My Profile'],
+        cashier: ['profile', 'My Profile'],
+        therapist: ['profile', 'My Profile'],
+        staff: ['profile', 'My Profile'],
+        receptionist: ['profile', 'My Profile'],
     };
 
     let activeTheme = 'light';
@@ -23,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const moonIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.4A8.5 8.5 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"></path></svg>';
     const gearIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"></path><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 1 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 1 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 1 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9Z"></path></svg>';
 
+    // Save the selected theme and refresh the page colors and buttons.
     const updateTheme = (theme) => {
         activeTheme = theme;
         document.documentElement.dataset.theme = theme;
@@ -34,21 +37,26 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Unable to save the theme preference.', error);
         }
 
+    // Switch the password field between hidden and visible.
         document.querySelectorAll('.app-theme-toggle').forEach((button) => {
             const nextTheme = theme === 'dark' ? 'light' : 'dark';
             button.innerHTML = theme === 'dark' ? sunIcon : moonIcon;
             button.setAttribute('aria-label', `Switch to ${nextTheme} mode`);
             button.title = `Switch to ${nextTheme} mode`;
         });
+    // Handle this small task for the current item.
         document.querySelectorAll('.app-settings-choice').forEach((button) => {
             button.setAttribute('aria-pressed', String(button.dataset.themeChoice === theme));
         });
     };
 
+    // Handle this small task for the current item.
     topbars.forEach((topbar, index) => {
         topbar.querySelectorAll(
             '.icon-button, .therapist-notification, .therapist-calendar-shortcut'
+    // Handle this small task for the current item.
         ).forEach((shortcut) => shortcut.remove());
+    // Handle this small task for the current item.
         topbar.querySelectorAll('.receptionist-topbar-tools').forEach((tools) => {
             if (tools.children.length === 0) tools.remove();
         });
@@ -86,12 +94,14 @@ document.addEventListener('DOMContentLoaded', () => {
         [
             { theme: 'light', label: 'Light mode', icon: sunIcon },
             { theme: 'dark', label: 'Dark mode', icon: moonIcon },
+    // Handle this small task for the current item.
         ].forEach(({ theme, label, icon }) => {
             const choice = document.createElement('button');
             choice.className = 'app-settings-choice';
             choice.type = 'button';
             choice.dataset.themeChoice = theme;
             choice.innerHTML = `${icon}<span>${label}</span>`;
+    // Save the selected theme and refresh the page colors and buttons.
             choice.addEventListener('click', () => updateTheme(theme));
             choices.append(choice);
         });
@@ -119,22 +129,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         settingsToggle.setAttribute('aria-controls', panel.id);
 
+    // Hide the popover and restore focus when needed.
         const closePanel = (restoreFocus = false) => {
             panel.hidden = true;
             settingsToggle.setAttribute('aria-expanded', 'false');
             if (restoreFocus) settingsToggle.focus();
         };
+    // Switch the password field between hidden and visible.
         themeToggle.addEventListener('click', () => {
             updateTheme(activeTheme === 'dark' ? 'light' : 'dark');
         });
+    // Switch the password field between hidden and visible.
         settingsToggle.addEventListener('click', () => {
             const open = panel.hidden;
             panel.hidden = !open;
             settingsToggle.setAttribute('aria-expanded', String(open));
         });
+    // Run the related action when the user interacts with this control.
         document.addEventListener('click', (event) => {
             if (!utilityGroup.contains(event.target)) closePanel();
         });
+    // Run the related action when the user interacts with this control.
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape' && !panel.hidden) closePanel(true);
         });
@@ -145,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageTitle = document.querySelector('.page-title');
     const topbarLeft = document.querySelector('.topbar-left');
     if (pageTitle && topbarLeft && pageTitle.textContent.trim() !== 'DASHBOARD OVERVIEW' && !document.body.classList.contains('service-page') && !document.body.classList.contains('inventory-page') && !document.body.classList.contains('analytics-page')) {
+    // Clean up the text before showing it in the page.
         const title = pageTitle.textContent.trim().toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
         const subtitle = document.querySelector('.page-date')?.textContent.trim() || 'Manage your spa operations.';
         const titleElement = document.createElement('div');
@@ -161,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const linksByRoute = new Map();
         const therapistAccountSection = sidebarMenu.querySelector('.nav-section[data-label="Account"]');
 
+    // Handle this small task for the current item.
         sidebarMenu.querySelectorAll('.nav-item').forEach((link) => {
             const route = new URL(link.href, window.location.origin).searchParams.get('route');
             if (route && !linksByRoute.has(route)) {
@@ -168,7 +185,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        const currentRole = (document.body.dataset.role || document.querySelector('.user-role')?.textContent || '').trim().toLowerCase();
+        const roleLabel = (document.body.dataset.role || document.querySelector('.user-role')?.textContent || '').trim().toLowerCase();
+        const currentRole = roleLabel === 'administrator' ? 'admin' : roleLabel;
+        let profileLink = linksByRoute.get('profile');
+        if (!profileLink) {
+            profileLink = document.createElement('a');
+            profileLink.className = 'nav-item';
+            const profileUrl = new URL(window.location.href);
+            profileUrl.search = '';
+            profileUrl.searchParams.set('route', 'profile');
+            profileUrl.hash = '';
+            profileLink.href = profileUrl.toString();
+            const icon = document.createElement('span');
+            icon.className = 'nav-icon';
+            icon.textContent = '◎';
+            const label = document.createElement('span');
+            label.textContent = 'My Profile';
+            profileLink.append(icon, label);
+            linksByRoute.set('profile', profileLink);
+        }
+        if (new URL(window.location.href).searchParams.get('route') === 'profile') {
+            profileLink.classList.add('active');
+        }
         const isManager = currentRole === 'manager';
         document.body.classList.toggle('manager-role', isManager);
 
@@ -196,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isManager) {
             const dashboardUrl = linksByRoute.get('dashboard')?.href;
             if (dashboardUrl) {
+    // Add the link for this page in the sidebar.
                 const addManagerLink = (route, label, icon) => {
                     if (linksByRoute.has(route)) return;
                     const link = document.createElement('a');
@@ -220,12 +259,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: 'Main', routes: ['dashboard', 'appointments', 'customers', 'calendar', 'rooms'] },
                 { label: 'Quick Actions', routes: ['services', 'pos', 'products'] },
                 { label: 'Reports', routes: ['reports'] },
-                { label: 'Settings', routes: ['users-and-roles', 'settings'] },
+                { label: 'Settings', routes: ['users-and-roles', 'settings', 'profile'] },
             ];
             const managerLabels = {
                 services: 'Services',
                 products: 'Inventory',
             };
+    // Handle this small task for the current item.
             Object.entries(managerLabels).forEach(([route, label]) => {
                 const link = linksByRoute.get(route);
                 const text = link?.querySelector('span:last-child');
@@ -233,11 +273,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             sidebarMenu.replaceChildren();
+    // Handle this small task for the current item.
             managerGroups.forEach((group) => {
                 const section = document.createElement('div');
                 section.className = 'nav-section';
                 section.dataset.label = group.label;
 
+    // Handle this small task for the current item.
                 group.routes.forEach((route) => {
                     const link = linksByRoute.get(route);
                     if (link) section.append(link);
@@ -245,7 +287,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (section.children.length > 0) sidebarMenu.append(section);
             });
-        } else if ((currentRole === 'staff' || currentRole === 'therapist') && document.body.classList.contains('therapist-dashboard-page')) {
+        } else if (
+            (currentRole === 'staff' || currentRole === 'therapist')
+            && (document.body.classList.contains('therapist-dashboard-page') || document.body.classList.contains('account-profile-page'))
+        ) {
             const therapistGroups = [
                 { label: 'Main', routes: ['dashboard', 'appointments', 'customers', 'customer-history', 'calendar'] },
                 { label: 'Work', routes: ['services', 'products'] },
@@ -257,6 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 calendar: 'My Schedule',
                 services: 'Service',
             };
+    // Handle this small task for the current item.
             Object.entries(therapistLabels).forEach(([route, label]) => {
                 const link = linksByRoute.get(route);
                 const text = link?.querySelector('span:last-child');
@@ -264,10 +310,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             sidebarMenu.replaceChildren();
+    // Handle this small task for the current item.
             therapistGroups.forEach((group) => {
                 const section = document.createElement('div');
                 section.className = 'nav-section';
                 section.dataset.label = group.label;
+    // Handle this small task for the current item.
                 group.routes.forEach((route) => {
                     const link = linksByRoute.get(route);
                     if (link) section.append(link);
@@ -279,6 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else if (currentRole === 'receptionist') {
             const dashboardUrl = linksByRoute.get('dashboard')?.href;
+    // Add the link for this page in the sidebar.
             const addReceptionistLink = (route, label, icon) => {
                 if (linksByRoute.has(route) || !dashboardUrl) return;
                 const link = document.createElement('a');
@@ -302,13 +351,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const receptionistGroups = [
                 { label: 'Main', routes: ['dashboard', 'appointments', 'customers', 'calendar', 'rooms'] },
                 { label: 'Quick Actions', routes: ['new-appointment', 'register-customer'] },
+                { label: 'Account', routes: ['profile'] },
             ];
 
             sidebarMenu.replaceChildren();
+    // Handle this small task for the current item.
             receptionistGroups.forEach((group) => {
                 const section = document.createElement('div');
                 section.className = 'nav-section';
                 section.dataset.label = group.label;
+    // Handle this small task for the current item.
                 group.routes.forEach((route) => {
                     const link = linksByRoute.get(route);
                     if (link) section.append(link);
@@ -323,6 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 : new URL(window.location.href);
             const currentUrl = new URL(window.location.href);
             const currentRoute = currentUrl.searchParams.get('route') || 'dashboard';
+    // Create the needed item for this page section.
             const createCashierLink = (route, label, icon, hash = '') => {
                 const link = document.createElement('a');
                 const targetUrl = new URL(dashboardUrl.pathname, dashboardUrl.origin);
@@ -339,7 +392,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.append(anchor, text);
 
                 const isAnchorActive = hash !== '' && currentUrl.hash === `#${hash}`;
-                const isRouteActive = hash === '' && route === currentRoute && currentUrl.hash === '';
+                const isProfileActive = route === 'profile' && ['profile', 'cashier-profile'].includes(currentRoute);
+                const isRouteActive = hash === '' && (route === currentRoute || isProfileActive) && currentUrl.hash === '';
                 if (isAnchorActive || isRouteActive) link.classList.add('active');
                 return link;
             };
@@ -365,16 +419,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     label: 'Settings',
                     links: [
-                        ['cashier-profile', 'My Profile', '◎', ''],
+                        ['profile', 'My Profile', '◎', ''],
                     ],
                 },
             ];
 
             sidebarMenu.replaceChildren();
+    // Handle this small task for the current item.
             cashierGroups.forEach((group) => {
                 const section = document.createElement('div');
                 section.className = 'nav-section';
                 section.dataset.label = group.label;
+    // Handle this small task for the current item.
                 group.links.forEach(([route, label, icon, hash]) => {
                     section.append(createCashierLink(route, label, icon, hash));
                 });
@@ -386,13 +442,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 ['customers', 'memberships', 'customer-history'],
                 ['products', 'stock-management', 'suppliers'],
                 ['reports'],
-                ['users-and-roles', 'settings'],
+                ['users-and-roles', 'settings', 'profile'],
             ];
 
+            const staffManagementLabel = currentRole === 'admin' ? 'Staff Management' : 'Users & Roles';
+            const staffManagementLink = linksByRoute.get('users-and-roles');
+            const staffManagementText = staffManagementLink?.querySelector('span:last-child');
+            if (staffManagementText) staffManagementText.textContent = staffManagementLabel;
+
             sidebarMenu.replaceChildren();
+    // Handle this small task for the current item.
             adminGroups.forEach((routes) => {
                 const section = document.createElement('div');
                 section.className = 'nav-section';
+    // Handle this small task for the current item.
                 routes.forEach((route) => {
                     const link = linksByRoute.get(route);
                     if (link) section.append(link);
@@ -404,13 +467,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const routeSearchItems = [
         ...document.querySelectorAll('.nav-item')
+    // Handle this small task for the current item.
     ].map((link) => ({
         label: link.textContent.trim(),
         href: link.href,
+    // Handle this small task for the current item.
     })).filter((item, index, items) => (
+    // Handle this small task for the current item.
         item.label && items.findIndex((candidate) => candidate.href === item.href) === index
     ));
 
+    // Handle this small task for the current item.
     const attachRouteSearch = (searchBox) => {
         let input = searchBox.querySelector('input');
 
@@ -420,6 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
             input.className = 'search-input';
             input.placeholder = 'Search pages';
             input.setAttribute('aria-label', 'Search pages');
+    // Handle this small task for the current item.
             searchBox.querySelectorAll('span:not(.search-icon)').forEach((label) => label.remove());
             searchBox.append(input);
         }
@@ -430,18 +498,22 @@ document.addEventListener('DOMContentLoaded', () => {
         results.setAttribute('role', 'listbox');
         searchBox.append(results);
 
+    // Handle this small task for the current item.
         const closeResults = () => {
             results.classList.remove('visible');
             results.replaceChildren();
         };
 
+    // Handle this small task for the current item.
         const renderResults = () => {
             const query = input.value.trim().toLowerCase();
+    // Handle this small task for the current item.
             const matches = routeSearchItems.filter((item) => (
                 query === '' || item.label.toLowerCase().includes(query)
             ));
 
             results.replaceChildren();
+    // Handle this small task for the current item.
             matches.forEach((item) => {
                 const result = document.createElement('a');
                 result.className = 'search-result';
@@ -455,6 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         input.addEventListener('focus', renderResults);
         input.addEventListener('input', renderResults);
+    // Run the related action when the user interacts with this control.
         input.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 closeResults();
@@ -470,6 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+    // Run the related action when the user interacts with this control.
         document.addEventListener('click', (event) => {
             if (!searchBox.contains(event.target)) {
                 closeResults();
@@ -479,12 +553,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.search-box').forEach(attachRouteSearch);
 
+    // Switch the password field between hidden and visible.
     document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
         const password = toggle.closest('.password-wrap')?.querySelector('input[type="password"], input[type="text"]');
         const visibleIcon = toggle.querySelector('[data-password-visible]');
         const hiddenIcon = toggle.querySelector('[data-password-hidden]');
         if (!password) return;
 
+    // Switch the password field between hidden and visible.
         toggle.addEventListener('click', () => {
             const showing = password.type === 'text';
             password.type = showing ? 'password' : 'text';
@@ -521,11 +597,13 @@ document.addEventListener('DOMContentLoaded', () => {
         user_email: [1, 150],
         user_phone: [0, 30],
     };
+    // Read a clear label for the current field.
     const getFieldLabel = (field) => {
         const label = field.labels?.[0];
         const labelText = label?.querySelector('span')?.textContent || label?.textContent || field.name || 'This field';
         return labelText.replace(/\s+/g, ' ').trim().replace(/[:*]$/, '') || 'This field';
     };
+    // Check the field value and return a simple message.
     const getValidationMessage = (field) => {
         const label = getFieldLabel(field);
         const value = typeof field.value === 'string'
@@ -542,9 +620,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (field.required && !file) return `${label} is required.`;
             if (!file) return '';
             if (file.size > 5 * 1024 * 1024) return 'Choose a file no larger than 5 MB.';
+    // Handle this small task for the current item.
             const acceptedTypes = (field.accept || '').split(',').map((type) => type.trim().toLowerCase()).filter(Boolean);
             if (acceptedTypes.length > 0) {
                 const extension = `.${file.name.split('.').pop().toLowerCase()}`;
+    // Handle this small task for the current item.
                 const accepted = acceptedTypes.some((type) =>
                     type === file.type.toLowerCase()
                     || (type.endsWith('/*') && file.type.toLowerCase().startsWith(type.slice(0, -1)))
@@ -612,6 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (field.type === 'tel' && value.length > 30) return `${label} must be no more than 30 characters.`;
         return '';
     };
+    // Check the field value and return a simple message.
     const getValidationMessageElement = (field) => {
         let message = validationMessages.get(field);
         if (message) return message;
@@ -627,6 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
         field.setAttribute('aria-describedby', [...describedBy, message.id].join(' '));
         return message;
     };
+    // Check one input and show or hide its message.
     const validateField = (field, showSuccess = true) => {
         if (field.disabled || field.readOnly) return true;
         const message = getValidationMessage(field);
@@ -647,11 +729,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return !invalid;
     };
 
+    // Handle this small task for the current item.
     document.querySelectorAll('form').forEach((currentForm) => {
         const fields = [...currentForm.querySelectorAll(validationControls)];
         if (fields.length === 0) return;
         currentForm.noValidate = true;
 
+    // Run the related action when the user interacts with this control.
         currentForm.addEventListener('input', (event) => {
             if (!event.target.matches(validationControls)) return;
             validateField(event.target);
@@ -660,13 +744,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (confirmation && validationMessages.has(confirmation)) validateField(confirmation);
             }
         });
+    // Run the related action when the user interacts with this control.
         currentForm.addEventListener('change', (event) => {
             if (event.target.matches(validationControls)) validateField(event.target);
         });
+    // Run the related action when the user interacts with this control.
         currentForm.addEventListener('blur', (event) => {
             if (event.target.matches(validationControls)) validateField(event.target);
         }, true);
+    // Run the related action when the user interacts with this control.
         currentForm.addEventListener('submit', (event) => {
+    // Check one input and show or hide its message.
             const invalidFields = fields.filter((field) => !validateField(field));
             if (invalidFields.length > 0) {
                 event.preventDefault();
@@ -685,16 +773,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const customerPickerOptions = [...bookingForm.querySelectorAll('#appointment-customer-options option')];
         const customerIdField = bookingForm.querySelector('[data-booking-customer]');
         const customerByName = new Map(
+    // Handle this small task for the current item.
             customerPickerOptions.map((option) => [option.value.trim().toLocaleLowerCase(), option.dataset.customerId || ''])
         );
+    // Handle this small task for the current item.
         const matchCustomerName = (value) => {
             const search = value.trim().toLocaleLowerCase();
             if (!search) return '';
             const exactId = customerByName.get(search);
             if (exactId) return exactId;
+    // Handle this small task for the current item.
             const matches = customerPickerOptions.filter((option) => option.value.trim().toLocaleLowerCase().includes(search));
             return matches.length === 1 ? (matches[0].dataset.customerId || '') : '';
         };
+    // Handle this small task for the current item.
         const syncCustomerPicker = () => {
             if (!customerPickerSearch || !customerIdField) return;
             customerIdField.value = matchCustomerName(customerPickerSearch.value);
@@ -717,7 +809,9 @@ document.addEventListener('DOMContentLoaded', () => {
             date: bookingForm.querySelector('[name="appointment_date"]'),
             time: bookingForm.querySelector('[name="start_time"]'),
         };
+    // Handle this small task for the current item.
         const updateBookingSummary = () => {
+    // Handle this small task for the current item.
             Object.entries(summaryTargets).forEach(([key, field]) => {
                 const target = document.querySelector(`[data-summary-${key}]`);
                 if (!target || !field) return;
@@ -759,6 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
+    // Run the related action when the user interacts with this control.
         Object.values(summaryTargets).forEach((field) => field?.addEventListener('change', updateBookingSummary));
         updateBookingSummary();
     }
@@ -767,15 +862,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const membershipFilter = document.querySelector('[data-membership-filter]');
     const customerCards = [...document.querySelectorAll('.receptionist-customer-card')];
     const customerNoResults = document.querySelector('[data-customer-no-results]');
+    // Handle this small task for the current item.
     const filterCustomers = () => {
         const query = customerSearch?.value.trim().toLocaleLowerCase() || '';
         const membership = membershipFilter?.value || '';
+    // Handle this small task for the current item.
         customerCards.forEach((card) => {
             const matchesQuery = card.textContent.toLocaleLowerCase().includes(query);
             const matchesMembership = !membership || card.dataset.membership === membership;
             card.hidden = !matchesQuery || !matchesMembership;
         });
         if (customerNoResults) {
+    // Handle this small task for the current item.
             customerNoResults.hidden = customerCards.length === 0 || customerCards.some((card) => !card.hidden);
         }
     };
@@ -785,9 +883,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const cashierCustomerSearch = document.querySelector('[data-cashier-customer-search]');
     const cashierCustomerRows = [...document.querySelectorAll('[data-cashier-customer-row]')];
     const cashierCustomerNoResults = document.querySelector('[data-cashier-customer-no-results]');
+    // Run the related action when the user interacts with this control.
     cashierCustomerSearch?.addEventListener('input', () => {
         const query = cashierCustomerSearch.value.trim().toLocaleLowerCase();
         let visibleCount = 0;
+    // Handle this small task for the current item.
         cashierCustomerRows.forEach((row) => {
             row.hidden = !row.textContent.toLocaleLowerCase().includes(query);
             if (!row.hidden) visibleCount += 1;
@@ -795,10 +895,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cashierCustomerNoResults) cashierCustomerNoResults.hidden = visibleCount > 0;
     });
 
+    // Handle this small task for the current item.
     document.querySelectorAll('[data-cashier-customer-view]').forEach((button) => {
+    // Run the related action when the user interacts with this control.
         button.addEventListener('click', () => {
             const modal = document.getElementById('cashier-customer-details-modal');
             if (!modal) return;
+    // Handle this small task for the current item.
             ['name', 'phone', 'membership', 'visits', 'spent', 'currency'].forEach((field) => {
                 const target = modal.querySelector(`[data-cashier-detail="${field}"]`);
                 if (target) target.textContent = button.dataset[field] || '';
@@ -811,9 +914,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const cashierReceiptSearch = document.querySelector('[data-cashier-receipt-search]');
     const cashierReceiptRows = [...document.querySelectorAll('[data-cashier-receipt-row]')];
     const cashierReceiptNoResults = document.querySelector('[data-cashier-receipt-no-results]');
+    // Run the related action when the user interacts with this control.
     cashierReceiptSearch?.addEventListener('input', () => {
         const query = cashierReceiptSearch.value.trim().toLocaleLowerCase();
         let visibleCount = 0;
+    // Handle this small task for the current item.
         cashierReceiptRows.forEach((row) => {
             row.hidden = !row.textContent.toLocaleLowerCase().includes(query);
             if (!row.hidden) visibleCount += 1;
@@ -821,10 +926,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cashierReceiptNoResults) cashierReceiptNoResults.hidden = visibleCount > 0;
     });
 
+    // Handle this small task for the current item.
     document.querySelectorAll('[data-open-modal="cashier-receipt-modal"]').forEach((button) => {
+    // Run the related action when the user interacts with this control.
         button.addEventListener('click', () => {
             const modal = document.getElementById('cashier-receipt-modal');
             if (!modal) return;
+    // Handle this small task for the current item.
             ['receiptNo', 'customer', 'date', 'items', 'method', 'amount', 'currency'].forEach((field) => {
                 const target = modal.querySelector(`[data-receipt-detail="${field}"]`);
                 if (target) target.textContent = button.dataset[field] || '';
@@ -833,10 +941,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const printCashierReceipt = document.querySelector('[data-print-cashier-receipt]');
+    // Run the related action when the user interacts with this control.
     printCashierReceipt?.addEventListener('click', () => {
         document.body.classList.add('cashier-printing-receipt');
         window.print();
     });
+    // Run the related action when the user interacts with this control.
     window.addEventListener('afterprint', () => {
         document.body.classList.remove('cashier-printing-receipt');
     });
@@ -844,9 +954,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const therapistCustomerSearch = document.querySelector('[data-therapist-customer-search]');
     const therapistCustomerCards = [...document.querySelectorAll('[data-therapist-customer-card]')];
     const therapistCustomerEmpty = document.querySelector('[data-therapist-customer-empty]');
+    // Run the related action when the user interacts with this control.
     therapistCustomerSearch?.addEventListener('input', () => {
         const query = therapistCustomerSearch.value.trim().toLocaleLowerCase();
         let visibleCount = 0;
+    // Handle this small task for the current item.
         therapistCustomerCards.forEach((card) => {
             card.hidden = !card.textContent.toLocaleLowerCase().includes(query);
             if (!card.hidden) visibleCount += 1;
@@ -859,9 +971,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const therapistHistorySearch = document.querySelector('[data-therapist-history-search]');
     const therapistHistoryRows = [...document.querySelectorAll('[data-therapist-history-row]')];
     const therapistHistoryNoResults = document.querySelector('.therapist-history-no-results');
+    // Run the related action when the user interacts with this control.
     therapistHistorySearch?.addEventListener('input', () => {
         const query = therapistHistorySearch.value.trim().toLocaleLowerCase();
         let visibleCount = 0;
+    // Handle this small task for the current item.
         therapistHistoryRows.forEach((row) => {
             row.hidden = !row.textContent.toLocaleLowerCase().includes(query);
             if (!row.hidden) visibleCount += 1;
@@ -874,9 +988,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const therapistScheduleSearch = document.querySelector('[data-therapist-schedule-search]');
     const therapistScheduleBookings = [...document.querySelectorAll('[data-schedule-booking]')];
     const therapistScheduleEmpty = document.querySelector('[data-therapist-calendar-empty]');
+    // Run the related action when the user interacts with this control.
     therapistScheduleSearch?.addEventListener('input', () => {
         const query = therapistScheduleSearch.value.trim().toLocaleLowerCase();
         let visibleCount = 0;
+    // Handle this small task for the current item.
         therapistScheduleBookings.forEach((booking) => {
             booking.hidden = !((booking.dataset.scheduleSearch || booking.textContent).toLocaleLowerCase().includes(query));
             if (!booking.hidden) visibleCount += 1;
@@ -889,9 +1005,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const therapistServiceSearch = document.querySelector('[data-therapist-service-search]');
     const therapistServiceCards = [...document.querySelectorAll('[data-service-card]')];
     const therapistServiceEmpty = document.querySelector('[data-therapist-service-empty]');
+    // Run the related action when the user interacts with this control.
     therapistServiceSearch?.addEventListener('input', () => {
         const query = therapistServiceSearch.value.trim().toLocaleLowerCase();
         let visibleCount = 0;
+    // Handle this small task for the current item.
         therapistServiceCards.forEach((card) => {
             card.hidden = !((card.dataset.search || card.textContent).toLocaleLowerCase().includes(query));
             if (!card.hidden) visibleCount += 1;
@@ -904,9 +1022,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const therapistProductSearch = document.querySelector('[data-therapist-product-search]');
     const therapistProductCards = [...document.querySelectorAll('[data-therapist-product-card]')];
     const therapistProductsEmpty = document.querySelector('[data-therapist-products-empty]');
+    // Run the related action when the user interacts with this control.
     therapistProductSearch?.addEventListener('input', () => {
         const query = therapistProductSearch.value.trim().toLocaleLowerCase();
         let visibleCount = 0;
+    // Handle this small task for the current item.
         therapistProductCards.forEach((card) => {
             card.hidden = !((card.dataset.search || card.textContent).toLocaleLowerCase().includes(query));
             if (!card.hidden) visibleCount += 1;
@@ -924,15 +1044,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const appointmentNoResults = document.querySelector('.appointment-no-results');
     const therapistAppointmentsPage = document.body.classList.contains('therapist-dashboard-page');
     let activeAppointmentFilter = therapistAppointmentsPage ? 'today' : 'all';
+    // Build today's date string for the current view.
     const todayDate = () => {
         const now = new Date();
         return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     };
+    // Hide any appointment that does not match the active filters.
     const filterAppointments = () => {
         const query = appointmentSearch?.value.trim().toLocaleLowerCase() || '';
         const selectedDate = appointmentDateFilter?.value || '';
         const selectedStatus = appointmentStatusFilter?.value || 'all';
         let visibleCount = 0;
+    // Handle this small task for the current item.
         appointmentRows.forEach((row) => {
             const matchesSearch = !query || (row.dataset.appointmentSearch || row.textContent).toLocaleLowerCase().includes(query);
             const appointmentDate = row.dataset.appointmentDate || '';
@@ -961,9 +1084,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (appointmentNoResults) appointmentNoResults.hidden = visibleCount > 0;
     };
+    // Handle this small task for the current item.
     appointmentFilters.forEach((filter) => {
+    // Run the related action when the user interacts with this control.
         filter.addEventListener('click', () => {
             activeAppointmentFilter = filter.dataset.appointmentFilter || 'all';
+    // Switch the password field between hidden and visible.
             appointmentFilters.forEach((button) => button.classList.toggle('active', button === filter));
             if (appointmentStatusFilter) {
                 appointmentStatusFilter.value = activeAppointmentFilter === 'today' ? 'all' : activeAppointmentFilter;
@@ -973,15 +1099,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     appointmentSearch?.addEventListener('input', filterAppointments);
     appointmentDateFilter?.addEventListener('change', filterAppointments);
+    // Run the related action when the user interacts with this control.
     appointmentStatusFilter?.addEventListener('change', () => {
         activeAppointmentFilter = 'all';
+    // Switch the password field between hidden and visible.
         appointmentFilters.forEach((button) => button.classList.toggle('active', button.dataset.appointmentFilter === 'all'));
         filterAppointments();
     });
     if (appointmentRows.length > 0) filterAppointments();
 
+    // Handle this small task for the current item.
     document.querySelectorAll('[data-appointment-view]').forEach((button) => {
+    // Run the related action when the user interacts with this control.
         button.addEventListener('click', () => {
+    // Handle this small task for the current item.
             document.querySelectorAll('[data-appointment-detail]').forEach((detail) => {
                 const key = detail.dataset.appointmentDetail;
                 detail.textContent = key ? button.dataset[key] || '' : '';
@@ -989,6 +1120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Set up the profile photo upload and preview.
     const configureProfilePhotoPicker = (inputId, imageId, initialsId, filenameId) => {
         const input = document.getElementById(inputId);
         const image = document.getElementById(imageId);
@@ -996,6 +1128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const filename = document.getElementById(filenameId);
         let objectUrl = '';
 
+    // Run the related action when the user interacts with this control.
         input?.addEventListener('change', () => {
             const file = input.files?.[0];
             if (!file || !image || !initials || !filename) return;
@@ -1029,6 +1162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const therapistProfilePhotoInitials = document.getElementById('therapist-profile-photo-initials');
     const therapistProfilePhotoFilename = document.getElementById('therapist-profile-photo-filename');
     const therapistProfilePhotoGuidance = 'JPG, PNG, GIF, or WEBP. Maximum 5 MB. Choose or create a login account to save the photo.';
+    // Handle this small task for the current item.
     const updateTherapistAccountPhoto = () => {
         if (!therapistProfilePhotoImage || !therapistProfilePhotoInitials || therapistProfilePhotoInput?.files?.length) return;
         const selectedOption = therapistLoginAccount?.selectedOptions?.[0];
@@ -1046,10 +1180,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 : therapistProfilePhotoGuidance;
         }
     };
+    // Run the related action when the user interacts with this control.
     therapistLoginAccount?.addEventListener('change', () => {
         if (!therapistLoginCredentials) return;
         const creatingLogin = therapistLoginAccount.value === 'new';
         therapistLoginCredentials.hidden = !creatingLogin;
+    // Handle this small task for the current item.
         therapistLoginCredentials.querySelectorAll('input').forEach((input) => {
             input.required = creatingLogin;
         });
@@ -1062,6 +1198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const customerPhotoPrompt = document.querySelector('[data-customer-photo-prompt]');
     const customerPhotoError = document.querySelector('[data-customer-photo-error]');
     let customerPhotoObjectUrl = '';
+    // Run the related action when the user interacts with this control.
     customerPhotoInput?.addEventListener('change', () => {
         const file = customerPhotoInput.files?.[0];
         if (!file || !customerPhotoPreview || !customerPhotoPrompt || !customerPhotoError) return;
@@ -1089,7 +1226,9 @@ document.addEventListener('DOMContentLoaded', () => {
         customerPhotoPrompt.hidden = true;
     });
 
+    // Handle this small task for the current item.
     openModalButtons.forEach((button) => {
+    // Run the related action when the user interacts with this control.
         button.addEventListener('click', () => {
             const modalId = button.getAttribute('data-open-modal');
             const modal = document.getElementById(modalId);
@@ -1100,7 +1239,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Handle this small task for the current item.
     closeModalButtons.forEach((button) => {
+    // Run the related action when the user interacts with this control.
         button.addEventListener('click', () => {
             const modalId = button.getAttribute('data-close-modal');
             const modal = document.getElementById(modalId);
@@ -1113,6 +1254,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const modalBackdrop = document.querySelector('.modal-backdrop');
     if (modalBackdrop) {
+    // Run the related action when the user interacts with this control.
         modalBackdrop.addEventListener('click', (event) => {
             if (event.target === modalBackdrop) {
                 modalBackdrop.classList.add('hidden');
@@ -1125,11 +1267,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const serviceCategory = document.getElementById('service-category');
     const serviceCards = [...document.querySelectorAll('#service-grid .service-card')];
     const noServiceResults = document.getElementById('service-no-results');
+    // Handle this small task for the current item.
     const filterServices = () => {
         if (!serviceSearch || !serviceCategory) return;
         const query = serviceSearch.value.trim().toLowerCase();
         const category = serviceCategory.value;
         let visibleCount = 0;
+    // Handle this small task for the current item.
         serviceCards.forEach((card) => {
             const matchesQuery = (card.dataset.search || '').includes(query);
             const matchesCategory = category === 'all' || card.dataset.category === category;
@@ -1147,9 +1291,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const cashierServiceCategories = [...document.querySelectorAll('[data-cashier-service-category]')];
     const cashierServiceNoResults = document.querySelector('[data-cashier-service-no-results]');
     let activeCashierServiceCategory = 'all';
+    // Handle this small task for the current item.
     const filterCashierServices = () => {
         const query = cashierServiceSearch?.value.trim().toLocaleLowerCase() || '';
         let visibleCount = 0;
+    // Handle this small task for the current item.
         cashierServiceCards.forEach((card) => {
             const matchesQuery = (card.dataset.search || '').includes(query);
             const matchesCategory = activeCashierServiceCategory === 'all'
@@ -1160,9 +1306,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cashierServiceNoResults) cashierServiceNoResults.hidden = visibleCount > 0;
     };
     cashierServiceSearch?.addEventListener('input', filterCashierServices);
+    // Handle this small task for the current item.
     cashierServiceCategories.forEach((button) => {
+    // Run the related action when the user interacts with this control.
         button.addEventListener('click', () => {
             activeCashierServiceCategory = button.dataset.cashierServiceCategory || 'all';
+    // Handle this small task for the current item.
             cashierServiceCategories.forEach((categoryButton) => {
                 const active = categoryButton === button;
                 categoryButton.classList.toggle('active', active);
@@ -1175,9 +1324,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const cashierProductSearch = document.querySelector('[data-cashier-product-search]');
     const cashierProductRows = [...document.querySelectorAll('[data-cashier-product-row]')];
     const cashierProductNoResults = document.querySelector('[data-cashier-product-no-results]');
+    // Run the related action when the user interacts with this control.
     cashierProductSearch?.addEventListener('input', () => {
         const query = cashierProductSearch.value.trim().toLocaleLowerCase();
         let visibleCount = 0;
+    // Handle this small task for the current item.
         cashierProductRows.forEach((row) => {
             row.hidden = !row.textContent.toLocaleLowerCase().includes(query);
             if (!row.hidden) visibleCount += 1;
@@ -1188,9 +1339,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const cashierMembershipSearch = document.querySelector('[data-cashier-membership-search]');
     const cashierMembershipRows = [...document.querySelectorAll('[data-cashier-membership-row]')];
     const cashierMembershipNoResults = document.querySelector('[data-cashier-membership-no-results]');
+    // Run the related action when the user interacts with this control.
     cashierMembershipSearch?.addEventListener('input', () => {
         const query = cashierMembershipSearch.value.trim().toLocaleLowerCase();
         let visibleCount = 0;
+    // Handle this small task for the current item.
         cashierMembershipRows.forEach((row) => {
             row.hidden = !row.textContent.toLocaleLowerCase().includes(query);
             if (!row.hidden) visibleCount += 1;
@@ -1202,11 +1355,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const inventoryStatus = document.getElementById('inventory-status');
     const inventoryRows = [...document.querySelectorAll('#inventory-table tbody tr')];
     const inventoryEmpty = document.getElementById('inventory-empty');
+    // Handle this small task for the current item.
     const filterInventory = () => {
         if (!inventorySearch || !inventoryStatus) return;
         const query = inventorySearch.value.trim().toLowerCase();
         const status = inventoryStatus.value;
         let visibleCount = 0;
+    // Handle this small task for the current item.
         inventoryRows.forEach((row) => {
             const matchesQuery = (row.dataset.search || '').includes(query);
             const matchesStatus = status === 'all' || row.dataset.status === status;
@@ -1220,7 +1375,9 @@ document.addEventListener('DOMContentLoaded', () => {
     inventoryStatus?.addEventListener('change', filterInventory);
 
     const searchInputs = document.querySelectorAll('.search-input');
+    // Handle this small task for the current item.
     searchInputs.forEach((input) => {
+    // Run the related action when the user interacts with this control.
         input.addEventListener('input', () => {
             const query = input.value.trim().toLowerCase();
             const table = input.closest('.main-panel')?.querySelector('.searchable-table');
@@ -1230,6 +1387,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const rows = table.querySelectorAll('tbody tr');
+    // Handle this small task for the current item.
             rows.forEach((row) => {
                 const text = row.textContent.toLowerCase();
                 row.style.display = text.includes(query) ? '' : 'none';
@@ -1238,8 +1396,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const filterPills = document.querySelectorAll('.pill');
+    // Handle this small task for the current item.
     filterPills.forEach((pill) => {
+    // Run the related action when the user interacts with this control.
         pill.addEventListener('click', () => {
+    // Handle this small task for the current item.
             filterPills.forEach((item) => item.classList.remove('active'));
             pill.classList.add('active');
         });
@@ -1270,6 +1431,7 @@ document.addEventListener('DOMContentLoaded', () => {
         drawerOverlay.tabIndex = -1;
         dashboardShell.insertBefore(drawerOverlay, sidebar);
 
+    // Handle this small task for the current item.
         const setDrawerOpen = (isOpen) => {
             document.body.classList.toggle('sidebar-drawer-open', isOpen);
             sidebar.classList.toggle('is-open', isOpen);
@@ -1285,18 +1447,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
+    // Switch the password field between hidden and visible.
         drawerToggle.addEventListener('click', () => {
             setDrawerOpen(!sidebar.classList.contains('is-open'));
         });
+    // Run the related action when the user interacts with this control.
         drawerOverlay.addEventListener('click', () => setDrawerOpen(false));
+    // Run the related action when the user interacts with this control.
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape' && sidebar.classList.contains('is-open')) setDrawerOpen(false);
         });
+    // Handle this small task for the current item.
         sidebar.querySelectorAll('a.nav-item').forEach((link) => {
+    // Run the related action when the user interacts with this control.
             link.addEventListener('click', () => {
                 if (window.innerWidth <= 1024) setDrawerOpen(false);
             });
         });
+    // Run the related action when the user interacts with this control.
         window.addEventListener('resize', () => {
             if (window.innerWidth > 1024) {
                 document.body.classList.remove('sidebar-drawer-open');
@@ -1317,27 +1485,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if (sidebar && window.location.hash !== '#spa-route-transition') {
-        sidebar.classList.add('sidebar-enter');
-        sidebar.addEventListener('animationend', () => {
-            sidebar.classList.remove('sidebar-enter');
-        }, { once: true });
-    }
     if (mainPanel && window.location.hash === '#spa-route-transition') {
         history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
         mainPanel.classList.add('route-transition-enter');
+    // Run the related action when the user interacts with this control.
         mainPanel.addEventListener('animationend', () => {
             mainPanel.classList.remove('route-transition-enter');
         }, { once: true });
     }
 
     if (!reducedMotion.matches) {
+    // Handle this small task for the current item.
         const numberFormat = (value, decimals) => value.toLocaleString(undefined, {
             minimumFractionDigits: decimals,
             maximumFractionDigits: decimals,
         });
         document.querySelectorAll(
             '.manager-stat-card strong, .receptionist-stat-card strong, .analytics-stat-card strong, .stat-card .stat-value'
+    // Handle this small task for the current item.
         ).forEach((counter) => {
             const original = counter.textContent.trim();
             const match = original.match(/^([^0-9-]*)(-?[\d,]+(?:\.\d+)?)(\s*%?)$/);
@@ -1348,6 +1513,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const decimals = (match[2].split('.')[1] || '').length;
             const startedAt = performance.now();
             const duration = 650;
+    // Handle this small task for the current item.
             const updateCounter = (timestamp) => {
                 const progress = Math.min((timestamp - startedAt) / duration, 1);
                 const easedProgress = 1 - ((1 - progress) ** 3);
@@ -1362,6 +1528,7 @@ document.addEventListener('DOMContentLoaded', () => {
             requestAnimationFrame(updateCounter);
         });
 
+    // Run the related action when the user interacts with this control.
         document.addEventListener('click', (event) => {
             const button = event.target.closest('button.primary-button, button.secondary-button, button.icon-button, button.pill, a.primary-button, a.secondary-button');
             if (!button || button.matches(':disabled')) return;
@@ -1372,12 +1539,15 @@ document.addEventListener('DOMContentLoaded', () => {
             ripple.style.left = `${event.clientX ? event.clientX - bounds.left : bounds.width / 2}px`;
             ripple.style.top = `${event.clientY ? event.clientY - bounds.top : bounds.height / 2}px`;
             button.append(ripple);
+    // Run the related action when the user interacts with this control.
             ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
         });
     }
 
     if (mainPanel) {
+    // Handle this small task for the current item.
         document.querySelectorAll('.sidebar-menu a.nav-item, .calendar-navigation a').forEach((link) => {
+    // Run the related action when the user interacts with this control.
             link.addEventListener('click', (event) => {
                 if (
                     reducedMotion.matches
@@ -1400,10 +1570,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 event.preventDefault();
                 mainPanel.classList.add('route-transition-leave');
+    // Handle this small task for the current item.
                 document.querySelectorAll('.main-panel .table-wrap').forEach((table) => {
                     table.classList.add('is-loading');
                 });
                 destination.hash = 'spa-route-transition';
+    // Handle this small task for the current item.
                 window.setTimeout(() => window.location.assign(destination.href), 130);
             });
         });

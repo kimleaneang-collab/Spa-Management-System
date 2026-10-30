@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class ServiceController
 {
+    // Create services when allowed and show the service list.
     public function index(): void
     {
         if (empty($_SESSION['user'])) {

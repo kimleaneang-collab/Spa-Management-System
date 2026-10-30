@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class BillingController
 {
+    // Show receipts recorded by the signed-in cashier.
     public function receipts(): void
     {
         require_roles(['cashier']);
@@ -21,6 +22,7 @@ final class BillingController
         require __DIR__ . '/../Views/billing/cashier-receipts.php';
     }
 
+    // Handle checkout requests and show the billing screen.
     public function index(): void
     {
         require_roles(['admin', 'manager', 'staff', 'receptionist', 'cashier']);
@@ -32,6 +34,7 @@ final class BillingController
         $invoiceModel = new Invoice(Database::connection());
         $formError = '';
         $formSuccess = (string) ($_SESSION['pos_success'] ?? '');
+        $checkoutToken = bin2hex(random_bytes(32));
         unset($_SESSION['pos_success']);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -43,10 +46,16 @@ final class BillingController
 
             $customerId = filter_var($_POST['customer_id'] ?? null, FILTER_VALIDATE_INT);
             $paymentMethod = (string) ($_POST['payment_method'] ?? '');
+            $postedCheckoutToken = (string) ($_POST['checkout_token'] ?? '');
+            if (preg_match('/^[a-f0-9]{64}$/', $postedCheckoutToken) === 1) {
+                $checkoutToken = $postedCheckoutToken;
+            }
             $discountInput = trim((string) ($_POST['discount_amount'] ?? '0'));
             $itemsInput = (string) ($_POST['items_json'] ?? '');
             $items = json_decode($itemsInput, true);
-            if ($customerId === false || $customerId < 1) {
+            if (preg_match('/^[a-f0-9]{64}$/', $postedCheckoutToken) !== 1) {
+                $formError = 'The checkout session expired. Please try again.';
+            } elseif ($customerId === false || $customerId < 1) {
                 $formError = 'Select a customer to continue.';
             } elseif (!in_array($paymentMethod, ['cash', 'card', 'bank_transfer', 'qr_payment'], true)) {
                 $formError = 'Select a valid payment method.';
@@ -61,7 +70,8 @@ final class BillingController
                         $items,
                         round((float) $discountInput, 2),
                         $paymentMethod,
-                        (int) ($_SESSION['user']['id'] ?? 0) ?: null
+                        (int) ($_SESSION['user']['id'] ?? 0) ?: null,
+                        $checkoutToken
                     );
                     $_SESSION['pos_success'] = 'Payment completed. Invoice ' . $invoiceNumber . ' was saved.';
                     redirect('pos');
