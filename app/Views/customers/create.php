@@ -17,7 +17,7 @@ $initials = strtoupper(substr($nameParts[0] ?? 'R', 0, 1) . substr($nameParts[1]
 <body class="dashboard-page receptionist-role receptionist-booking-page receptionist-register-customer-page" data-role="receptionist">
     <div class="dashboard-shell">
         <aside class="sidebar">
-            <div class="brand-block"><div class="brand-mark"><span class="brand-leaf">⌁</span><div class="brand-text"><div class="brand-name">Relax</div><div class="brand-subtitle">SPA</div></div></div></div>
+            <div class="brand-block"><div class="brand-mark"><img class="brand-logo" src="<?= e(APP_URL) ?>/public/images/relax-spa-logo-v2.png" alt="Relax Spa"></div></div>
             <nav class="sidebar-menu">
                 <div class="nav-section" data-label="Main">
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=dashboard"><span class="nav-icon">⌂</span><span>Dashboard</span></a>
@@ -48,6 +48,7 @@ $initials = strtoupper(substr($nameParts[0] ?? 'R', 0, 1) . substr($nameParts[1]
             <div class="content-wrap receptionist-workspace receptionist-new-appointment-page receptionist-register-customer-page-content">
                 <div class="page-heading receptionist-form-heading"><div><h1 class="page-title">REGISTER CUSTOMER</h1><div class="page-date">Add a new guest to the Relax Spa system.</div></div></div>
                 <form class="receptionist-booking-layout receptionist-new-appointment-form receptionist-register-form" method="post" action="<?= e(APP_URL) ?>/?route=customers">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="action" value="create">
                         <div class="receptionist-form-card receptionist-register-card">
                         <section class="receptionist-form-section receptionist-profile-photo-section">

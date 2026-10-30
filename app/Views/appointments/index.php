@@ -41,13 +41,7 @@ foreach ($appointments as $appointment) {
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">
-                <div class="brand-mark">
-                    <span class="brand-leaf">⌁</span>
-                    <div class="brand-text">
-                        <div class="brand-name">Relax</div>
-                        <div class="brand-subtitle">SPA</div>
-                    </div>
-                </div>
+                <div class="brand-mark"><img class="brand-logo" src="<?= e(APP_URL) ?>/public/images/relax-spa-logo-v2.png" alt="Relax Spa"></div>
             </div>
 
             <?php if ($isTherapist): ?>
@@ -123,7 +117,7 @@ foreach ($appointments as $appointment) {
                     <?php if ($isReceptionist): ?>
                         <a class="icon-button add-button" aria-label="New appointment" href="<?= e(APP_URL) ?>/?route=new-appointment">＋</a>
                     <?php else: ?>
-                        <button class="icon-button add-button" aria-label="Add" data-open-modal="appointment-modal">＋</button>
+                        <a class="icon-button add-button" aria-label="New appointment" href="<?= e(APP_URL) ?>/?route=new-appointment">＋</a>
                     <?php endif; ?>
                     <div class="user-chip"><?= profile_avatar($_SESSION['user'] ?? [], 'user-name', strtoupper(substr((string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'SV'), 0, 2))) ?><span class="user-role"><?= e(role_label((string) ($_SESSION['user']['role'] ?? 'admin'))) ?></span><span class="user-chevron">▾</span></div>
                 </div>
@@ -141,7 +135,7 @@ foreach ($appointments as $appointment) {
                     <?php elseif ($isReceptionist): ?>
                         <a class="primary-button" href="<?= e(APP_URL) ?>/?route=register-customer">＋ Register Customer</a>
                     <?php else: ?>
-                        <button class="primary-button" type="button" data-open-modal="appointment-modal">+ New appointment</button>
+                        <a class="primary-button" href="<?= e(APP_URL) ?>/?route=new-appointment">+ New appointment</a>
                     <?php endif; ?>
                 </div>
                 <?php if ($formError !== ''): ?>
@@ -256,6 +250,7 @@ foreach ($appointments as $appointment) {
                                             <?php else: ?>
                                             <a class="secondary-button" href="<?= e(APP_URL) ?>/?route=appointments&amp;edit=<?= e((string) $appointment['id']) ?>">Edit</a>
                                             <form method="post" action="<?= e(APP_URL) ?>/?route=appointments" style="display:inline" onsubmit="return confirm('Delete this appointment?');">
+                                                <?= csrf_field() ?>
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?= e((string) $appointment['id']) ?>">
                                                 <button class="secondary-button" type="submit">Delete</button>
@@ -294,17 +289,18 @@ foreach ($appointments as $appointment) {
         </div>
     </div>
     <?php elseif (!$isReceptionist): ?>
-    <div class="modal-backdrop <?= $editingAppointment !== null ? '' : 'hidden' ?>" id="appointment-modal" aria-hidden="<?= $editingAppointment !== null ? 'false' : 'true' ?>">
+    <div class="modal-backdrop <?= $editingAppointment !== null || $showCreateModal ? '' : 'hidden' ?>" id="appointment-modal" aria-hidden="<?= $editingAppointment !== null || $showCreateModal ? 'false' : 'true' ?>">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="appointment-title">
             <div class="modal-header">
                 <div>
                     <p class="eyebrow"><?= $editingAppointment !== null ? 'Edit booking' : 'New booking' ?></p>
                     <h2 id="appointment-title"><?= $editingAppointment !== null ? 'Edit Appointment' : 'Schedule Appointment' ?></h2>
                 </div>
-                <button class="modal-close" type="button" aria-label="Close" data-close-modal="appointment-modal">×</button>
+                <a class="modal-close" href="<?= e(APP_URL) ?>/?route=appointments" aria-label="Close">×</a>
             </div>
 
             <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=appointments">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="<?= $editingAppointment !== null ? 'update' : 'create' ?>">
                 <input type="hidden" name="id" value="<?= e((string) ($editingAppointment['id'] ?? '')) ?>">
                 <div class="form-grid two-col">
@@ -366,7 +362,7 @@ foreach ($appointments as $appointment) {
                     </label>
                 </div>
                 <div class="modal-actions">
-                    <button class="secondary-button" type="button" data-close-modal="appointment-modal">Cancel</button>
+                    <a class="secondary-button" href="<?= e(APP_URL) ?>/?route=appointments">Cancel</a>
                     <button class="primary-button" type="submit"><?= $editingAppointment !== null ? 'Update booking' : 'Save booking' ?></button>
                 </div>
             </form>

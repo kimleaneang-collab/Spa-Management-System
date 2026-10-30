@@ -75,8 +75,10 @@ final class CustomerController
                         array_key_exists('customer_date_of_birth', $_POST) ? $dateOfBirth : null,
                         array_key_exists('customer_notes', $_POST) ? $notes : null
                     );
+                    write_audit_log(Database::connection(), 'customer.updated', 'customers', $id);
                 } else {
                     $customerModel->create($name, $phone, $email, $gender, $dateOfBirth, $notes);
+                    write_audit_log(Database::connection(), 'customer.created', 'customers', (int) Database::connection()->lastInsertId());
                 }
             }
 
@@ -94,6 +96,7 @@ final class CustomerController
             $id = (int) ($_POST['id'] ?? 0);
             if ($id > 0) {
                 $customerModel->delete($id);
+                write_audit_log(Database::connection(), 'customer.deleted', 'customers', $id);
             }
             redirect('customers');
         }

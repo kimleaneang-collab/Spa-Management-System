@@ -17,13 +17,7 @@ if (empty($_SESSION['user'])) {
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">
-                <div class="brand-mark">
-                    <span class="brand-leaf">⌁</span>
-                    <div class="brand-text">
-                        <div class="brand-name">Relax</div>
-                        <div class="brand-subtitle">SPA</div>
-                    </div>
-                </div>
+                <div class="brand-mark"><img class="brand-logo" src="<?= e(APP_URL) ?>/public/images/relax-spa-logo-v2.png" alt="Relax Spa"></div>
             </div>
             <nav class="sidebar-menu">
                 <div class="nav-section">
@@ -70,6 +64,7 @@ if (empty($_SESSION['user'])) {
                     </div>
                     <button class="primary-button" type="button" data-open-modal="product-modal">+ Add product</button>
                 </div>
+                <?php if ($formError !== ''): ?><div class="alert alert-error" role="alert"><?= e($formError) ?></div><?php endif; ?>
                 <section class="product-grid">
                     <?php foreach ($products as $product): ?>
                         <article class="product-card">
@@ -95,6 +90,7 @@ if (empty($_SESSION['user'])) {
                 <button class="modal-close" type="button" aria-label="Close" data-close-modal="product-modal">×</button>
             </div>
             <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=products" enctype="multipart/form-data">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="create">
                 <div class="form-grid two-col">
                     <label>

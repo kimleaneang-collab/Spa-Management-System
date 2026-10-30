@@ -12,11 +12,12 @@ final class ServiceController
             redirect('login');
         }
 
-        $serviceModel = new Service(Database::connection());
+        $db = Database::connection();
+        $serviceModel = new Service($db);
 
         $role = strtolower((string) ($_SESSION['user']['role'] ?? ''));
         $isTherapist = in_array($role, ['staff', 'therapist'], true);
-        $isReadOnly = $isTherapist || $role === 'cashier';
+        $isReadOnly = $isTherapist || in_array($role, ['cashier', 'receptionist'], true);
 
         if ($role === 'cashier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             http_response_code(403);
@@ -25,11 +26,7 @@ final class ServiceController
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create') {
-            if ($isTherapist) {
-                http_response_code(403);
-                echo 'Therapists cannot create or modify services.';
-                return;
-            }
+            require_roles(['admin', 'manager']);
 
             $categoryId = (int) ($_POST['category_id'] ?? 0);
             $code = trim((string) ($_POST['service_code'] ?? ''));
@@ -39,28 +36,19 @@ final class ServiceController
             $duration = (int) $durationInput;
             $price = (float) $priceInput;
             $description = trim((string) ($_POST['description'] ?? ''));
-            $imagePath = '';
-            $upload = $_FILES['service_image'] ?? null;
-
-            if ($upload !== null && $upload['error'] === UPLOAD_ERR_OK) {
-                $finfo = new finfo(FILEINFO_MIME_TYPE);
-                $mime = $finfo->file($upload['tmp_name']);
-                $extensions = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
-                if ((int) $upload['size'] <= 5 * 1024 * 1024 && isset($extensions[$mime])) {
-                    $directory = __DIR__ . '/../../public/uploads/service_images';
-                    if (!is_dir($directory)) {
-                        mkdir($directory, 0755, true);
-                    }
-                    $filename = bin2hex(random_bytes(16)) . '.' . $extensions[$mime];
-                    if (move_uploaded_file($upload['tmp_name'], $directory . DIRECTORY_SEPARATOR . $filename)) {
-                        $imagePath = 'public/uploads/service_images/' . $filename;
-                    }
-                }
+            [$imagePath, $uploadError] = store_image_upload($_FILES['service_image'] ?? null, 'service_images');
+            if ($uploadError !== '') {
+                $_SESSION['form_error'] = $uploadError;
+                redirect('services');
             }
 
             if ($categoryId > 0 && valid_text($code, 2, 30) && valid_text($name, 2, 150) && ctype_digit($durationInput) && $duration >= 5 && $duration <= 1440 && valid_non_negative_number($priceInput) && valid_text($description, 0, 2000)) {
                 $serviceModel->create($categoryId, $code, $name, $duration, $price, $description, $imagePath);
+                write_audit_log($db, 'service.created', 'services', (int) $db->lastInsertId(), null, ['service_code' => $code]);
             } else {
+                if ($imagePath !== '') {
+                    remove_uploaded_image($imagePath);
+                }
                 $_SESSION['form_error'] = 'Please enter a valid category, code, name, duration, and price.';
             }
 

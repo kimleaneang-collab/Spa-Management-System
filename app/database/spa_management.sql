@@ -360,6 +360,7 @@ CREATE TABLE purchase_order_items (
 CREATE TABLE invoices (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     invoice_no VARCHAR(50) NOT NULL UNIQUE,
+    checkout_token CHAR(64) NULL UNIQUE,
     customer_id BIGINT UNSIGNED NOT NULL,
     appointment_id BIGINT UNSIGNED NULL,
     membership_id BIGINT UNSIGNED NULL,

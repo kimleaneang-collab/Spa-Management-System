@@ -12,8 +12,11 @@ final class ProductController
             redirect('login');
         }
 
-        $productModel = new Product(Database::connection());
+        $db = Database::connection();
+        $productModel = new Product($db);
         $role = strtolower((string) ($_SESSION['user']['role'] ?? ''));
+        $formError = (string) ($_SESSION['form_error'] ?? '');
+        unset($_SESSION['form_error']);
 
         if ($role === 'cashier' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             http_response_code(403);
@@ -22,6 +25,8 @@ final class ProductController
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create') {
+            require_roles(['admin', 'manager']);
+
             $code = trim((string) ($_POST['product_code'] ?? ''));
             $name = trim((string) ($_POST['product_name'] ?? ''));
             $category = trim((string) ($_POST['category'] ?? ''));
@@ -36,45 +41,27 @@ final class ProductController
             $reorderLevel = (float) $reorderLevelInput;
             $expiryDate = trim((string) ($_POST['expiry_date'] ?? ''));
             $imagePath = '';
-            $upload = $_FILES['product_image'] ?? null;
-
-            if ($upload !== null && $upload['error'] === UPLOAD_ERR_OK) {
-                if ((int) $upload['size'] > 5 * 1024 * 1024) {
-                    redirect('products');
-                }
-
-                $finfo = new finfo(FILEINFO_MIME_TYPE);
-                $mime = $finfo->file($upload['tmp_name']);
-                $extensions = [
-                    'image/jpeg' => 'jpg',
-                    'image/png' => 'png',
-                    'image/gif' => 'gif',
-                    'image/webp' => 'webp',
-                ];
-
-                if (!isset($extensions[$mime])) {
-                    redirect('products');
-                }
-
-                $filename = bin2hex(random_bytes(16)) . '.' . $extensions[$mime];
-                $uploadDirectory = __DIR__ . '/../../public/uploads';
-                if (!is_dir($uploadDirectory)) {
-                    mkdir($uploadDirectory, 0755, true);
-                }
-
-                if (!move_uploaded_file($upload['tmp_name'], $uploadDirectory . DIRECTORY_SEPARATOR . $filename)) {
-                    redirect('products');
-                }
-                $imagePath = 'public/uploads/' . $filename;
+            [$imagePath, $uploadError] = store_image_upload($_FILES['product_image'] ?? null);
+            if ($uploadError !== '') {
+                $_SESSION['form_error'] = $uploadError;
+                redirect('products');
             }
 
             if (valid_text($code, 2, 40) && valid_text($name, 2, 150) && valid_text($category, 0, 100) && valid_text($unit, 1, 30) && valid_non_negative_number($costPriceInput) && valid_non_negative_number($sellingPriceInput) && valid_non_negative_number($stockQuantityInput) && valid_non_negative_number($reorderLevelInput) && valid_date_value($expiryDate)) {
                 $productModel->create($code, $name, $category, $unit, $costPrice, $sellingPrice, $stockQuantity, $reorderLevel, $expiryDate, $imagePath);
+                write_audit_log($db, 'product.created', 'products', (int) $db->lastInsertId(), null, ['product_code' => $code]);
+            } elseif ($imagePath !== '') {
+                remove_uploaded_image($imagePath);
+                $_SESSION['form_error'] = 'Please enter valid product details.';
+            } else {
+                $_SESSION['form_error'] = 'Please enter valid product details.';
             }
 
             redirect('products');
         }
 
+        $formError = (string) ($_SESSION['form_error'] ?? $formError);
+        unset($_SESSION['form_error']);
         $products = $productModel->all();
 
         $view = match ($role) {

@@ -43,6 +43,12 @@ final class UserController
                     $formError = 'Invite another active Administrator before deleting your own account.';
                 } else {
                     $userModel->delete($id);
+                    if ($id === $currentUserId) {
+                        $_SESSION['user']['id'] = null;
+                    }
+                    write_audit_log(Database::connection(), 'user.deleted', 'users', (int) $id, null, [
+                        'role' => (string) $targetUser['role_name'],
+                    ]);
                     remove_profile_image((string) ($targetUser['profile_image'] ?? ''));
                     if ($id === $currentUserId) {
                         $this->endSession();
@@ -123,9 +129,15 @@ final class UserController
                         try {
                             if ($action === 'update') {
                                 $userModel->update((int) $id, $name, $username, $email, $phone, $role, $status, $password, $newProfileImage);
+                                $recordId = (int) $id;
                             } else {
                                 $userModel->create($name, $username, $email, $phone, $role, $password, $newProfileImage);
+                                $recordId = (int) Database::connection()->lastInsertId();
                             }
+                            write_audit_log(Database::connection(), 'user.' . $action, 'users', $recordId, null, [
+                                'role' => $role,
+                                'status' => $status,
+                            ]);
                         } catch (Throwable $exception) {
                             if ($newProfileImage !== '') {
                                 remove_profile_image($newProfileImage);

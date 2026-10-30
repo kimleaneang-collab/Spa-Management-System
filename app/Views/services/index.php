@@ -23,13 +23,7 @@ $activeCategories = array_unique(array_column($activeServices, 'category'));
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">
-                <div class="brand-mark">
-                    <span class="brand-leaf">⌁</span>
-                    <div class="brand-text">
-                        <div class="brand-name">Relax</div>
-                        <div class="brand-subtitle">SPA</div>
-                    </div>
-                </div>
+                <div class="brand-mark"><img class="brand-logo" src="<?= e(APP_URL) ?>/public/images/relax-spa-logo-v2.png" alt="Relax Spa"></div>
             </div>
 
             <nav class="sidebar-menu">
@@ -140,6 +134,7 @@ $activeCategories = array_unique(array_column($activeServices, 'category'));
                 <button class="modal-close" type="button" aria-label="Close" data-close-modal="service-modal">×</button>
             </div>
             <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=services" enctype="multipart/form-data">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="create">
                 <div class="form-grid two-col">
                     <label>

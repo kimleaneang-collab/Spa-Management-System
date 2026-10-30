@@ -122,6 +122,8 @@ final class TherapistController
                 } else {
                     $therapistModel->create($name, $email, $phone, $specialization, $gender, $status, $bio, $userId);
                 }
+                $therapistRecordId = $action === 'update' ? $id : (int) $db->lastInsertId();
+                write_audit_log($db, 'therapist.' . $action, 'therapists', $therapistRecordId);
                 $db->commit();
             } catch (PDOException $exception) {
                 if ($db->inTransaction()) {

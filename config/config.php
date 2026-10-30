@@ -34,6 +34,11 @@ function asset_version(string $assetPath): string
 
 date_default_timezone_set('Asia/Phnom_Penh');
 
+$isProduction = strtolower((string) (getenv('APP_ENV') ?: 'local')) === 'production';
+ini_set('log_errors', '1');
+ini_set('display_errors', $isProduction ? '0' : '1');
+ini_set('display_startup_errors', $isProduction ? '0' : '1');
+
 /*
 |--------------------------------------------------------------------------
 | Session Security
@@ -51,11 +56,18 @@ date_default_timezone_set('Asia/Phnom_Penh');
 ini_set('session.use_only_cookies', '1');
 ini_set('session.use_strict_mode', '1');
 ini_set('session.use_trans_sid', '0');
+ini_set('session.cookie_lifetime', '0');
+ini_set('session.gc_maxlifetime', '1800');
 
 $secureCookie = (
-    isset($_SERVER['HTTPS'])
-    && $_SERVER['HTTPS'] !== 'off'
+    !empty($_SERVER['HTTPS'])
+    && strtolower((string) $_SERVER['HTTPS']) !== 'off'
 );
+
+if (strtolower((string) (getenv('APP_ENV') ?: 'local')) === 'production' && !$secureCookie) {
+    http_response_code(400);
+    exit('HTTPS must be enabled for production.');
+}
 
 // SECURITY: Set hard session cookie settings to reduce XSS/session theft exposure.
 session_set_cookie_params([
@@ -72,6 +84,38 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+header("Content-Security-Policy: frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self'");
+header('Cache-Control: no-store, private');
+if ($secureCookie) {
+    header('Strict-Transport-Security: max-age=31536000');
+}
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+if (!empty($_SESSION['user']['id'])) {
+    $now = time();
+    $lastActivity = (int) ($_SESSION['last_activity'] ?? 0);
+    $authenticatedAt = (int) ($_SESSION['authenticated_at'] ?? 0);
+    if (
+        $lastActivity === 0
+        || $authenticatedAt === 0
+        || $now - $lastActivity > 1800
+        || $now - $authenticatedAt > 28800
+    ) {
+        $_SESSION = [];
+        session_regenerate_id(true);
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    } else {
+        $_SESSION['last_activity'] = $now;
+    }
+}
+
 /*
 |--------------------------------------------------------------------------
 | Escape HTML
@@ -85,6 +129,48 @@ function e(?string $value): string
         ENT_QUOTES | ENT_SUBSTITUTE,
         'UTF-8'
     );
+}
+
+function csrf_field(): string
+{
+    return '<input type="hidden" name="csrf_token" value="' . e((string) ($_SESSION['csrf_token'] ?? '')) . '">';
+}
+
+function require_valid_csrf_token(): void
+{
+    $token = (string) ($_POST['csrf_token'] ?? '');
+    if (
+        empty($_SESSION['csrf_token'])
+        || !hash_equals((string) $_SESSION['csrf_token'], $token)
+    ) {
+        http_response_code(419);
+        exit('Invalid CSRF token.');
+    }
+}
+
+function write_audit_log(
+    PDO $db,
+    string $action,
+    ?string $tableName = null,
+    ?int $recordId = null,
+    ?array $oldValues = null,
+    ?array $newValues = null
+): void {
+    $statement = $db->prepare(
+        'INSERT INTO audit_logs
+            (user_id, action, table_name, record_id, old_values, new_values, ip_address)
+         VALUES
+            (:user_id, :action, :table_name, :record_id, :old_values, :new_values, :ip_address)'
+    );
+    $statement->execute([
+        ':user_id' => isset($_SESSION['user']['id']) ? (int) $_SESSION['user']['id'] : null,
+        ':action' => $action,
+        ':table_name' => $tableName,
+        ':record_id' => $recordId,
+        ':old_values' => $oldValues !== null ? json_encode($oldValues, JSON_THROW_ON_ERROR) : null,
+        ':new_values' => $newValues !== null ? json_encode($newValues, JSON_THROW_ON_ERROR) : null,
+        ':ip_address' => substr((string) ($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45),
+    ]);
 }
 
 function profile_image_url(string $imagePath): string
@@ -184,6 +270,118 @@ function remove_profile_image(string $imagePath): void
     $absolutePath = APP_ROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'user_profiles' . DIRECTORY_SEPARATOR . $filename;
     if (is_file($absolutePath) && !unlink($absolutePath)) {
         error_log('Unable to remove profile image: ' . $absolutePath);
+    }
+}
+
+function store_image_upload(?array $upload, string $subdirectory = ''): array
+{
+    if ($upload === null) {
+        return ['', ''];
+    }
+
+    $uploadError = $upload['error'] ?? UPLOAD_ERR_NO_FILE;
+    if (!is_scalar($uploadError)) {
+        return ['', 'The selected image is invalid. Please try again.'];
+    }
+    if ((int) $uploadError === UPLOAD_ERR_NO_FILE) {
+        return ['', ''];
+    }
+    if ((int) $uploadError !== UPLOAD_ERR_OK) {
+        return ['', 'The image could not be uploaded. Please select it again.'];
+    }
+
+    $temporaryPath = $upload['tmp_name'] ?? '';
+    $uploadSize = $upload['size'] ?? null;
+    if (
+        !is_string($temporaryPath)
+        || $temporaryPath === ''
+        || !is_uploaded_file($temporaryPath)
+        || !is_scalar($uploadSize)
+        || !is_numeric($uploadSize)
+        || (int) $uploadSize > 5 * 1024 * 1024
+        || (int) filesize($temporaryPath) > 5 * 1024 * 1024
+    ) {
+        return ['', 'Choose a valid image no larger than 5 MB.'];
+    }
+
+    if ($subdirectory !== '' && preg_match('/^[A-Za-z0-9_-]+$/', $subdirectory) !== 1) {
+        throw new InvalidArgumentException('Invalid image upload directory.');
+    }
+
+    $mimeType = (new finfo(FILEINFO_MIME_TYPE))->file($temporaryPath);
+    $extensions = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/gif' => 'gif',
+        'image/webp' => 'webp',
+    ];
+    $imageInfo = getimagesize($temporaryPath);
+    if (
+        !is_string($mimeType)
+        || !isset($extensions[$mimeType])
+        || $imageInfo === false
+        || $imageInfo[0] < 1
+        || $imageInfo[1] < 1
+        || $imageInfo[0] > 8000
+        || $imageInfo[1] > 8000
+        || $imageInfo[0] * $imageInfo[1] > 40000000
+    ) {
+        return ['', 'Choose a valid JPG, PNG, GIF, or WEBP image.'];
+    }
+
+    $uploadRoot = APP_ROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads';
+    $directory = $subdirectory === ''
+        ? $uploadRoot
+        : $uploadRoot . DIRECTORY_SEPARATOR . $subdirectory;
+    if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
+        throw new RuntimeException('Unable to create the image upload directory.');
+    }
+
+    $filename = bin2hex(random_bytes(16)) . '.' . $extensions[$mimeType];
+    $destination = $directory . DIRECTORY_SEPARATOR . $filename;
+    if (!move_uploaded_file($temporaryPath, $destination)) {
+        return ['', 'The image could not be saved. Please try again.'];
+    }
+
+    $relativePath = 'public/uploads/';
+    if ($subdirectory !== '') {
+        $relativePath .= $subdirectory . '/';
+    }
+
+    return [$relativePath . $filename, ''];
+}
+
+function remove_uploaded_image(string $imagePath): void
+{
+    $prefix = 'public/uploads/';
+    if (!str_starts_with($imagePath, $prefix)) {
+        return;
+    }
+
+    $relativePath = substr($imagePath, strlen($prefix));
+    if (
+        $relativePath === ''
+        || str_contains($relativePath, '..')
+        || str_contains($relativePath, '\\')
+    ) {
+        return;
+    }
+
+    $uploadRoot = realpath(APP_ROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads');
+    $absolutePath = realpath(
+        APP_ROOT . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $imagePath)
+    );
+    if (
+        $uploadRoot === false
+        || $absolutePath === false
+        || !str_starts_with($absolutePath, $uploadRoot . DIRECTORY_SEPARATOR)
+        || !is_file($absolutePath)
+    ) {
+        return;
+    }
+
+    if (!unlink($absolutePath)) {
+        error_log('Unable to remove uploaded image: ' . $absolutePath);
     }
 }
 
@@ -341,7 +539,7 @@ function authorize_route(string $route): void
         return;
     }
 
-    $adminOnly = ['backup'];
+    $adminOnly = ['backup', 'audit-logs'];
     $managerRoutes = ['users', 'users-and-roles', 'settings', 'therapists'];
     $staffRoutes = ['dashboard', 'appointments', 'calendar', 'services', 'rooms', 'customers', 'memberships', 'customer-history', 'history', 'products', 'stock', 'stock-management', 'suppliers', 'reports', 'report', 'sales', 'inventory-report'];
     $receptionistRoutes = ['dashboard', 'appointments', 'new-appointment', 'calendar', 'services', 'rooms', 'customers', 'register-customer', 'memberships', 'customer-history', 'history', 'pos'];

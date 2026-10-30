@@ -25,7 +25,7 @@ foreach ($options['customers'] as $customerOption) {
 <body class="dashboard-page receptionist-role receptionist-booking-page" data-role="receptionist">
     <div class="dashboard-shell">
         <aside class="sidebar">
-            <div class="brand-block"><div class="brand-mark"><span class="brand-leaf">⌁</span><div class="brand-text"><div class="brand-name">Relax</div><div class="brand-subtitle">SPA</div></div></div></div>
+            <div class="brand-block"><div class="brand-mark"><img class="brand-logo" src="<?= e(APP_URL) ?>/public/images/relax-spa-logo-v2.png" alt="Relax Spa"></div></div>
             <nav class="sidebar-menu">
                 <div class="nav-section" data-label="Main">
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=dashboard"><span class="nav-icon">⌂</span><span>Dashboard</span></a>
@@ -59,6 +59,7 @@ foreach ($options['customers'] as $customerOption) {
                 </div>
                 <?php if ($formError !== ''): ?><div class="alert alert-error" role="alert"><?= e($formError) ?></div><?php endif; ?>
                 <form class="receptionist-booking-layout receptionist-new-appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=appointments" data-booking-form>
+                        <?= csrf_field() ?>
                         <input type="hidden" name="action" value="create">
                         <input type="hidden" name="status" value="pending">
                         <div class="receptionist-form-card">

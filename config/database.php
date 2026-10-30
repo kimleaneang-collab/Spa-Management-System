@@ -13,11 +13,19 @@ final class Database
             return self::$connection;
         }
 
-        $host = '127.0.0.1';
-        $port = '3306';
-        $db   = 'spa_management';
-        $user = 'root';
-        $pass = '';
+        $environment = strtolower((string) (getenv('APP_ENV') ?: 'local'));
+        $host = (string) (getenv('DB_HOST') ?: '127.0.0.1');
+        $port = (string) (getenv('DB_PORT') ?: '3306');
+        $db = (string) (getenv('DB_NAME') ?: 'spa_management');
+        $user = (string) (getenv('DB_USER') ?: ($environment === 'local' ? 'root' : ''));
+        $pass = (string) (getenv('DB_PASSWORD') ?: '');
+
+        if (!ctype_digit($port) || (int) $port < 1 || (int) $port > 65535) {
+            throw new RuntimeException('DB_PORT must be a valid TCP port.');
+        }
+        if ($environment === 'production' && ($user === '' || $pass === '')) {
+            throw new RuntimeException('Set DB_USER and DB_PASSWORD in the production environment.');
+        }
 
         $dsn = "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4";
 

@@ -19,6 +19,7 @@ require_once __DIR__ . '/app/controllers/ReportController.php';
 require_once __DIR__ . '/app/controllers/UserController.php';
 require_once __DIR__ . '/app/controllers/SettingsController.php';
 require_once __DIR__ . '/app/controllers/ProfileController.php';
+require_once __DIR__ . '/app/controllers/AuditController.php';
 
 // Read the requested page; unauthenticated visitors start at the login route.
 $route = trim(
@@ -27,6 +28,10 @@ $route = trim(
 );
 
 authorize_route($route);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_valid_csrf_token();
+}
 
 $auth = new AuthController();
 
@@ -140,6 +145,10 @@ switch ($route) {
 
     case 'backup':
         (new SettingsController())->backup();
+        break;
+
+    case 'audit-logs':
+        (new AuditController())->index();
         break;
 
     default:

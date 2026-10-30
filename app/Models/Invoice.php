@@ -100,10 +100,19 @@ final class Invoice
         array $items,
         float $discountAmount,
         string $paymentMethod,
-        ?int $userId
+        ?int $userId,
+        string $checkoutToken
     ): string {
         if (!in_array($paymentMethod, ['cash', 'card', 'bank_transfer', 'qr_payment'], true)) {
             throw new DomainException('Select a valid payment method.');
+        }
+        if (preg_match('/^[a-f0-9]{64}$/', $checkoutToken) !== 1) {
+            throw new DomainException('The checkout session expired. Reload the page and try again.');
+        }
+
+        $existingInvoice = $this->invoiceForCheckoutToken($checkoutToken);
+        if ($existingInvoice !== null) {
+            return $existingInvoice;
         }
 
         $this->db->beginTransaction();
@@ -196,13 +205,14 @@ final class Invoice
 
             $invoiceStatement = $this->db->prepare(
                 "INSERT INTO invoices
-                    (invoice_no, customer_id, invoice_date, subtotal, discount_amount, tax_amount,
+                    (invoice_no, checkout_token, customer_id, invoice_date, subtotal, discount_amount, tax_amount,
                      total_amount, paid_amount, status, created_by)
                  VALUES
-                    (:invoice_no, :customer_id, NOW(), :subtotal, :discount, :tax, :total, :paid, 'paid', :created_by)"
+                    (:invoice_no, :checkout_token, :customer_id, NOW(), :subtotal, :discount, :tax, :total, :paid, 'paid', :created_by)"
             );
             $invoiceStatement->execute([
                 ':invoice_no' => $invoiceNumber,
+                ':checkout_token' => $checkoutToken,
                 ':customer_id' => $customerId,
                 ':subtotal' => $subtotal,
                 ':discount' => $discountAmount,
@@ -270,6 +280,13 @@ final class Invoice
                 ':received_by' => $userId,
             ]);
 
+            write_audit_log($this->db, 'payment.checkout', 'invoices', $invoiceId, null, [
+                'invoice_no' => $invoiceNumber,
+                'customer_id' => $customerId,
+                'amount' => $total,
+                'payment_method' => $paymentMethod,
+            ]);
+
             $this->db->commit();
 
             return $invoiceNumber;
@@ -277,7 +294,24 @@ final class Invoice
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
+            if ($exception instanceof PDOException && $exception->getCode() === '23000') {
+                $existingInvoice = $this->invoiceForCheckoutToken($checkoutToken);
+                if ($existingInvoice !== null) {
+                    return $existingInvoice;
+                }
+            }
             throw $exception;
         }
+    }
+
+    private function invoiceForCheckoutToken(string $checkoutToken): ?string
+    {
+        $statement = $this->db->prepare(
+            'SELECT invoice_no FROM invoices WHERE checkout_token = :checkout_token LIMIT 1'
+        );
+        $statement->execute([':checkout_token' => $checkoutToken]);
+        $invoiceNumber = $statement->fetchColumn();
+
+        return $invoiceNumber !== false ? (string) $invoiceNumber : null;
     }
 }

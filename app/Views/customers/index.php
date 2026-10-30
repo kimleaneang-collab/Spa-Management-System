@@ -19,13 +19,7 @@ $isTherapist = in_array(strtolower((string) ($_SESSION['user']['role'] ?? '')), 
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">
-                <div class="brand-mark">
-                    <span class="brand-leaf">⌁</span>
-                    <div class="brand-text">
-                        <div class="brand-name">Relax</div>
-                        <div class="brand-subtitle">SPA</div>
-                    </div>
-                </div>
+                <div class="brand-mark"><img class="brand-logo" src="<?= e(APP_URL) ?>/public/images/relax-spa-logo-v2.png" alt="Relax Spa"></div>
             </div>
             <?php if ($isTherapist): ?>
             <nav class="sidebar-menu">
@@ -206,6 +200,7 @@ $isTherapist = in_array(strtolower((string) ($_SESSION['user']['role'] ?? '')), 
                                             <td>
                                                 <a class="secondary-button" href="<?= e(APP_URL) ?>/?route=customers&amp;edit=<?= e((string) ($customer['id'] ?? 0)) ?>">Edit</a>
                                                 <form method="post" action="<?= e(APP_URL) ?>/?route=customers" style="display:inline" onsubmit="return confirm('Delete this customer?');">
+                                                    <?= csrf_field() ?>
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="id" value="<?= e((string) ($customer['id'] ?? 0)) ?>">
                                                     <button class="secondary-button" type="submit">Delete</button>
@@ -231,6 +226,7 @@ $isTherapist = in_array(strtolower((string) ($_SESSION['user']['role'] ?? '')), 
                 <button class="modal-close" type="button" aria-label="Close" data-close-modal="therapist-customer-modal">×</button>
             </div>
             <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=customers">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="create">
                 <div class="form-grid two-col">
                     <label><span>Name</span><input type="text" name="customer_name" minlength="2" maxlength="150" required></label>
@@ -255,6 +251,7 @@ $isTherapist = in_array(strtolower((string) ($_SESSION['user']['role'] ?? '')), 
                 <button class="modal-close" type="button" aria-label="Close" data-close-modal="customer-modal">×</button>
             </div>
             <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=customers">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="<?= $editingCustomer !== null ? 'update' : 'create' ?>">
                 <input type="hidden" name="id" value="<?= e((string) ($editingCustomer['id'] ?? '')) ?>">
                 <div class="form-grid two-col">

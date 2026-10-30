@@ -22,13 +22,7 @@ unset($_SESSION['login_username']);
 <body class="login-page">
     <main class="login-shell">
         <section class="login-brand" aria-label="Relax Spa">
-            <div class="brand-mark">
-                <span class="brand-leaf">⌁</span>
-                <div>
-                    <div class="brand-name">Relax</div>
-                    <div class="brand-subtitle">SPA</div>
-                </div>
-            </div>
+            <div class="brand-mark"><img class="brand-logo" src="<?= e(APP_URL) ?>/public/images/relax-spa-logo-v2.png" alt="Relax Spa"></div>
         </section>
 
         <section class="login-panel">

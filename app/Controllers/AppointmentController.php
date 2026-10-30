@@ -33,6 +33,7 @@ final class AppointmentController
             $id = (int) ($_POST['id'] ?? 0);
             if ($action === 'delete' && $id > 0) {
                 $appointmentModel->delete($id);
+                write_audit_log(Database::connection(), 'appointment.deleted', 'appointments', $id);
                 redirect('appointments');
             }
 
@@ -76,8 +77,10 @@ final class AppointmentController
             if ($customerId > 0 && $serviceId > 0 && valid_date_value($date, true) && $startDateTime !== null && $endDateTime !== null && $endDateTime > $startDateTime && in_array($status, ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled'], true) && valid_text($notes, 0, 2000)) {
                 if ($action === 'update' && $id > 0) {
                     $appointmentModel->update($id, $customerId, $serviceId, $therapistId, $roomId, $date, $start, $end, $status, $notes);
+                    write_audit_log(Database::connection(), 'appointment.updated', 'appointments', $id);
                 } elseif ($action === 'create') {
                     $appointmentModel->create($customerId, $serviceId, $therapistId, $roomId, $date, $start, $end, $status, $notes, (int) ($_SESSION['user']['id'] ?? 0) ?: null);
+                    write_audit_log(Database::connection(), 'appointment.created', 'appointments', (int) Database::connection()->lastInsertId());
                 }
             } else {
                 $missing = [];
@@ -121,11 +124,13 @@ final class AppointmentController
             $options = $appointmentModel->options();
         }
 
-        if ($role === 'receptionist'
-            && (string) ($_GET['route'] ?? '') === 'new-appointment') {
+        $isNewAppointmentRoute = (string) ($_GET['route'] ?? '') === 'new-appointment';
+        if ($role === 'receptionist' && $isNewAppointmentRoute) {
             require __DIR__ . '/../Views/appointments/create.php';
             return;
         }
+
+        $showCreateModal = $isNewAppointmentRoute && !$isTherapist && $editingAppointment === null;
 
         require __DIR__ . '/../Views/appointments/index.php';
     }

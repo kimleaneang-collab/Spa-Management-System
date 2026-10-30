@@ -19,13 +19,7 @@ $isReceptionist = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 're
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">
-                <div class="brand-mark">
-                    <span class="brand-leaf">⌁</span>
-                    <div class="brand-text">
-                        <div class="brand-name">Relax</div>
-                        <div class="brand-subtitle">SPA</div>
-                    </div>
-                </div>
+                <div class="brand-mark"><img class="brand-logo" src="<?= e(APP_URL) ?>/public/images/relax-spa-logo-v2.png" alt="Relax Spa"></div>
             </div>
 
             <nav class="sidebar-menu">
@@ -106,7 +100,7 @@ $isReceptionist = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 're
                         <h1 class="page-title">ROOMS</h1>
                         <div class="page-date">Availability and service status</div>
                     </div>
-                    <?php if (!$isReceptionist): ?><button class="primary-button" type="button" data-open-modal="room-modal">+ Add room</button><?php endif; ?>
+                    <?php if ($canManageRooms): ?><button class="primary-button" type="button" data-open-modal="room-modal">+ Add room</button><?php endif; ?>
                 </div>
 
                 <section class="module-panel">
@@ -132,7 +126,7 @@ $isReceptionist = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 're
         </main>
     </div>
 
-    <?php if (!$isReceptionist): ?>
+    <?php if ($canManageRooms): ?>
     <div class="modal-backdrop hidden" id="room-modal" aria-hidden="true">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="room-title">
             <div class="modal-header">
@@ -144,6 +138,7 @@ $isReceptionist = strtolower((string) ($_SESSION['user']['role'] ?? '')) === 're
                 <button class="modal-close" type="button" aria-label="Close" data-close-modal="room-modal">×</button>
             </div>
             <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=rooms">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="create">
                 <div class="form-grid two-col">
                     <label>

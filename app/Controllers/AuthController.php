@@ -201,6 +201,9 @@ final class AuthController
         */
         // SECURITY: Rotate the session ID once the user is authenticated.
         session_regenerate_id(true);
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        $_SESSION['authenticated_at'] = time();
+        $_SESSION['last_activity'] = time();
 
         /*
         |--------------------------------------------------------------------------
