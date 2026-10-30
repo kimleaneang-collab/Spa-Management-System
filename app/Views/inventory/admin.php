@@ -13,7 +13,7 @@ if (empty($_SESSION['user'])) {
     <title>Products | Relax Spa</title>
     <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css?v=<?= e(asset_version('public/css/style.css')) ?>">
 </head>
-<body class="dashboard-page" data-role="admin">
+<body class="dashboard-page admin-products-page" data-role="admin">
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">
@@ -142,6 +142,6 @@ if (empty($_SESSION['user'])) {
             </form>
         </div>
     </div>
-    <script src="<?= e(APP_URL) ?>/public/js/main.js"></script>
+    <script src="<?= e(APP_URL) ?>/public/js/main.js?v=<?= e(asset_version('public/js/main.js')) ?>"></script>
 </body>
 </html>

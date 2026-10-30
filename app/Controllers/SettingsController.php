@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 final class SettingsController
 {
+    /** Display general settings to administrators and managers. */
     public function general(): void
     {
         require_roles(['admin', 'manager']);
@@ -13,6 +14,12 @@ final class SettingsController
         require __DIR__ . '/../Views/settings/general.php';
     }
 
+    /**
+     * Create, download, or list database backups for administrators.
+     *
+     * POST creates a backup. A GET request with a download parameter streams a
+     * backup file. A regular GET request displays the available backups.
+     */
     public function backup(): void
     {
         require_roles(['admin']);
@@ -52,6 +59,7 @@ final class SettingsController
             exit;
         }
 
+        // The backup list is only available through a regular GET request.
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             http_response_code(405);
             header('Allow: GET, POST');

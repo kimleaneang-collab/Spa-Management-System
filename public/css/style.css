@@ -12690,3 +12690,66 @@ body[data-theme="dark"] .main-panel input::placeholder,
 body[data-theme="dark"] .main-panel textarea::placeholder {
     color: var(--muted);
 }
+
+body[data-theme="dark"].admin-treatments-page .module-panel,
+body[data-theme="dark"].admin-treatments-page .service-card {
+    border-color: var(--line);
+    background-color: var(--card);
+    color: var(--text);
+}
+
+body[data-theme="dark"].admin-treatments-page .service-body h3,
+body[data-theme="dark"].admin-treatments-page .service-meta {
+    color: var(--text);
+}
+
+body[data-theme="dark"].admin-treatments-page .toolbar-pills .pill:not(.active) {
+    background-color: var(--field);
+    color: var(--text-soft);
+}
+
+body[data-theme="dark"].admin-products-page .product-card {
+    border-color: var(--line);
+    background-color: var(--card);
+    color: var(--text);
+}
+
+body[data-theme="dark"].admin-products-page .product-card h3 {
+    color: var(--text);
+}
+
+body[data-theme="dark"].admin-products-page .product-card p {
+    color: var(--text-soft);
+}
+
+body[data-theme="dark"].inventory-page .inventory-table-panel {
+    border-color: var(--line);
+    background-color: var(--card);
+    color: var(--text);
+}
+
+body[data-theme="dark"].inventory-page .inventory-search,
+body[data-theme="dark"].inventory-page .inventory-status-filter {
+    border-color: var(--line);
+    background-color: var(--field);
+    color: var(--text-soft);
+}
+
+body[data-theme="dark"].inventory-page .inventory-search input,
+body[data-theme="dark"].inventory-page .inventory-status-filter select,
+body[data-theme="dark"].inventory-page .inventory-table td,
+body[data-theme="dark"].inventory-page .inventory-table .inventory-item-name {
+    color: var(--text);
+}
+
+body[data-theme="dark"].inventory-page .inventory-table th {
+    color: var(--text-soft);
+}
+
+body[data-theme="dark"].inventory-page .inventory-table td {
+    border-color: var(--line);
+}
+
+body[data-theme="dark"].inventory-page .inventory-stock-meter {
+    background-color: var(--line);
+}
