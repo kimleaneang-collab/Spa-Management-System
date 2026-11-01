@@ -562,8 +562,8 @@ function authorize_route(string $route): void
         return;
     }
 
-    $adminOnly = ['backup', 'audit-logs'];
-    $managerRoutes = ['users', 'users-and-roles', 'settings', 'therapists'];
+    $adminOnly = ['backup', 'audit-logs', 'employee-management'];
+    $managerRoutes = ['users', 'users-and-roles', 'settings', 'therapists', 'reports-export'];
     $staffRoutes = ['dashboard', 'appointments', 'calendar', 'services', 'rooms', 'customers', 'memberships', 'customer-history', 'history', 'products', 'stock', 'stock-management', 'suppliers', 'reports', 'report', 'sales', 'inventory-report'];
     $receptionistRoutes = ['dashboard', 'appointments', 'new-appointment', 'calendar', 'services', 'rooms', 'customers', 'register-customer', 'memberships', 'customer-history', 'history', 'pos'];
     $cashierRoutes = ['dashboard', 'pos', 'customers', 'receipts', 'services', 'products', 'memberships', 'cashier-profile'];

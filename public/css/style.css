@@ -8285,6 +8285,12 @@ body[data-role="receptionist"] .receptionist-calendar .calendar-more {
     font-size: 10px;
 }
 
+.analytics-heading-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .analytics-period {
     flex: 0 0 auto;
     padding: 6px 9px;
@@ -12838,4 +12844,174 @@ body[data-theme="dark"].account-profile-page .account-profile-fields input[reado
         max-height: calc(100vh - 24px);
         max-height: calc(100dvh - 24px);
     }
+}
+
+.employee-management-content {
+    min-height: calc(100vh - 60px);
+    padding: 26px clamp(14px, 2vw, 28px) 34px;
+    background: #f3efe5;
+}
+
+.employee-management-content > .page-heading {
+    margin-bottom: 16px;
+}
+
+.employee-management-content .page-title {
+    color: #172f2b;
+    font-size: clamp(26px, 2.2vw, 34px);
+}
+
+.employee-management-content .page-date {
+    margin-top: 4px;
+    color: #68716a;
+    font-size: 13px;
+}
+
+.employee-form-grid,
+.employee-record-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.employee-form-panel,
+.employee-table-panel {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid #e8e1d5;
+    border-radius: 12px;
+    background: #fffdfb;
+}
+
+.employee-form-panel h2,
+.employee-table-panel h2 {
+    margin: 0 0 14px;
+    color: #183f39;
+    font-size: 17px;
+}
+
+.employee-form {
+    display: grid;
+    gap: 14px;
+}
+
+.employee-form .form-grid {
+    gap: 12px;
+}
+
+.employee-form label {
+    display: grid;
+    min-width: 0;
+    gap: 6px;
+    color: #34443d;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.employee-form input:not([type="checkbox"]),
+.employee-form select {
+    width: 100%;
+    min-width: 0;
+    height: 40px;
+    padding: 0 10px;
+    border: 1px solid #d8d3ca;
+    border-radius: 7px;
+    background: #fff;
+    color: #26332d;
+    font: inherit;
+    font-weight: 400;
+}
+
+.employee-form .primary-button {
+    justify-self: start;
+    padding: 10px 15px;
+    border-radius: 7px;
+    font-size: 13px;
+}
+
+.employee-form .primary-button:disabled {
+    cursor: not-allowed;
+    opacity: .6;
+}
+
+.employee-day-off {
+    display: flex !important;
+    width: fit-content;
+    align-items: center;
+    grid-template-columns: auto 1fr;
+}
+
+.employee-day-off input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+}
+
+.employee-table-panel {
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.employee-table-panel .table-wrap {
+    overflow-x: auto;
+}
+
+.employee-table-panel .data-table {
+    min-width: 620px;
+}
+
+.employee-management-message {
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    border: 1px solid;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.employee-management-message.success {
+    border-color: #b9d8c0;
+    background: #edf8ef;
+    color: #28643a;
+}
+
+@media (max-width: 900px) {
+    .employee-form-grid,
+    .employee-record-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .employee-management-content {
+        padding: 20px 12px;
+    }
+
+    .employee-form .form-grid.two-col {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+body[data-theme="dark"].employee-management-page .employee-management-content {
+    background: #141c18 !important;
+}
+
+body[data-theme="dark"].employee-management-page .employee-form-panel,
+body[data-theme="dark"].employee-management-page .employee-table-panel {
+    border-color: var(--line);
+    background: var(--card);
+    color: var(--text);
+}
+
+body[data-theme="dark"].employee-management-page .employee-form-panel h2,
+body[data-theme="dark"].employee-management-page .employee-table-panel h2,
+body[data-theme="dark"].employee-management-page .employee-form label {
+    color: var(--text);
+}
+
+body[data-theme="dark"].employee-management-page .employee-form input:not([type="checkbox"]),
+body[data-theme="dark"].employee-management-page .employee-form select {
+    border-color: var(--line);
+    background: var(--field);
+    color: var(--text);
 }

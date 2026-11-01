@@ -90,6 +90,9 @@ $lastActive = static function (?string $value): string {
                     <?php if ($isManager): ?>
                         <a class="nav-item" href="<?= e(APP_URL) ?>/?route=pos"><span class="nav-icon">▤</span><span>POS &amp; Billing</span></a>
                     <?php endif; ?>
+                    <?php if ($isAdministrator): ?>
+                        <a class="nav-item" href="<?= e(APP_URL) ?>/?route=employee-management"><span class="nav-icon">♙</span><span>Employee Management</span></a>
+                    <?php endif; ?>
                     <a class="nav-item active" href="<?= e(APP_URL) ?>/?route=users-and-roles"><span class="nav-icon">⚙</span><span><?= $isAdministrator ? 'Staff Management' : 'Users &amp; Roles' ?></span></a>
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
                 </div>

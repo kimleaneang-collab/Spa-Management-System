@@ -20,6 +20,7 @@ $changeClass = static fn (?float $change): string => $change !== null && $change
 $formatMoney = static fn (float $amount): string => e($currency) . ' ' . number_format($amount, 2);
 $userName = (string) ($_SESSION['user']['full_name'] ?? $_SESSION['user']['username'] ?? 'User');
 $userInitials = strtoupper(substr($userName, 0, 2));
+$analyticsRole = strtolower((string) ($_SESSION['user']['role'] ?? ''));
 ?>
 <!doctype html>
 <html lang="en">
@@ -29,7 +30,7 @@ $userInitials = strtoupper(substr($userName, 0, 2));
     <title>Reports &amp; Analytics | Relax Spa</title>
     <link rel="stylesheet" href="<?= e(APP_URL) ?>/public/css/style.css?v=<?= e(asset_version('public/css/style.css')) ?>">
 </head>
-<body class="dashboard-page analytics-page <?= strtolower((string) ($_SESSION['user']['role'] ?? '')) === 'manager' ? 'manager-role' : '' ?>" data-role="<?= e(strtolower((string) ($_SESSION['user']['role'] ?? ''))) ?>">
+<body class="dashboard-page analytics-page <?= in_array($analyticsRole, ['admin', 'manager'], true) ? 'manager-role' : '' ?>" data-role="<?= e($analyticsRole) ?>">
     <div class="dashboard-shell">
         <aside class="sidebar">
             <div class="brand-block">
@@ -52,6 +53,9 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                     <a class="nav-item active" href="<?= e(APP_URL) ?>/?route=reports"><span class="nav-icon">▥</span><span>Reports &amp; Analytics</span></a>
                 </div>
                 <div class="nav-section" data-label="Settings">
+                    <?php if ($analyticsRole === 'admin'): ?>
+                        <a class="nav-item" href="<?= e(APP_URL) ?>/?route=employee-management"><span class="nav-icon">♙</span><span>Employee Management</span></a>
+                    <?php endif; ?>
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=users-and-roles"><span class="nav-icon">⚙</span><span>Users &amp; Roles</span></a>
                     <a class="nav-item" href="<?= e(APP_URL) ?>/?route=settings"><span class="nav-icon">⚙</span><span>Settings</span></a>
                 </div>
@@ -79,7 +83,10 @@ $userInitials = strtoupper(substr($userName, 0, 2));
                         <h1 class="page-title">REPORTS &amp; ANALYTICS</h1>
                         <p>Performance across bookings, revenue and staff.</p>
                     </div>
-                    <span class="analytics-period">▤ &nbsp;Last 7 Days</span>
+                    <div class="analytics-heading-actions">
+                        <span class="analytics-period">▤ &nbsp;Last 7 Days</span>
+                        <a class="secondary-button" href="<?= e(APP_URL) ?>/?route=reports-export">Export Report</a>
+                    </div>
                 </div>
 
                 <section class="analytics-stat-grid" aria-label="Performance summary for the last seven days">

@@ -17,6 +17,7 @@ require_once __DIR__ . '/app/controllers/InventoryController.php';
 require_once __DIR__ . '/app/controllers/ProductController.php';
 require_once __DIR__ . '/app/controllers/ReportController.php';
 require_once __DIR__ . '/app/controllers/UserController.php';
+require_once __DIR__ . '/app/controllers/EmployeeController.php';
 require_once __DIR__ . '/app/controllers/SettingsController.php';
 require_once __DIR__ . '/app/controllers/ProfileController.php';
 require_once __DIR__ . '/app/controllers/AuditController.php';
@@ -113,6 +114,10 @@ switch ($route) {
         (new ReportController())->index();
         break;
 
+    case 'reports-export':
+        (new ReportController())->export();
+        break;
+
     case 'sales':
         (new ReportController())->sales();
         break;
@@ -125,6 +130,10 @@ switch ($route) {
     case 'users-and-roles':
         // Both URLs are supported as aliases for user and role management.
         (new UserController())->index();
+        break;
+
+    case 'employee-management':
+        (new EmployeeController())->index();
         break;
 
     case 'settings':

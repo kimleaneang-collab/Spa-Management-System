@@ -437,12 +437,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebarMenu.append(section);
             });
         } else {
+            if (currentRole === 'admin' && !linksByRoute.has('employee-management')) {
+                const dashboardLink = linksByRoute.get('dashboard');
+                if (dashboardLink) {
+                    const employeeLink = document.createElement('a');
+                    employeeLink.className = 'nav-item';
+                    const employeeUrl = new URL(dashboardLink.href);
+                    employeeUrl.search = '';
+                    employeeUrl.searchParams.set('route', 'employee-management');
+                    employeeLink.href = employeeUrl.toString();
+                    const icon = document.createElement('span');
+                    icon.className = 'nav-icon';
+                    icon.textContent = '♙';
+                    const label = document.createElement('span');
+                    label.textContent = 'Employee Management';
+                    employeeLink.append(icon, label);
+                    linksByRoute.set('employee-management', employeeLink);
+                }
+            }
+
             const adminGroups = [
                 ['dashboard', 'appointments', 'services', 'therapists', 'rooms'],
                 ['customers', 'memberships', 'customer-history'],
                 ['products', 'stock-management', 'suppliers'],
                 ['reports'],
-                ['users-and-roles', 'settings', 'profile'],
+                ['employee-management', 'users-and-roles', 'settings', 'profile'],
             ];
 
             const staffManagementLabel = currentRole === 'admin' ? 'Staff Management' : 'Users & Roles';
