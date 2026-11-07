@@ -62,16 +62,36 @@ if (empty($_SESSION['user'])) {
                         <h1 class="page-title">SUPPLIERS</h1>
                         <div class="page-date">Vendor list</div>
                     </div>
+                    <?php if ($canManageInventory): ?>
+                        <button class="primary-button" type="button" data-open-modal="supplier-modal">+ Add supplier</button>
+                    <?php endif; ?>
                 </div>
+                <?php if ($successMessage !== ''): ?>
+                    <div class="employee-management-message success" role="status"><?= e($successMessage) ?></div>
+                <?php endif; ?>
+                <?php if ($formError !== ''): ?>
+                    <div class="alert alert-error" role="alert"><?= e($formError) ?></div>
+                <?php endif; ?>
                 <section class="module-panel">
                     <div class="table-wrap">
                         <table class="data-table">
                             <thead>
-                                <tr><th>Supplier</th><th>Contact</th><th>Phone</th><th>Products</th><th>Status</th></tr>
+                                <tr><th>Supplier</th><th>Contact</th><th>Phone</th><th>Email</th><th>Products</th><th>Status</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td>Botanical House</td><td>Ms. Sokha</td><td>+855 12 444 123</td><td>Skin Care</td><td><span class="status-pill status-confirmed">Active</span></td></tr>
-                                <tr><td>Amber Wellness</td><td>Mr. Dara</td><td>+855 90 222 112</td><td>Massage Oils</td><td><span class="status-pill status-pending">Review</span></td></tr>
+                                <?php foreach ($suppliers as $supplier): ?>
+                                    <tr>
+                                        <td><?= e((string) $supplier['name']) ?><br><small><?= e((string) $supplier['supplier_code']) ?></small></td>
+                                        <td><?= e((string) ($supplier['contact_person'] ?? '-')) ?></td>
+                                        <td><?= e((string) ($supplier['phone'] ?? '-')) ?></td>
+                                        <td><?= e((string) ($supplier['email'] ?? '-')) ?></td>
+                                        <td><?= e((string) ($supplier['products'] ?? '') ?: '-') ?></td>
+                                        <td><span class="status-pill <?= $supplier['status'] === 'active' ? 'status-confirmed' : 'status-pending' ?>"><?= e(ucfirst((string) $supplier['status'])) ?></span></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                                <?php if ($suppliers === []): ?>
+                                    <tr><td colspan="6">No suppliers have been added.</td></tr>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -79,6 +99,52 @@ if (empty($_SESSION['user'])) {
             </div>
         </main>
     </div>
+    <?php if ($canManageInventory): ?>
+        <div class="modal-backdrop <?= $formError !== '' ? '' : 'hidden' ?>" id="supplier-modal" aria-hidden="<?= $formError !== '' ? 'false' : 'true' ?>">
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="supplier-title">
+                <div class="modal-header">
+                    <div>
+                        <p class="eyebrow">Inventory</p>
+                        <h2 id="supplier-title">Add supplier</h2>
+                    </div>
+                    <button class="modal-close" type="button" aria-label="Close" data-close-modal="supplier-modal">×</button>
+                </div>
+                <form class="appointment-form" method="post" action="<?= e(APP_URL) ?>/?route=suppliers">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="create_supplier">
+                    <div class="form-grid two-col">
+                        <label>
+                            <span>Supplier code</span>
+                            <input type="text" name="supplier_code" maxlength="40" required value="<?= e((string) ($formValues['supplier_code'] ?? '')) ?>">
+                        </label>
+                        <label>
+                            <span>Supplier name</span>
+                            <input type="text" name="supplier_name" maxlength="150" required value="<?= e((string) ($formValues['supplier_name'] ?? '')) ?>">
+                        </label>
+                        <label>
+                            <span>Contact person (optional)</span>
+                            <input type="text" name="contact_person" maxlength="150" value="<?= e((string) ($formValues['contact_person'] ?? '')) ?>">
+                        </label>
+                        <label>
+                            <span>Phone (optional)</span>
+                            <input type="tel" name="phone" maxlength="30" value="<?= e((string) ($formValues['phone'] ?? '')) ?>">
+                        </label>
+                        <label>
+                            <span>Email (optional)</span>
+                            <input type="email" name="email" maxlength="150" value="<?= e((string) ($formValues['email'] ?? '')) ?>">
+                        </label>
+                        <label>
+                            <span>Address (optional)</span>
+                            <input type="text" name="address" maxlength="255" value="<?= e((string) ($formValues['address'] ?? '')) ?>">
+                        </label>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="primary-button" type="submit">Save supplier</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <?php endif; ?>
     <script src="<?= e(APP_URL) ?>/public/js/main.js?v=<?= e(asset_version('public/js/main.js')) ?>"></script>
 </body>
 </html>

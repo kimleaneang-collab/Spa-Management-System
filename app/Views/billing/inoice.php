@@ -98,6 +98,7 @@ $money = static fn (float $amount): string => e($currency) . ' ' . number_format
 
                     <form class="pos-cart" method="post" action="<?= e(APP_URL) ?>/?route=pos" id="pos-checkout">
                         <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                        <input type="hidden" name="checkout_token" value="<?= e($checkoutToken) ?>">
                         <input type="hidden" name="items_json" id="pos-items-json" value="[]">
                         <div class="pos-cart-heading"><h2>Current order</h2><button class="pos-clear" type="button" id="pos-clear">Clear</button></div>
                         <label class="pos-field-label" for="pos-customer">Customer</label>
